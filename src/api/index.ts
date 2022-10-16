@@ -3,6 +3,7 @@ import { Router } from "express";
 import morganMiddleware from "./middlewares/morganMiddleware";
 
 import loginRouter from "./routes/login";
+import usersRouter from "./routes/users";
 
 const routes = () => {
   const app = Router();
@@ -10,6 +11,7 @@ const routes = () => {
   app.use(morganMiddleware);
 
   loginRouter(app);
+  usersRouter(app);
 
   return app;
 };
