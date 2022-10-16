@@ -2,14 +2,14 @@ import { Router } from "express";
 
 import morganMiddleware from "./middlewares/morganMiddleware";
 
-import login from "./routes/login";
+import loginRouter from "./routes/login";
 
 const routes = () => {
   const app = Router();
 
   app.use(morganMiddleware);
 
-  login(app);
+  loginRouter(app);
 
   return app;
 };
