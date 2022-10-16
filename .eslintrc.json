@@ -19,7 +19,8 @@
   ],
   "parserOptions": {
     "project": "./tsconfig.json",
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
   "rules": {
     "no-unused-vars": "warn",
