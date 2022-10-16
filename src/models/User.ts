@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import joi from "joi";
+import joigoose from "joigoose";
 
-const joigoose = require("joigoose")(mongoose);
+const Joigoose = joigoose(mongoose);
 
 const joiUserSchema = joi.object({
   name: joi.string().required(),
   email: joi.string().email().required(),
 });
 
-const userSchema = new mongoose.Schema(joigoose.convert(joiUserSchema));
+const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema));
 const User = mongoose.model("User", userSchema);
 
 export { User, joiUserSchema };
