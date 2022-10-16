@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": ["node_modules/@types", "src/types/express/index.d.ts"]
   },
   "include": ["src/**/**/*"],
   "exclude": ["node_modules"]
