@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import { RequestHandler } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import config from "../../config";
+import Config from "../../config";
+import { User } from "../../types/custom";
 
-const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
 
   if (!authToken) {
@@ -19,7 +20,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
 
   const getVerifiedUserData = (userAccessToken: string) => {
     try {
-      const decodedUserData = jwt.verify(userAccessToken, config.JWT_SECRET!);
+      const decodedUserData = jwt.verify(userAccessToken, Config.JWT_SECRET);
 
       return decodedUserData;
     } catch (error) {
@@ -33,7 +34,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     return next(createError(401));
   }
 
-  req.user = verifiedUserData;
+  req.user = verifiedUserData as User;
 
   next();
 };
