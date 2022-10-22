@@ -1,11 +1,14 @@
 /**
  * Module dependencies.
  */
+import Debug from "debug";
+import http from "http";
+import { AddressInfo } from "net";
+
 import app from "../app";
 import Logger from "../loaders/logger";
 
-const debug = require("debug")("jaam-toast-backend:server");
-const http = require("http");
+const debug = Debug("jaam-toast-backend:server");
 
 /**
  * Get port from environment and store in Express.
@@ -57,7 +60,8 @@ function onError(error: { syscall: string; code: any }) {
     throw error;
   }
 
-  const bind = typeof port === "string" ? `Pipe ${port}` : `Port ${port}`;
+  const bind =
+    typeof port === "string" ? `Pipe ${port}` : `Port ${port as number}`;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -79,7 +83,7 @@ function onError(error: { syscall: string; code: any }) {
  */
 
 function onListening() {
-  const addr = server.address();
+  const addr = server.address() as string | AddressInfo;
   const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`;
   debug(`Listening on ${bind}`);
 
