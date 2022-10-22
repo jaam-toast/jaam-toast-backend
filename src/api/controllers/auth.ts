@@ -1,40 +1,53 @@
-import { RequestHandler } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
 import { User } from "../../models/User";
 
 import catchAsync from "../../utils/asyncHandler";
-import config from "../../config";
+import Config from "../../config";
 
-export const login: RequestHandler = catchAsync(async (req, res, next) => {
-  const { name, email } = req.body;
+type UserDataType = {
+  _id: string;
+  username: string;
+  userGithubUri: string;
+  userImage?: string;
+};
 
-  if (!name || !email) {
+export const login = catchAsync(async (req, res, next) => {
+  const { username, userGithubUri, userImage } = req.user;
+
+  if (!username || !userGithubUri) {
     return next(createError(401));
   }
 
-  let userData = await User.findOne({ email });
+  let userData: UserDataType | null = await User.findOne({ userGithubUri });
 
   if (!userData) {
     userData = await User.create({
-      name,
-      email,
+      username,
+      userGithubUri,
+      userImage,
     });
   }
 
   const userPayload = {
-    name: userData.name,
-    email: userData.email,
+    username: userData?.username,
+    userGithubUri: userData?.userGithubUri,
+    userImage: userData?.userImage,
   };
 
-  const accessToken = jwt.sign(userPayload, config.JWT_SECRET!, {
+  const accessToken = jwt.sign(userPayload, Config.JWT_SECRET, {
     expiresIn: "1d",
   });
 
   return res.json({
     result: "ok",
-    data: { userData },
+    data: {
+      _id: userData?._id,
+      username: userData?.username,
+      userGithubUri: userData?.userGithubUri,
+      userImage: userData?.userImage,
+    },
     accessToken,
   });
 });
