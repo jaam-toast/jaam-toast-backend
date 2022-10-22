@@ -5,11 +5,14 @@ import joigoose from "joigoose";
 const Joigoose = joigoose(mongoose);
 
 const joiUserSchema = joi.object({
-  name: joi.string().required(),
-  email: joi.string().email().required(),
+  username: joi.string().required(),
+  userGithubUri: joi.string().required(),
+  userImage: joi.string(),
 });
 
-const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema));
+const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema), {
+  versionKey: false,
+});
 const User = mongoose.model("User", userSchema);
 
 export { User, joiUserSchema };
