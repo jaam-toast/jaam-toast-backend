@@ -8,7 +8,7 @@ type GithubToken = {
   token_type: string;
 };
 
-const GithubOauth: AxiosInstance = axios.create({
+const GithubOauth = axios.create({
   baseURL: "https://github.com",
   timeout: 2500,
   headers: {
