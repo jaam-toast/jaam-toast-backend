@@ -11,7 +11,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     } - ${req.ip}`,
   );
 
-  res.status(err.status || 500);
+  res.status((err.status as number) || 500);
   res.json(err);
 };
 

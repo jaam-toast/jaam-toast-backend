@@ -6,11 +6,11 @@ type GithubUserType = {
   avatar_url?: string;
 };
 
-const GithubClient: AxiosInstance = axios.create({
+const GithubClient = axios.create({
   baseURL: "https://api.GitHub.com",
   timeout: 2500,
   headers: {
-    Accept: "application/vnd.GitHub.v3+json",
+    Accept: "application/vnd.GitHub.+json",
   },
 });
 

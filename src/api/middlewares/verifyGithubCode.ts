@@ -5,13 +5,13 @@ import { getGithubToken } from "../github/oauth";
 import { getUserData } from "../github/client";
 
 const verifyGithubCode = catchAsync(async (req, res, next) => {
-  const { code }: { code: string } = req.body;
+  const { code } = req.body;
 
   if (!code) {
     return next(createError(401));
   }
 
-  const accessToken = await getGithubToken(code);
+  const accessToken = await getGithubToken(code as string);
 
   if (!accessToken) {
     return next(createError(401));
