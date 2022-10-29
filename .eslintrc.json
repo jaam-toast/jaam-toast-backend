@@ -20,7 +20,8 @@
   "parserOptions": {
     "project": "./tsconfig.json",
     "ecmaVersion": "latest",
-    "sourceType": "module"
+    "sourceType": "module",
+    "createDefaultProgram": true
   },
   "rules": {
     "no-unused-vars": "warn",
