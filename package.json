@@ -2,9 +2,6 @@
   "name": "jaam-toast-backend",
   "version": "0.0.0",
   "private": true,
-  "engines": {
-    "node": "16.17.1"
-  },
   "scripts": {
     "start": "node ./src/bin/www",
     "dev": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"yarn run tsc --watch\" \"nodemon dist/bin/www\"",
