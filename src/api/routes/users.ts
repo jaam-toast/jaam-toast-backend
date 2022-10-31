@@ -22,10 +22,18 @@ const usersRouter = (app: Router) => {
     ),
     UserController.getOrganizations,
   );
+
+  route.get(
+    "/:user_id/repos",
+    validateSchema(
+      Joi.object({
+        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
       }),
       "params",
     ),
-    (req, res, next) => {},
+    UserController.getUserRepos,
+  );
+
   );
 };
 
