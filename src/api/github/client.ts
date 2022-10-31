@@ -9,6 +9,7 @@ type GithubUserType = {
 
 type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
+type ListOrgReposResponse = Endpoints["GET /orgs/{org}/repos"]["response"];
 
 const GithubClient = axios.create({
   baseURL: "https://api.GitHub.com",
@@ -70,6 +71,24 @@ export const getOrgs = async (accessToken: string) => {
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  return data;
+};
+
+export const getOrgRepos = async (accessToken: string, org: string) => {
+  const { data } = await GithubClient.get<ListOrgReposResponse["data"]>(
+    `/orgs/${org}/repos`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        visibility: "public",
+        affiliation: "organization_member",
+        sort: "updated",
       },
     },
   );
