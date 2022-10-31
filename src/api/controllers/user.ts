@@ -2,6 +2,7 @@ import createError from "http-errors";
 
 import {
   getOrgs,
+  getOrgRepos,
   getPrivateRepos,
   getPublicRepos,
 } from "../github/client";
@@ -71,3 +72,32 @@ export const getUserRepos = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getOrganizationRepos = catchAsync(async (req, res, next) => {
+  const { githubAccessToken } = req.query;
+  const { org } = req.params;
+
+  if (!githubAccessToken || !org) {
+    return next(createError(400));
+  }
+
+  const organizationRepos = await getOrgRepos(githubAccessToken as string, org);
+
+  if (!organizationRepos) {
+    return next(createError(401));
+  }
+
+  const organizationReposList = organizationRepos.map(repo => {
+    const repoData = {
+      repoName: repo.full_name,
+      repoCloneUrl: repo.clone_url,
+      repoUpdatedAt: repo.updated_at,
+    };
+
+    return repoData;
+  });
+
+  return res.json({
+    result: "ok",
+    data: organizationReposList,
+  });
+});
