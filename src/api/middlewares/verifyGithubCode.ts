@@ -11,13 +11,13 @@ const verifyGithubCode = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  const accessToken = await getGithubToken(code as string);
+  const githubAccessToken = await getGithubToken(code as string);
 
-  if (!accessToken) {
+  if (!githubAccessToken) {
     return next(createError(401));
   }
 
-  const githubData = await getUserData(accessToken);
+  const githubData = await getUserData(githubAccessToken);
 
   if (!githubData) {
     return next(createError(401));
@@ -27,6 +27,7 @@ const verifyGithubCode = catchAsync(async (req, res, next) => {
     username: githubData.login,
     userGithubUri: githubData.url,
     userImage: githubData.avatar_url,
+    githubAccessToken,
   };
 
   req.user = verifiedUserData;

@@ -14,7 +14,7 @@ type UserDataType = {
 };
 
 export const login = catchAsync(async (req, res, next) => {
-  const { username, userGithubUri, userImage } = req.user;
+  const { username, userGithubUri, userImage, githubAccessToken } = req.user;
 
   if (!username || !userGithubUri) {
     return next(createError(401));
@@ -48,6 +48,7 @@ export const login = catchAsync(async (req, res, next) => {
       userGithubUri: userData?.userGithubUri,
       userImage: userData?.userImage,
     },
+    githubAccessToken,
     accessToken,
   });
 });
