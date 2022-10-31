@@ -35,6 +35,12 @@
     "no-process-exit": "off",
     "no-underscore-dangle": "off",
     "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true
+      }
+    ],
     "react/jsx-filename-extension": [0, { "extensions": [".js", ".jsx"] }],
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-var-requires": "off",
@@ -49,7 +55,7 @@
     "node/no-process-env": 1,
     "node/no-unsupported-features/es-syntax": [
       "error",
-      { "ignores": ["modules"] }
+      { "ignores": ["modules", "dynamicImport"] }
     ],
     "node/no-missing-import": 0,
     "node/no-unpublished-import": 0

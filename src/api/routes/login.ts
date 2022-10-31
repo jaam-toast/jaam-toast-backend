@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import verifyGithubCode from "../middlewares/verifyGithubCode";
+
 import * as AuthController from "../controllers/auth";
 
 const route = Router();
