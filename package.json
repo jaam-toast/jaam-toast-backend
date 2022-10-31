@@ -18,7 +18,7 @@
     "cors": "^2.8.5",
     "debug": "^4.3.4",
     "dotenv": "^16.0.3",
-    "eslint-config-airbnb-typescript": "^17.0.0",
+    "execa": "^6.1.0",
     "express": "~4.16.1",
     "helmet": "^6.0.0",
     "http-errors": "^2.0.0",
@@ -30,6 +30,7 @@
     "winston": "^3.8.2"
   },
   "devDependencies": {
+    "@octokit/types": "^8.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
     "@types/debug": "^4.1.7",
@@ -45,6 +46,7 @@
     "concurrently": "^7.4.0",
     "eslint": "^8.25.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^27.1.2",
