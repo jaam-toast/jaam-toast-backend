@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Endpoints } from "@octokit/types";
 
 type GithubUserType = {
   login: string;
@@ -6,6 +7,7 @@ type GithubUserType = {
   avatar_url?: string;
 };
 
+type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
 const GithubClient = axios.create({
   baseURL: "https://api.GitHub.com",
   timeout: 2500,
@@ -24,4 +26,15 @@ export const getUserData = async (accessToken: string) => {
   return data;
 };
 
-export const getPublicRepos = async () => {};
+export const getOrgs = async (accessToken: string) => {
+  const { data } = await GithubClient.get<ListUserOrgsResponse["data"]>(
+    "/user/orgs",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  return data;
+};
