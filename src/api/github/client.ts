@@ -7,7 +7,9 @@ type GithubUserType = {
   avatar_url?: string;
 };
 
+type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
+
 const GithubClient = axios.create({
   baseURL: "https://api.GitHub.com",
   timeout: 2500,
@@ -22,6 +24,42 @@ export const getUserData = async (accessToken: string) => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
+
+  return data;
+};
+
+export const getPublicRepos = async (accessToken: string) => {
+  const { data } = await GithubClient.get<ListUserReposResponse["data"]>(
+    "/user/repos",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        visibility: "public",
+        affiliation: "owner",
+        sort: "updated",
+      },
+    },
+  );
+
+  return data;
+};
+
+export const getPrivateRepos = async (accessToken: string) => {
+  const { data } = await GithubClient.get<ListUserReposResponse["data"]>(
+    "/user/repos",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        visibility: "private",
+        affiliation: "owner",
+        sort: "updated",
+      },
+    },
+  );
 
   return data;
 };
