@@ -1,11 +1,6 @@
 import createError from "http-errors";
 
-import {
-  getOrgs,
-  getOrgRepos,
-  getPrivateRepos,
-  getPublicRepos,
-} from "../github/client";
+import { getRepos, getOrgs, getOrgRepos } from "../github/client";
 
 import catchAsync from "../../utils/asyncHandler";
 
@@ -41,8 +36,8 @@ export const getUserRepos = catchAsync(async (req, res, next) => {
     return next(createError(400));
   }
 
-  const publicRepos = await getPublicRepos(githubAccessToken as string);
-  const privateRepos = await getPrivateRepos(githubAccessToken as string);
+  const publicRepos = await getRepos(githubAccessToken as string, "public");
+  const privateRepos = await getRepos(githubAccessToken as string, "private");
 
   if (!publicRepos || !privateRepos) {
     return next(createError(401));

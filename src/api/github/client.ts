@@ -29,7 +29,7 @@ export const getUserData = async (accessToken: string) => {
   return data;
 };
 
-export const getPublicRepos = async (accessToken: string) => {
+export const getRepos = async (accessToken: string, repoType: string) => {
   const { data } = await GithubClient.get<ListUserReposResponse["data"]>(
     "/user/repos",
     {
@@ -37,25 +37,7 @@ export const getPublicRepos = async (accessToken: string) => {
         Authorization: `Bearer ${accessToken}`,
       },
       params: {
-        visibility: "public",
-        affiliation: "owner",
-        sort: "updated",
-      },
-    },
-  );
-
-  return data;
-};
-
-export const getPrivateRepos = async (accessToken: string) => {
-  const { data } = await GithubClient.get<ListUserReposResponse["data"]>(
-    "/user/repos",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      params: {
-        visibility: "private",
+        visibility: `${repoType}`,
         affiliation: "owner",
         sort: "updated",
       },
