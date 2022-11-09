@@ -12,6 +12,7 @@
     "airbnb-base",
     "airbnb-typescript",
     "eslint:recommended",
+    "@typescript-eslint/parser",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:node/recommended",
@@ -19,6 +20,7 @@
   ],
   "parserOptions": {
     "project": "./tsconfig.json",
+    "tsconfigRootdir": "./",
     "ecmaVersion": "latest",
     "sourceType": "module",
     "createDefaultProgram": true
