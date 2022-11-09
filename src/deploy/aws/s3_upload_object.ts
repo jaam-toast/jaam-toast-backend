@@ -1,7 +1,7 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import path from "path";
 import fs from "fs";
-import { s3Client } from "./s3Client";
+import { s3Client } from "./libs/s3Client";
 
 const file = "./temp/index.ts";
 const fileStream = fs.createReadStream(file);
