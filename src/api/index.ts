@@ -3,7 +3,7 @@ import { Router } from "express";
 import morganMiddleware from "./middlewares/morganMiddleware";
 
 import loginRouter from "./routes/login";
-import testRouter from "./routes/test";
+import deployRouter from "./routes/deploy";
 import usersRouter from "./routes/users";
 
 const routes = () => {
@@ -13,7 +13,7 @@ const routes = () => {
 
   loginRouter(app);
   usersRouter(app);
-  testRouter(app);
+  deployRouter(app);
 
   return app;
 };
