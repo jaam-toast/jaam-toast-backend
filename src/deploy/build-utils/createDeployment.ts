@@ -4,6 +4,7 @@ import createInstance from "../aws/ec2_createinstances";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
 
+import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
 import { RepoBuildOptions } from "../../types/custom";
@@ -64,11 +65,19 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
       }
     } catch (err) {
       debug(`Error: 'publicIpAddress' is expected to be a string - ${err}`);
+      throw new DeploymentError({
+        code: "ec2Client_DescribeInstancesCommand",
+        message: "publicIpAddress is typeof undefined",
+      });
     }
   } catch (err) {
     debug(
       `Error: An unexpected error occurred during RunInstancesCommand - ${err}`,
     );
+    throw new DeploymentError({
+      code: "ec2Client_RunInstancesCommand",
+      message: "RunInstancesCommand didn't work as expected",
+    });
   }
 };
 
