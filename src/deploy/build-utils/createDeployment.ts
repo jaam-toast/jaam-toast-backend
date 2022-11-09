@@ -4,9 +4,14 @@ import createInstance from "../aws/ec2_createinstances";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
 
+import { createDeploymentDebug } from "../../utils/createDebug";
+
 import { RepoBuildOptions } from "../../types/custom";
 
 const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
+  const debug = createDeploymentDebug(true);
+
+  debug("Creating deployment...", "Creating build commands...");
 
   const {
     repoName,
@@ -35,8 +40,12 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
     },
   };
 
+  debug("Created build commands and instanceParams");
+
   try {
     const instanceId = await createInstance(instanceParams);
+
+    debug(`Created instance - ${instanceId}`);
 
     try {
       const publicIpAddressInterval = setInterval(getPublicIpAddress, 1000);
@@ -45,13 +54,21 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
       async function getPublicIpAddress() {
         publicIpAddress = await describeInstanceIp(instanceId as string);
 
+        debug("Creating instance public IP...");
+
         if (publicIpAddress) {
           clearInterval(publicIpAddressInterval);
+
+          debug(`Created instance public IP - ${publicIpAddress}`);
         }
       }
     } catch (err) {
+      debug(`Error: 'publicIpAddress' is expected to be a string - ${err}`);
     }
   } catch (err) {
+    debug(
+      `Error: An unexpected error occurred during RunInstancesCommand - ${err}`,
+    );
   }
 };
 
