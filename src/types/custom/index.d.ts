@@ -1,3 +1,5 @@
+import { RRType, Date } from "@aws-sdk/client-route-53";
+
 export type User = {
   username: string;
   userGithubUri: string;
@@ -29,16 +31,16 @@ export interface DeploymentOptions {
   gitMetadata?: GitMetadata;
 }
 
-export interface InstanceParams {
-  ImageId: string | undefined;
-  InstanceType: string | undefined;
-  KeyName: string | undefined;
-  MinCount: number;
-  MaxCount: number;
-  UserData: string;
-  IamInstanceProfile: {
-    Arn: string | undefined;
-  };
+export interface RepoBuildOptions extends ClientOptions, DeploymentOptions {}
+
+interface CreateDNSRecordProps {
+  subdomain: string;
+  recordValue: string;
+  recordType: RRType;
 }
 
-export interface RepoBuildOptions extends ClientOptions, DeploymentOptions {}
+interface RecordSetResponse {
+  recordId: string | undefined;
+  recordStatus: string | undefined;
+  recordCreatedAt: Date | undefined;
+}
