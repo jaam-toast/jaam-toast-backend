@@ -61,6 +61,19 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
           clearInterval(publicIpAddressInterval);
 
           debug(`Created instance public IP - ${publicIpAddress}`);
+
+          const createDNSRecordInput = {
+            subdomain: repoName,
+            recordValue: publicIpAddress,
+            recordType: RRType.A,
+          };
+
+          const recordChangeInfo = await createDNSRecord(createDNSRecordInput);
+
+          debug(
+            `A new A record '${recordChangeInfo?.recordId}' for ${publicIpAddress} has been requested: [${recordChangeInfo?.recordStatus}] - at ${recordChangeInfo?.recordCreatedAt}`,
+          );
+
         }
       }
     } catch (err) {
