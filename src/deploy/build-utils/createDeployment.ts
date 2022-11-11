@@ -43,7 +43,11 @@ export default async function createDeployment(
       let publicIpAddress;
 
       async function getPublicIpAddress() {
-        publicIpAddress = await describeInstanceIp(instanceId as string);
+        const instanceChangeInfo = await describeInstanceIp(
+          instanceId as string,
+        );
+
+        publicIpAddress = instanceChangeInfo?.publicIpAddress;
 
         debug("Creating instance public IP...");
 
