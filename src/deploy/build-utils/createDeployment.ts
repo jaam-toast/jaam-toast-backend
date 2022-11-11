@@ -1,12 +1,13 @@
-import Config from "../../config";
-
 import createInstance from "../aws/ec2_createinstances";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
+import createDNSRecord from "../aws/route53_createrecord";
+import runCertbot from "./runCertbot";
 
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
+import { RRType } from "@aws-sdk/client-route-53";
 import { RepoBuildOptions } from "../../types/custom";
 
 export default async function createDeployment(
@@ -68,6 +69,34 @@ export default async function createDeployment(
             `A new A record '${recordChangeInfo?.recordId}' for ${publicIpAddress} has been requested: [${recordChangeInfo?.recordStatus}] - at ${recordChangeInfo?.recordCreatedAt}`,
           );
 
+          if (recordChangeInfo?.recordId) {
+            debug("Running certbot to request a certificate...");
+
+            runCertbot(
+              recordChangeInfo.recordId,
+              instanceId as string,
+              repoName,
+            );
+
+            debug("Sending back to client of newly created deployment info...");
+
+            const newDeploymentInfo = {
+              deployedUrl: `${repoName}.jaamtoast.click`,
+              deployPublicAddress: publicIpAddress,
+              deployRepoName: repoName,
+              deployRemoteUrl: remoteUrl,
+            };
+
+            return newDeploymentInfo;
+          } else {
+            debug(
+              `Error: 'recordChangeInfo.recordId' is expected to be a string`,
+            );
+            throw new DeploymentError({
+              code: "route53Client",
+              message: "recordChangeInfo.recordId is typeof undefined",
+            });
+          }
         }
       }
     } catch (err) {
