@@ -1,17 +1,29 @@
 import { RunInstancesCommand } from "@aws-sdk/client-ec2";
 
+import Config from "../../config";
 import ec2Client from "./libs/ec2Client";
 
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
-import { InstanceParams } from "../../types/custom";
-
-const createInstance = async (instanceParams: InstanceParams) => {
+const createInstance = async (commands: string[]) => {
   const debug = createDeploymentDebug(true);
 
+  const instanceParams = {
+    ImageId: Config.AMI_ID,
+    InstanceType: Config.INSTANCE_TYPE,
+    KeyName: Config.KEY_PAIR_NAME,
+    MinCount: 1,
+    MaxCount: 1,
+    UserData: Buffer.from(commands.join("\n")).toString("base64"),
+    IamInstanceProfile: {
+      Arn: Config.IAM_INSTANCE_PROFILE,
+    },
+  };
+
   try {
-    const data = await ec2Client.send(new RunInstancesCommand(instanceParams));
+    const command = new RunInstancesCommand(instanceParams);
+    const data = await ec2Client.send(command);
 
     if (data.Instances) {
       const instanceId = data.Instances[0].InstanceId;

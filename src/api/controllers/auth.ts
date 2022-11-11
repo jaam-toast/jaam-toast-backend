@@ -1,10 +1,10 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
+import Config from "../../config";
 import { User } from "../../models/User";
 
 import catchAsync from "../../utils/asyncHandler";
-import Config from "../../config";
 
 type UserDataType = {
   _id: string;

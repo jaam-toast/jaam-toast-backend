@@ -33,7 +33,7 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
     envList,
   };
 
-  // const data = await createDeployment(repoBuildOptions);
+  const newDeploymentInfo = await createDeployment(repoBuildOptions);
 
   // const deployedData = {
   //     deployedUrl: data.deployUrl,
@@ -41,6 +41,6 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
 
   return res.json({
     result: "ok",
-    data: repoBuildOptions,
+    data: newDeploymentInfo,
   });
 });

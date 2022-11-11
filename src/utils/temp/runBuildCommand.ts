@@ -1,7 +1,8 @@
-import { execa } from "execa";
 import path from "path";
 
 async function runBuildCommand(cloneUrl: string) {
+  const { execa } = await import("execa");
+
   try {
     const cloneCommandResult = await execa(
       "git",
