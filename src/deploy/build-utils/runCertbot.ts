@@ -25,14 +25,9 @@ export default function runCertbot(
       recordStatus = await describeRecord(recordId);
       instanceState = instanceChangeInfo?.instanceStateName;
 
-      const isInstanceRunning =
-        instanceState === InstanceStateName.running
-          ? `Still in the process - ${instanceState}`
-          : `Created instance is ${instanceState}`;
-
       debug(
-        `Checking recordStatus - ${recordStatus}`,
-        `Checking instanceState - ${isInstanceRunning}`,
+        `Checking recordStatus - [${recordStatus}]`,
+        `Checking instanceState - [${instanceState}]`,
       );
 
       if (
@@ -41,7 +36,7 @@ export default function runCertbot(
       ) {
         clearInterval(recordStatusInterval);
 
-        setTimeout(() => runCertbotCommand(instanceId, subdomain), 90000);
+        setTimeout(() => runCertbotCommand(instanceId, subdomain), 120000);
 
         return recordStatus;
       }

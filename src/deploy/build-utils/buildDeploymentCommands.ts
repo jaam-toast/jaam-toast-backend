@@ -27,17 +27,19 @@ export default function buildDeploymentCommands(
   );
 
   const yumUpdate = [`#!/usr/bin/bash`, `yum update -y`];
+
   const nvmInstall = [
     `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash`,
     `. /root/.nvm/nvm.sh`,
     `nvm install ${NODE_VERSION}`,
   ];
+
   const gitClone = [
     `cd /home/ec2-user/jaamtoast`,
     `git clone ${GIT_CLONE_URL}`,
   ];
-  const setEnv = [`cd ${REPO_NAME}`, `touch .env`];
 
+  const setEnv = [`cd ${REPO_NAME}`, `touch .env`];
   envList?.forEach(({ key, value }) => {
     setEnv.push(`echo ${key}=${value} >> .env`);
   });
@@ -55,10 +57,11 @@ export default function buildDeploymentCommands(
 
     location / {
         proxy_pass http://127.0.0.1:3000;
+				proxy_http_version  1.1;
 
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header    Host                \$host;
+        proxy_set_header    X-Real-IP           \$remote_addr;
+        proxy_set_header    X-Forwarded-For     \$proxy_add_x_forwarded_for;
     }
   }
     ' > default.conf`,
