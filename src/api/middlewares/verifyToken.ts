@@ -3,6 +3,7 @@ import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
 import Config from "../../config";
+
 import { User } from "../../types/custom";
 
 const verifyToken: RequestHandler = (req, res, next) => {

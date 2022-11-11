@@ -14,8 +14,9 @@ export const uploadParams = {
 
 export const run = async () => {
   try {
-    const data = await s3Client.send(new PutObjectCommand(uploadParams));
-    console.log("Success", data);
+    const command = new PutObjectCommand(uploadParams);
+    const data = await s3Client.send(command);
+
     return data;
   } catch (err) {
     console.log("Error", err);

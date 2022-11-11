@@ -9,7 +9,9 @@ import { createDeploymentDebug } from "../../utils/createDebug";
 
 import { RepoBuildOptions } from "../../types/custom";
 
-const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
+export default async function createDeployment(
+  repoBuildOptions: RepoBuildOptions,
+) {
   const debug = createDeploymentDebug(true);
 
   debug("Creating deployment...", "Creating build commands...");
@@ -29,22 +31,10 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
 
   const commands = buildDeploymentCommands(clientOptions, deploymentOptions);
 
-  const instanceParams = {
-    ImageId: Config.AMI_ID,
-    InstanceType: Config.INSTANCE_TYPE,
-    KeyName: Config.KEY_PAIR_NAME,
-    MinCount: 1,
-    MaxCount: 1,
-    UserData: Buffer.from(commands.join("\n")).toString("base64"),
-    IamInstanceProfile: {
-      Arn: Config.IAM_INSTANCE_PROFILE,
-    },
-  };
-
-  debug("Created build commands and instanceParams");
+  debug("Created build commands to create a new instance");
 
   try {
-    const instanceId = await createInstance(instanceParams);
+    const instanceId = await createInstance(commands);
 
     debug(`Created instance - ${instanceId}`);
 
@@ -92,6 +82,4 @@ const createDeployment = async (repoBuildOptions: RepoBuildOptions) => {
       message: "RunInstancesCommand didn't work as expected",
     });
   }
-};
-
-export default createDeployment;
+}
