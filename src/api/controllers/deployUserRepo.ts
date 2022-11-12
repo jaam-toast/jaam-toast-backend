@@ -35,10 +35,6 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
 
   const newDeploymentInfo = await createDeployment(repoBuildOptions);
 
-  // const deployedData = {
-  //     deployedUrl: data.deployUrl,
-  // }
-
   return res.json({
     result: "ok",
     data: newDeploymentInfo,
