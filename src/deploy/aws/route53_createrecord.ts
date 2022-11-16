@@ -16,7 +16,7 @@ const createDNSRecord = async ({
   recordValue,
   recordType = RRType.A,
 }: CreateDNSRecordProps) => {
-  const debug = createDeploymentDebug(true);
+  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const recordName = `${subdomain}.jaamtoast.click`;
 

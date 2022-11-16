@@ -1,3 +1,5 @@
+import Config from "../../config";
+
 import createInstance from "../aws/ec2_createinstances";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
@@ -13,7 +15,7 @@ import { RepoBuildOptions } from "../../types/custom";
 export default async function createDeployment(
   repoBuildOptions: RepoBuildOptions,
 ) {
-  const debug = createDeploymentDebug(true);
+  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   debug("Creating deployment...", "Creating build commands...");
 
@@ -76,6 +78,10 @@ export default async function createDeployment(
               recordChangeInfo.recordId,
               instanceId as string,
               repoName,
+            );
+
+            debug(
+              `Waiting for requesting a certificate to enable HTTPS on ${repoName}.${Config.SERVER_URL}...`,
             );
 
             runGetFilteredLogEvents(instanceId as string, repoName);
