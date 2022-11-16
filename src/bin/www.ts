@@ -4,6 +4,7 @@
 import Debug from "debug";
 import http from "http";
 import { AddressInfo } from "net";
+import SocketSingleton from "../deploy/socket";
 
 import app from "../app";
 import Logger from "../loaders/logger";
@@ -22,6 +23,7 @@ app.set("port", port);
  */
 
 const server = http.createServer(app);
+export const socketIO = new SocketSingleton(server);
 
 /**
  * Listen on provided port, on all network interfaces.
