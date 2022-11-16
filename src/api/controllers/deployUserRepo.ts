@@ -2,6 +2,7 @@ import createError from "http-errors";
 
 import catchAsync from "../../utils/asyncHandler";
 
+import { bulidingLogSocket } from "../../deploy/socket";
 import createDeployment from "../../deploy/build-utils/createDeployment";
 
 export const deployUserRepo = catchAsync(async (req, res, next) => {
@@ -34,6 +35,8 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
   };
 
   const newDeploymentInfo = await createDeployment(repoBuildOptions);
+
+  bulidingLogSocket();
 
   return res.json({
     result: "ok",
