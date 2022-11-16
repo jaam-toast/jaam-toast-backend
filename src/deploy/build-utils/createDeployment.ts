@@ -78,7 +78,11 @@ export default async function createDeployment(
               repoName,
             );
 
-            debug("Sending back to client of newly created deployment info...");
+            runGetFilteredLogEvents(instanceId as string, repoName);
+
+            debug(
+              `Waiting for a building log of  ${repoName}.${Config.SERVER_URL}...`,
+            );
 
             const newDeploymentInfo = {
               deployedUrl: `${repoName}.jaamtoast.click`,
