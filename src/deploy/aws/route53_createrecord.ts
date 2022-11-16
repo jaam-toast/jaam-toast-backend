@@ -9,7 +9,7 @@ import route53Client from "./libs/route53Client";
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
-import { CreateDNSRecordProps, RecordSetResponse } from "../../types/custom";
+import { CreateDNSRecordProps } from "../../types/custom";
 
 const createDNSRecord = async ({
   subdomain,
@@ -40,6 +40,7 @@ const createDNSRecord = async ({
 
   try {
     const command = new ChangeResourceRecordSetsCommand(recordParams);
+
     const data = await route53Client.send(command);
 
     if (data.ChangeInfo) {

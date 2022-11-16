@@ -1,16 +1,18 @@
 import { GetChangeCommand } from "@aws-sdk/client-route-53";
 
 import Config from "../../config";
+import route53Client from "./libs/route53Client";
+
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
-
-import route53Client from "./libs/route53Client";
 
 const describeRecord = async (Id: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
+  const getChangeParams = { Id };
+
   try {
-    const command = new GetChangeCommand({ Id });
+    const command = new GetChangeCommand(getChangeParams);
 
     const data = await route53Client.send(command);
 

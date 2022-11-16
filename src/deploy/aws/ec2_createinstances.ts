@@ -23,6 +23,7 @@ const createInstance = async (commands: string[]) => {
 
   try {
     const command = new RunInstancesCommand(instanceParams);
+
     const data = await ec2Client.send(command);
 
     if (data.Instances) {

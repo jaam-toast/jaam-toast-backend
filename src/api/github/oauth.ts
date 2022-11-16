@@ -19,7 +19,7 @@ const GithubOauth = axios.create({
 export const getGithubToken = async (code: string) => {
   const { data } = await GithubOauth.post<GithubToken>(
     "/login/oauth/access_token?",
-    null,
+    {},
     {
       params: {
         client_id: Config.CLIENT_ID,
