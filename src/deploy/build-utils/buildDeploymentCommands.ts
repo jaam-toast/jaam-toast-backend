@@ -7,7 +7,7 @@ export default function buildDeploymentCommands(
   clientOptions: ClientOptions,
   deploymentOptions: DeploymentOptions = { nodeVersion: "16.x" },
 ) {
-  const debug = createDeploymentDebug(true);
+  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const { remoteUrl, repoName } = clientOptions;
   const { nodeVersion, envList } = deploymentOptions;

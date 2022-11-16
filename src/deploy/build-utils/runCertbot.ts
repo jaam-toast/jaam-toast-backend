@@ -2,6 +2,7 @@ import { InstanceStateName } from "@aws-sdk/client-ec2";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
+import Config from "../../config";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import describeRecord from "../aws/route53_describerecord";
 import runCertbotCommand from "../cli/runCertbotCommands";
@@ -11,7 +12,7 @@ export default function runCertbot(
   instanceId: string,
   subdomain: string,
 ) {
-  const debug = createDeploymentDebug(true);
+  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const recordStatusInterval = setInterval(getRecordStatus, 1000);
 

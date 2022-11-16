@@ -7,7 +7,7 @@ import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
 const createInstance = async (commands: string[]) => {
-  const debug = createDeploymentDebug(true);
+  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const instanceParams = {
     ImageId: Config.AMI_ID,
