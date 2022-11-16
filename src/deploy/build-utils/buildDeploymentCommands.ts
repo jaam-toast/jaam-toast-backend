@@ -20,10 +20,10 @@ export default function buildDeploymentCommands(
   const NODE_VERSION = nodeVersion.includes("14")
     ? Config.NODEJS_FERMIUM
     : Config.NODEJS_GALLIUM;
-  const CUSTOM_DOMAIN = `${REPO_NAME}.jaamtoast.click`;
+  const CUSTOM_DOMAIN = `${REPO_NAME}.${Config.SERVER_URL}`;
 
   debug(
-    `GIT_CLONE_URL: ${remoteUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.jaamtoast.click`,
+    `GIT_CLONE_URL: ${remoteUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}`,
   );
 
   const yumUpdate = [

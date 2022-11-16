@@ -18,7 +18,7 @@ const createDNSRecord = async ({
 }: CreateDNSRecordProps) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
-  const recordName = `${subdomain}.jaamtoast.click`;
+  const recordName = `${subdomain}.${Config.SERVER_URL}`;
 
   const recordParams = {
     HostedZoneId: Config.HOSTED_ZONE_ID,

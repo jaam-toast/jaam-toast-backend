@@ -13,7 +13,7 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
 
   debug(
     `letsencrypt - Plugins selected: Authenticator nginx, Installer nginx`,
-    `Requesting a certificate to enable HTTPS on ${subdomain}.jaamtoast.click `,
+    `Requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}`,
   );
 
   try {
@@ -27,7 +27,7 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
         "--targets",
         `[{"Key":"InstanceIds","Values":["${instanceId}"]}]`,
         "--parameters",
-        `{"commands":["#!/bin/bash","yum -y update",". /root/.nvm/nvm.sh","cd /home/ec2-user","certbot --nginx --non-interactive --agree-tos -d ${subdomain}.jaamtoast.click -m taewan.seoul@gmail.com","cd /etc","echo 39      1,13    *       *       *       root    certbot renew --no-self-upgrade >> crontab","systemctl restart crond","service nginx restart"]}`,
+        `{"commands":["#!/bin/bash","yum -y update","source /root/.nvm/nvm.sh","cd /home/ec2-user","certbot --nginx --non-interactive --agree-tos -d ${subdomain}.${Config.SERVER_URL} -m taewan.seoul@gmail.com","cd /etc","echo 39      1,13    *       *       *       root    certbot renew --no-self-upgrade >> crontab","systemctl restart crond","service nginx restart"]}`,
       ],
       { signal },
     );
@@ -68,7 +68,7 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
   } catch (err) {
     controller.abort();
     debug(
-      `Error: An unexpected error occurred requesting a certificate for ${subdomain}.jaamtoast.click - ${err}`,
+      `Error: An unexpected error occurred requesting a certificate for ${subdomain}.${Config.SERVER_URL} - ${err}`,
     );
     throw new DeploymentError({
       code: "letsencrypt_certbot",
