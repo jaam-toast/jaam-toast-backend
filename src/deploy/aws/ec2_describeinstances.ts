@@ -1,16 +1,19 @@
 import { DescribeInstancesCommand } from "@aws-sdk/client-ec2";
 
 import Config from "../../config";
+import ec2Client from "./libs/ec2Client";
+
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
-
-import ec2Client from "./libs/ec2Client";
 
 const describeInstanceIp = async (instanceId: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
+  const instancesParams = { InstanceIds: [instanceId] };
+
   try {
-    const command = new DescribeInstancesCommand({ InstanceIds: [instanceId] });
+    const command = new DescribeInstancesCommand(instancesParams);
+
     const data = await ec2Client.send(command);
 
     let publicIpAddress;
