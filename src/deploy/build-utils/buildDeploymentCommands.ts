@@ -26,7 +26,18 @@ export default function buildDeploymentCommands(
     `GIT_CLONE_URL: ${remoteUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.jaamtoast.click`,
   );
 
-  const yumUpdate = [`#!/usr/bin/bash`, `yum update -y`];
+  const yumUpdate = [
+    `#!/usr/bin/bash`,
+    `yum update -y`,
+    `exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1`,
+  ];
+
+  const cloudWatchAgent = [
+    `yum install amazon-cloudwatch-agent`,
+    `yum install -y collectd`,
+    `cd /opt/aws/amazon-cloudwatch-agent/bin`,
+    `/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:config.json`,
+  ];
 
   const nvmInstall = [
     `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash`,
@@ -94,6 +105,7 @@ export default function buildDeploymentCommands(
 
   const commands = [
     ...yumUpdate,
+    ...cloudWatchAgent,
     ...nvmInstall,
     ...gitClone,
     ...setEnv,
