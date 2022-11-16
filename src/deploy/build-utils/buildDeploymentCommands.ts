@@ -41,7 +41,7 @@ export default function buildDeploymentCommands(
 
   const nvmInstall = [
     `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash`,
-    `. /root/.nvm/nvm.sh`,
+    `source /root/.nvm/nvm.sh`,
     `nvm install ${NODE_VERSION}`,
   ];
 
@@ -101,6 +101,7 @@ export default function buildDeploymentCommands(
     `pm2 start npm --name "next" -- start`,
     `pm2 save`,
     `pm2 startup`,
+    `sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v16.18.0/bin /home/ec2-user/.config/yarn/global/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user`,
   ];
 
   const commands = [
