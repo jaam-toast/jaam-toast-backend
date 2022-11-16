@@ -91,7 +91,7 @@ export default async function createDeployment(
             );
 
             const newDeploymentInfo = {
-              deployedUrl: `${repoName}.jaamtoast.click`,
+              deployedUrl: `${repoName}.${Config.SERVER_URL}`,
               deployPublicAddress: publicIpAddress,
               deployRepoName: repoName,
               deployRemoteUrl: remoteUrl,
