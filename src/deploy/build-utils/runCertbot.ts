@@ -31,6 +31,10 @@ export default function runCertbot(
         `Checking instanceState - [${instanceState}]`,
       );
 
+      debug(
+        `Still waiting for requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
+      );
+
       if (
         recordStatus === "INSYNC" &&
         instanceState === InstanceStateName.running

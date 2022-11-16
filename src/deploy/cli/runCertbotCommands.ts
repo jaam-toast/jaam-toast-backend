@@ -33,24 +33,38 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
     );
 
     ssmCertbotCommands.stdout.on("data", data => {
-      debug(`stdout: ssmCertbotCommands - ${data}`);
+      process.stderr.write(`stdout: ssmCertbotCommands - ${data}`);
+
+      debug(`Successfully requesting for a certificate...`);
     });
 
     ssmCertbotCommands.stderr.on("data", data => {
       debug(
-        `stderr: ssmCertbotCommands - ${data}`,
-        `ERROR: The command failed. stderr: ${data.stderr}`,
+        `Error: An unexpected error occurred running certbot commands - ${data}`,
+      );
+      throw new Error(
+        `Error: The command failed. stderr: ssmCertbotCommands - ${data.stderr}`,
       );
     });
 
     ssmCertbotCommands.stderr.on("error", err => {
       debug(
-        `stderr: ssmCertbotCommands - ${err}`,
-        `ERROR: The command failed. Chlid process exited. stderr: ${err.name} (${err.message})`,
+        `Error: An unexpected error occurred running certbot commands - ${err}`,
+      );
+      throw new Error(
+        `Error: The command failed. Chlid process exited. stderr: ssmCertbotCommands - ${err.name} (${err.message})`,
       );
     });
 
-    debug(`A certificate for ${subdomain}.jaamtoast.click has been requested`);
+    ssmCertbotCommands.on("close", code => {
+      process.stderr.write(
+        `stdout: ssmCertbotCommands child process exits with code - ${code}`,
+      );
+
+      debug(
+        `A new certificate for ${subdomain}.${Config.SERVER_URL} has been requested`,
+      );
+    });
   } catch (err) {
     controller.abort();
     debug(
