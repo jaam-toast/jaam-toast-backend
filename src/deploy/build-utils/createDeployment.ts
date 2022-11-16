@@ -5,6 +5,7 @@ import describeInstanceIp from "../aws/ec2_describeinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
 import createDNSRecord from "../aws/route53_createrecord";
 import runCertbot from "./runCertbot";
+import runGetFilteredLogEvents from "./runGetFilteredLogEvents";
 
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
