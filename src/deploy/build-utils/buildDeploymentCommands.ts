@@ -9,10 +9,10 @@ export default function buildDeploymentCommands(
 ) {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
-  const { remoteUrl, repoName } = clientOptions;
+  const { repoCloneUrl, repoName } = clientOptions;
   const { nodeVersion, envList } = deploymentOptions;
 
-  const GIT_CLONE_URL = remoteUrl.replace(
+  const GIT_CLONE_URL = repoCloneUrl.replace(
     "https://github.com",
     `https://${Config.USER_CREDENTIAL_TOKEN}@github.com`,
   );
@@ -23,7 +23,7 @@ export default function buildDeploymentCommands(
   const CUSTOM_DOMAIN = `${REPO_NAME}.${Config.SERVER_URL}`;
 
   debug(
-    `GIT_CLONE_URL: ${remoteUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}`,
+    `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}`,
   );
 
   const yumUpdate = [

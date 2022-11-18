@@ -20,7 +20,7 @@ export default async function bulidingLogSocket() {
     });
 
     socket.on("get-building-log", repoName => {
-      `Getting ready for sending a buliding log for ${repoName}`;
+      debug(`Getting ready for sending a buliding log for ${repoName}`);
     });
 
     let prevData: string;
