@@ -14,6 +14,8 @@ type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
 type ListOrgReposResponse = Endpoints["GET /orgs/{org}/repos"]["response"];
 type CreateWebhookResponse =
   Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"];
+type PullRequestCommitResponse =
+  Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"];
 
 const GithubClient = axios.create({
   baseURL: "https://api.github.com",
@@ -112,3 +114,20 @@ export const createRepoWebhook = async (
   );
 };
 
+export const getHeadCommitMessage = async (
+  accessToken: string,
+  repoOwner: string,
+  repoName: string,
+  commitRef: string,
+) => {
+  const { data } = await GithubClient.get<PullRequestCommitResponse["data"]>(
+    `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  return data;
+};
