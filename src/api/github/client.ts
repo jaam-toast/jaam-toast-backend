@@ -1,6 +1,8 @@
 import axios from "axios";
 import { Endpoints } from "@octokit/types";
 
+import Config from "../../config";
+
 type GithubUserType = {
   login: string;
   url: string;
@@ -10,9 +12,11 @@ type GithubUserType = {
 type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
 type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
 type ListOrgReposResponse = Endpoints["GET /orgs/{org}/repos"]["response"];
+type CreateWebhookResponse =
+  Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"];
 
 const GithubClient = axios.create({
-  baseURL: "https://api.GitHub.com",
+  baseURL: "https://api.github.com",
   timeout: 2500,
   headers: {
     Accept: "application/vnd.GitHub.+json",
@@ -77,3 +81,34 @@ export const getOrgRepos = async (accessToken: string, org: string) => {
 
   return data;
 };
+
+export const createRepoWebhook = async (
+  accessToken: string,
+  repoOwner: string,
+  repoName: string,
+) => {
+  const { data } = await GithubClient.post<CreateWebhookResponse>(
+    `/repos/${repoOwner}/${repoName}/hooks`,
+    {
+      name: "web",
+      active: true,
+      events: ["pull_request"],
+      config: {
+        url: `${Config.WEBHOOK_PAYLOAD_URL}`,
+        content_type: "json",
+        insecure_ssl: "0",
+        secret: `${Config.WEBHOOK_SECRET_KEY}`,
+      },
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        owner: `${repoOwner}`,
+        repo: `${repoName}`,
+      },
+    },
+  );
+};
+
