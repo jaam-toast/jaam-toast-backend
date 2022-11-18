@@ -2,8 +2,9 @@ import createError from "http-errors";
 
 import catchAsync from "../../utils/asyncHandler";
 
-import { bulidingLogSocket } from "../../deploy/socket";
 import createDeployment from "../../deploy/build-utils/createDeployment";
+import { bulidingLogSocket } from "../../deploy/socket";
+import { createRepoWebhook } from "../github/client";
 
 export const deployUserRepo = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
@@ -33,10 +34,13 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
     buildCommand,
     envList,
   };
+  const repoOwner = repoCloneUrl.split("https://github.com/")[1].split("/")[0];
 
   const newDeploymentInfo = await createDeployment(repoBuildOptions);
 
   bulidingLogSocket();
+
+  createRepoWebhook(githubAccessToken as string, repoOwner, repoName);
 
   return res.json({
     result: "ok",
