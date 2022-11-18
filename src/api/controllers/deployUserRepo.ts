@@ -28,7 +28,7 @@ export const deployUserRepo = catchAsync(async (req, res, next) => {
 
   const repoBuildOptions = {
     repoName,
-    remoteUrl: repoCloneUrl,
+    repoCloneUrl,
     nodeVersion,
     installCommand,
     buildCommand,

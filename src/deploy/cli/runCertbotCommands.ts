@@ -71,7 +71,7 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
       `Error: An unexpected error occurred requesting a certificate for ${subdomain}.${Config.SERVER_URL} - ${err}`,
     );
     throw new DeploymentError({
-      code: "letsencrypt_certbot",
+      code: "aws-cli_letsencrypt_certbot",
       message: "letsencrypt certbot didn't work as expected",
     });
   }

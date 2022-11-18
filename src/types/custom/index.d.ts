@@ -8,7 +8,7 @@ export type User = {
 };
 
 export interface ClientOptions {
-  remoteUrl: string;
+  repoCloneUrl: string;
   repoName: string;
 }
 
@@ -20,7 +20,7 @@ export interface Env {
 export interface GitMetadata {
   commitAuthorName?: string | undefined;
   commitMessage?: string | undefined;
-  remoteUrl: string;
+  repoCloneUrl: string;
 }
 
 export interface DeploymentOptions {

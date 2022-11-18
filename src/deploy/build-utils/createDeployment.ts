@@ -22,7 +22,7 @@ export default async function createDeployment(
 
   const {
     repoName,
-    remoteUrl,
+    repoCloneUrl,
     nodeVersion,
     installCommand,
     buildCommand,
@@ -30,7 +30,7 @@ export default async function createDeployment(
     gitMetadata,
   } = repoBuildOptions;
 
-  const clientOptions = { remoteUrl, repoName };
+  const clientOptions = { repoCloneUrl, repoName };
   const deploymentOptions = { nodeVersion, envList };
 
   const commands = buildDeploymentCommands(clientOptions, deploymentOptions);
@@ -95,7 +95,7 @@ export default async function createDeployment(
               deployedUrl: `${repoName}.${Config.SERVER_URL}`,
               deployPublicAddress: publicIpAddress,
               deployRepoName: repoName,
-              deployRemoteUrl: remoteUrl,
+              deployRemoteUrl: repoCloneUrl,
             };
 
             return newDeploymentInfo;
