@@ -49,6 +49,15 @@ export const updateUserRepo = catchAsync(async (req, res, next) => {
       repoName: repository.name,
       cloneUrl: repository.clone_url,
     };
+
+    const { commit } = await getHeadCommitMessage(
+      githubAccessToken as string,
+      pullRequestData.repoOwner,
+      pullRequestData.repoName,
+      pullRequestData.headRef,
+    );
+
+    const commitMessage = commit.message;
   }
 
   return res.json({
