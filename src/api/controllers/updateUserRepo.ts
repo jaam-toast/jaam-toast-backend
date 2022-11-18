@@ -58,6 +58,8 @@ export const updateUserRepo = catchAsync(async (req, res, next) => {
     );
 
     const commitMessage = commit.message;
+
+    runUpdateDeploymentCommands(`${"intanceId"}`, pullRequestData.repoName);
   }
 
   return res.json({
