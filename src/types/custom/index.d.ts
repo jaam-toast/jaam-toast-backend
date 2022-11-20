@@ -1,15 +1,19 @@
 import { RRType, Date } from "@aws-sdk/client-route-53";
+import { Types } from "mongoose";
 
-export type User = {
+export interface User {
   username: string;
   userGithubUri: string;
   userImage?: string;
   githubAccessToken?: string;
-};
+  myRepos?: Types.ObjectId[];
+}
 
 export interface ClientOptions {
-  repoCloneUrl: string;
   repoName: string;
+  repoOwner: string;
+  repoCloneUrl: string;
+  repoUpdatedAt: string;
 }
 
 export interface Env {
@@ -28,10 +32,19 @@ export interface DeploymentOptions {
   installCommand?: string;
   buildCommand?: string;
   envList?: Env[];
+  bulidType?: string;
   gitMetadata?: GitMetadata;
 }
 
 export interface RepoBuildOptions extends ClientOptions, DeploymentOptions {}
+
+export interface DeploymentData extends RepoBuildOptions {
+  instanceId: string;
+  deployedUrl?: string;
+  recordId?: string;
+  buildingLog?: (string | undefined)[] | undefined;
+  lastCommitMessage?: string;
+}
 
 interface CreateDNSRecordProps {
   subdomain: string;
@@ -43,4 +56,10 @@ interface RecordSetResponse {
   recordId: string | undefined;
   recordStatus: string | undefined;
   recordCreatedAt: Date | undefined;
+  publicIpAddress?: string | undefined;
+}
+
+interface RecordInstaceStatus {
+  recordStatus: string | undefined;
+  instanceState: string | undefined;
 }
