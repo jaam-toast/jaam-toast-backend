@@ -1,10 +1,13 @@
-import Config from "../../config";
+const { startSession } = require("mongoose");
 
-import { getHeadCommitMessage } from "../github/client";
-import runUpdateDeploymentCommands from "../../deploy/cli/runUpdateDeploymentCommands";
+import Config from "../../../config";
 
-import catchAsync from "../../utils/asyncHandler";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { getHeadCommitMessage } from "../../github/client";
+import runUpdateDeploymentCommands from "../../../deploy/cli/runUpdateDeploymentCommands";
+
+import catchAsync from "../../../utils/asyncHandler";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { Repo } from "../../../models/Repo";
 
 interface PullRequestData {
   prAction: boolean;
@@ -19,7 +22,7 @@ interface PullRequestData {
   cloneUrl: string;
 }
 
-export const updateUserRepo = catchAsync(async (req, res, next) => {
+const updateDeployment = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
@@ -59,10 +62,38 @@ export const updateUserRepo = catchAsync(async (req, res, next) => {
 
     const lastCommitMessage = commit.message;
 
-    runUpdateDeploymentCommands(`${"intanceId"}`, pullRequestData.repoName);
+    req.deploymentData.lastCommitMessage = lastCommitMessage;
+
+    const session = await startSession();
+    let userRepo;
+    let instanceId;
+
+    await session.withTransaction(async () => {
+      userRepo = await Repo.findOne(
+        {
+          repoCloneUrl: pullRequestData.cloneUrl,
+        },
+        null,
+        { session },
+      ).lean();
+
+      await Repo.updateOne(
+        { repoCloneUrl: pullRequestData.cloneUrl },
+        { $set: { lastCommitMessage } },
+        { session },
+      );
+
+      instanceId = userRepo?.instanceId;
+    });
+
+    session.endSession();
+
+    runUpdateDeploymentCommands(`${instanceId}`, pullRequestData.repoName);
   }
 
   return res.json({
     result: "ok",
   });
 });
+
+export default updateDeployment;
