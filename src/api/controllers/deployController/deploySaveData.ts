@@ -37,6 +37,29 @@ const deploySaveData = catchAsync(async (req, res, next) => {
     );
   }
 
+  const session = await startSession();
+
+  await session.withTransaction(async () => {
+    const newRepoArr = await Repo.create(
+      [
+        {
+          ...req.deploymentData,
+        },
+      ],
+      { session },
+    );
+
+    const newRepo = newRepoArr[0].toObject();
+
+    await User.updateOne(
+      { _id: user_id },
+      { $push: { myRepos: newRepo._id } },
+      { session, new: true },
+    );
+  });
+
+  session.endSession();
+
   debug("A new deployment's data is saved successfully!");
 
   next();
