@@ -62,8 +62,6 @@ const updateDeployment = catchAsync(async (req, res, next) => {
 
     const lastCommitMessage = commit.message;
 
-    req.deploymentData.lastCommitMessage = lastCommitMessage;
-
     const session = await startSession();
     let userRepo;
     let instanceId;
@@ -89,6 +87,10 @@ const updateDeployment = catchAsync(async (req, res, next) => {
     session.endSession();
 
     runUpdateDeploymentCommands(`${instanceId}`, pullRequestData.repoName);
+
+    debug(
+      `Successfully requested for deploymnet updates of the new pull request from Github webhook`,
+    );
   }
 
   return res.json({
