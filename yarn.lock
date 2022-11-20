@@ -2425,7 +2425,7 @@
 
 "@types/joigoose@^2.0.7":
   version "2.0.7"
-  resolved "https://registry.npmjs.org/@types/joigoose/-/joigoose-2.0.7.tgz"
+  resolved "https://registry.yarnpkg.com/@types/joigoose/-/joigoose-2.0.7.tgz#49f41f0dc0281ae63e9c163bd674d73c460d3241"
   integrity sha512-pHl5FCa8IbvKFij5ijRYUgnlTtt8J51DKhyZ2O5E8loot8l4M837YEM3ipslrry+CX+nfbXynfHBty8P/N7rpQ==
   dependencies:
     joi "^17.3.0"
@@ -4096,7 +4096,7 @@ jws@^3.2.2:
 
 kareem@2.3.5:
   version "2.3.5"
-  resolved "https://registry.npmjs.org/kareem/-/kareem-2.3.5.tgz"
+  resolved "https://registry.yarnpkg.com/kareem/-/kareem-2.3.5.tgz#111fe9dbab754c8ed88b7a2360e2680cec1420ca"
   integrity sha512-qxCyQtp3ioawkiRNQr/v8xw9KIviMSSNmy+63Wubj7KmMn3g7noRXIZB4vPCAP+ETi2SR8eH6CvmlKZuGpoHOg==
 
 kareem@2.4.1:
@@ -4274,7 +4274,7 @@ mongodb-connection-string-url@^2.5.2, mongodb-connection-string-url@^2.5.3:
 
 mongodb@4.5.0:
   version "4.5.0"
-  resolved "https://registry.npmjs.org/mongodb/-/mongodb-4.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-4.5.0.tgz#d74c2008567b606dccef220f62a44cd7b934eb92"
   integrity sha512-A2l8MjEpKojnhbCM0MK3+UOGUSGvTNNSv7AkP1fsT7tkambrkkqN/5F2y+PhzsV0Nbv58u04TETpkaSEdI2zKA==
   dependencies:
     bson "^4.6.2"
@@ -4311,7 +4311,7 @@ mongoose@^6.6.5:
 
 mongoose@~6.3:
   version "6.3.9"
-  resolved "https://registry.npmjs.org/mongoose/-/mongoose-6.3.9.tgz"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-6.3.9.tgz#a984d36c998503815352150eb1999fe6800d1221"
   integrity sha512-pCvgKr/t9MHTz7w29uCX2g2gQ3iM/8jh8ZdIBawms/E4wv7SCjRnR3o08zZTNT/nORsZSK14P7F4KBVkdbecxA==
   dependencies:
     bson "^4.6.2"
