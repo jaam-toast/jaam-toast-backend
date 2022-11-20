@@ -1,49 +1,54 @@
 import Config from "../../config";
 
-import describeLogStreams from "../aws/cwl_describelogstreams";
 import getFilteredLogEvents from "../aws/cwl_filterlogeventscommand";
+import getLogStreamStatus from "./getLogStreamStatus";
 
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
-export default function runGetFilteredLogEvents(
+export default async function runGetFilteredLogEvents(
   instanceId: string,
   subdomain: string,
+  ms = 2000,
+  triesLeft = 50,
 ) {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+  const defaultTriesLeft = triesLeft;
 
-  const logStreamStatusInterval = setInterval(getLogStreamStatus, 2000);
+  return new Promise<(string | undefined)[] | undefined>((resolve, reject) => {
+    const logStreamStatusInterval = setInterval(async () => {
+      const logStremStatus = await getLogStreamStatus(instanceId, subdomain);
+      const logStreamName = logStremStatus?.logStreamName;
 
-  async function getLogStreamStatus() {
-    let logStreamStatus;
+      const filteredLogDelay = async (ms: number) => {
+        return new Promise<(string | undefined)[] | undefined>(resolve =>
+          setTimeout(
+            () => resolve(getFilteredLogEvents(instanceId, subdomain)),
+            ms,
+          ),
+        );
+      };
 
-    try {
-      logStreamStatus = await describeLogStreams(instanceId);
-
-      debug(`Checking logStreamStatus - [${logStreamStatus?.logStreamName}]`);
-
-      debug(
-        `Still waiting for requesting a log stream on ${subdomain}.${Config.SERVER_URL}...`,
-      );
-
-      if (logStreamStatus?.logStreamName === instanceId) {
+      if (logStreamName === instanceId) {
         clearInterval(logStreamStatusInterval);
+        const filteredLogEventMessages = await filteredLogDelay(60000);
 
-        const filteredLogEventMessages = setTimeout(
-          () => getFilteredLogEvents(instanceId, subdomain),
-          70000,
+        resolve(filteredLogEventMessages);
+      } else if (triesLeft <= 1) {
+        clearInterval(logStreamStatusInterval);
+        debug(
+          `Error: 'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expected`,
         );
 
-        return filteredLogEventMessages;
+        reject(
+          new DeploymentError({
+            code: "runGetFilteredLogEvents_logStreamStatusInterval",
+            message: `'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expected`,
+          }),
+        );
       }
-    } catch (err) {
-      debug(
-        `Error: An unexpected error occurred during DescribeLogStreamsCommand - ${err}`,
-      );
-      throw new DeploymentError({
-        code: "cloudWatchLogsClient_DescribeLogStreamsCommand",
-        message: "logStreamStatus.logStreamName is typeof undefined",
-      });
-    }
-  }
+
+      triesLeft--;
+    }, ms);
+  });
 }
