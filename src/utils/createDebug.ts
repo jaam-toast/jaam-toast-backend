@@ -90,7 +90,7 @@ export function createBuildingLogDebug(debug?: boolean) {
 
       process.stderr.write(
         [
-          chalk.yellowBright.bold("[building-log-debug]"),
+          chalk.greenBright.bold("[building-log-debug]"),
           chalk.blackBright(`${formattedTime}`),
           ...logs,
         ].join(" ") + "\n",
