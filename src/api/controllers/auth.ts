@@ -6,13 +6,6 @@ import { User } from "../../models/User";
 
 import catchAsync from "../../utils/asyncHandler";
 
-type UserDataType = {
-  _id: string;
-  username: string;
-  userGithubUri: string;
-  userImage?: string;
-};
-
 export const login = catchAsync(async (req, res, next) => {
   const { username, userGithubUri, userImage, githubAccessToken } = req.user;
 
@@ -20,13 +13,14 @@ export const login = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  let userData: UserDataType | null = await User.findOne({ userGithubUri });
+  let userData = await User.findOne({ userGithubUri });
 
   if (!userData) {
     userData = await User.create({
       username,
       userGithubUri,
       userImage,
+      githubAccessToken,
     });
   }
 

@@ -13,26 +13,28 @@ const getFilteredLogEvents = async (instanceId: string, subdomain: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const debugBuildingLog = createBuildingLogDebug(Config.CLIENT_OPTIONS.debug);
 
-  debug(
-    `Requesting a building log of newly created deployment - ${subdomain}.${Config.SERVER_URL}...`,
-  );
-
   const filterLogEventsParams = {
     logGroupName: "user-data.log",
     logStreamNames: [instanceId],
     filterPattern: Config.LOG_FILTERS.userDataFilter,
   };
 
+  debug("Running getFilteredLogEvents to request a buliding log...");
+
   try {
     const command = new FilterLogEventsCommand(filterLogEventsParams);
 
     const data = await cwlClient.send(command);
 
+    debug(
+      `A building log of newly created deployment - ${subdomain}.${Config.SERVER_URL} has been requested`,
+    );
+
     if (data.events) {
       const filteredLogEvent = data.events;
 
       debug(
-        "Sending back to client of the newly created deployment buliding log...",
+        `Successfully requested for a building log of  ${subdomain}.${Config.SERVER_URL}...`,
       );
 
       const filteredLogEventMessages = filteredLogEvent.map(log => {
@@ -42,14 +44,14 @@ const getFilteredLogEvents = async (instanceId: string, subdomain: string) => {
         return filteredMessage;
       });
 
+      debug(
+        "Sending back to client of the newly created deployment buliding log...",
+      );
+
       filteredLogEventMessages.forEach((bulidingLog, i) =>
         setTimeout(() => {
           debugBuildingLog(bulidingLog as string);
         }, i * 100),
-      );
-
-      debug(
-        `A building log of newly created deployment - ${subdomain}.${Config.SERVER_URL} has been requested`,
       );
 
       return filteredLogEventMessages;

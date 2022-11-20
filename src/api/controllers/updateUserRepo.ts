@@ -1,9 +1,9 @@
-import catchAsync from "../../utils/asyncHandler";
-
 import Config from "../../config";
+
 import { getHeadCommitMessage } from "../github/client";
 import runUpdateDeploymentCommands from "../../deploy/cli/runUpdateDeploymentCommands";
 
+import catchAsync from "../../utils/asyncHandler";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
 interface PullRequestData {
@@ -57,7 +57,7 @@ export const updateUserRepo = catchAsync(async (req, res, next) => {
       pullRequestData.headRef,
     );
 
-    const commitMessage = commit.message;
+    const lastCommitMessage = commit.message;
 
     runUpdateDeploymentCommands(`${"intanceId"}`, pullRequestData.repoName);
   }
