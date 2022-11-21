@@ -29,10 +29,10 @@ export interface GitMetadata {
 
 export interface DeploymentOptions {
   nodeVersion: string;
-  installCommand?: string;
-  buildCommand?: string;
+  installCommand: string;
+  buildCommand: string;
   envList?: Env[];
-  bulidType?: string;
+  buildType: string;
   gitMetadata?: GitMetadata;
 }
 

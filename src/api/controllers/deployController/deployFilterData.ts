@@ -32,7 +32,7 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
     buildingLog,
     lastCommitMessage,
   } = req.deploymentData;
@@ -46,7 +46,7 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
     deployedUrl,
     buildingLog,
     lastCommitMessage,
