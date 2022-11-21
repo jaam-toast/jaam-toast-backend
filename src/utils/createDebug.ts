@@ -8,7 +8,7 @@ export function createDeploymentDebug(debug: boolean) {
       const dayTime = new Date().toISOString();
       const formattedTime = `${dayTime.split("T")[0]} ${
         dayTime.split("T")[1].split(".")[0]
-      }`;
+      }.${dayTime.split(".")[1].split("Z")[0]}`;
 
       process.stderr.write(
         [
@@ -24,15 +24,9 @@ export function createDeploymentDebug(debug: boolean) {
         logs.forEach(log => {
           // process.stderr.write(log + " " + "\n");
 
-          fs.write(
-            fd,
-            `${chalk.cyanBright.bold(
-              "[jaamtoast-deployment]",
-            )} ${chalk.blackBright(`${formattedTime}`)} ${log}` + "\n",
-            err => {
-              if (err) throw Error(err.message);
-            },
-          );
+          fs.write(fd, `[deployment] ${formattedTime} ${log}` + "\n", err => {
+            if (err) throw Error(err.message);
+          });
         });
       });
     };
@@ -47,7 +41,7 @@ export function createCertbotDebug(debug?: boolean) {
       const dayTime = new Date().toISOString();
       const formattedTime = `${dayTime.split("T")[0]} ${
         dayTime.split("T")[1].split(".")[0]
-      }`;
+      }.${dayTime.split(".")[1].split("Z")[0]}`;
 
       process.stderr.write(
         [
@@ -63,15 +57,9 @@ export function createCertbotDebug(debug?: boolean) {
         logs.forEach(log => {
           // process.stderr.write(log + " " + "\n");
 
-          fs.write(
-            fd,
-            `${chalk.yellowBright.bold(
-              `[jaamtoast-certbot]`,
-            )} ${chalk.blackBright(`${formattedTime}`)} ${log}` + "\n",
-            err => {
-              if (err) throw Error(err.message);
-            },
-          );
+          fs.write(fd, `[certbot] ${formattedTime} ${log}` + "\n", err => {
+            if (err) throw Error(err.message);
+          });
         });
       });
     };
@@ -86,7 +74,7 @@ export function createBuildingLogDebug(debug?: boolean) {
       const dayTime = new Date().toISOString();
       const formattedTime = `${dayTime.split("T")[0]} ${
         dayTime.split("T")[1].split(".")[0]
-      }`;
+      }.${dayTime.split(".")[1].split("Z")[0]}`;
 
       process.stderr.write(
         [
@@ -102,15 +90,9 @@ export function createBuildingLogDebug(debug?: boolean) {
         logs.forEach(log => {
           // process.stderr.write(log + " " + "\n");
 
-          fs.write(
-            fd,
-            `${chalk.yellowBright.bold(
-              "[jaamtoast-building-log]",
-            )} ${chalk.blackBright(`${formattedTime}`)} ${log}` + "\n",
-            err => {
-              if (err) throw Error(err.message);
-            },
-          );
+          fs.write(fd, `[building-log] ${formattedTime} ${log}` + "\n", err => {
+            if (err) throw Error(err.message);
+          });
         });
       });
     };
