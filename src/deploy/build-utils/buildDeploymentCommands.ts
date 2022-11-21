@@ -2,15 +2,22 @@ import Config from "../../config";
 
 import { ClientOptions, DeploymentOptions } from "../../types/custom";
 import { createDeploymentDebug } from "../../utils/createDebug";
+import setNginxScript from "../aws/config/setNginxScript";
 
 export default function buildDeploymentCommands(
   clientOptions: ClientOptions,
-  deploymentOptions: DeploymentOptions = { nodeVersion: "16.x" },
+  deploymentOptions: DeploymentOptions = {
+    nodeVersion: "16.x",
+    installCommand: "",
+    buildCommand: "",
+    buildType: "SSR",
+  },
 ) {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const { repoCloneUrl, repoName } = clientOptions;
-  const { nodeVersion, envList } = deploymentOptions;
+  const { nodeVersion, installCommand, buildCommand, envList, buildType } =
+    deploymentOptions;
 
   const GIT_CLONE_URL = repoCloneUrl.replace(
     "https://github.com",
@@ -21,9 +28,26 @@ export default function buildDeploymentCommands(
     ? Config.NODEJS_FERMIUM
     : Config.NODEJS_GALLIUM;
   const CUSTOM_DOMAIN = `${REPO_NAME}.${Config.SERVER_URL}`;
+  const PM2_START_COMMAND = buildType.includes("SPA")
+    ? // ? `pm2 serve build 3000 --spa`
+      `pm2 start npm --name "next" -- start`
+    : `pm2 start npm --name "next" -- start`;
+
+  const isUsingYarn = (command: string) => {
+    return command.includes("yarn") ? true : false;
+  };
+
+  const INSTALL_COMMAND = isUsingYarn(installCommand)
+    ? `yarn install`
+    : `npm install --legacy-peer-deps`;
+  const BUILD_COMMAND = isUsingYarn(buildCommand)
+    ? `yarn build`
+    : `npm run build`;
+
+  const NGINX_SCRIPT = setNginxScript(buildType, CUSTOM_DOMAIN, REPO_NAME);
 
   debug(
-    `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}`,
+    `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}, PM2_START_COMMAND: ${PM2_START_COMMAND},INSTALL_COMMAND: ${INSTALL_COMMAND}, BUILD_COMMAND: ${BUILD_COMMAND}, NGINX_SCRIPT: ${NGINX_SCRIPT}`,
   );
 
   const yumUpdate = [
@@ -55,28 +79,9 @@ export default function buildDeploymentCommands(
     setEnv.push(`echo ${key}=${value} >> .env`);
   });
 
-  const npmBuild = [`npm install --legacy-peer-deps`, `npm run build`];
+  const npmBuild = [`${INSTALL_COMMAND}`, `${BUILD_COMMAND}`];
 
-  const setNginx = [
-    `cd /etc/nginx/conf.d`,
-    `echo '
-  server {
-    listen 80;
-    listen [::]:80;
-
-    server_name ${CUSTOM_DOMAIN};
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-				proxy_http_version  1.1;
-
-        proxy_set_header    Host                \$host;
-        proxy_set_header    X-Real-IP           \$remote_addr;
-        proxy_set_header    X-Forwarded-For     \$proxy_add_x_forwarded_for;
-    }
-  }
-    ' > default.conf`,
-  ];
+  const setNginx = NGINX_SCRIPT;
 
   const setCertbot = [
     `cd /home/ec2-user`,
@@ -98,10 +103,10 @@ export default function buildDeploymentCommands(
   const pm2Start = [
     `npm install pm2 -g`,
     `cd /home/ec2-user/jaamtoast/${REPO_NAME}`,
-    `pm2 start npm --name "next" -- start`,
+    `sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v16.18.0/bin /home/ec2-user/.config/yarn/global/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user`,
+    `${PM2_START_COMMAND}`,
     `pm2 save`,
     `pm2 startup`,
-    `sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v16.18.0/bin /home/ec2-user/.config/yarn/global/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user`,
   ];
 
   const commands = [

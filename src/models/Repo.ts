@@ -14,7 +14,7 @@ const joiRepoSchema = joi.object({
   nodeVersion: joi.string(),
   installCommand: joi.string().allow("").default(""),
   buildCommand: joi.string().allow("").default(""),
-  bulidType: joi.string().allow("").default(""),
+  buildType: joi.string().allow("").default(""),
   envList: joi.array().items(
     joi.object({
       key: joi.string(),

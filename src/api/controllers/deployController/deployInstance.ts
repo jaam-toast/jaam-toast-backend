@@ -21,7 +21,7 @@ const deployInstance = catchAsync(async (req, res, next) => {
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
   } = req.body;
 
   if (!repoName || !repoCloneUrl) {
@@ -38,7 +38,7 @@ const deployInstance = catchAsync(async (req, res, next) => {
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
   };
 
   bulidingLogSocket();

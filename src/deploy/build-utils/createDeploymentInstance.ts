@@ -24,7 +24,7 @@ export default async function createDeploymentInstance(
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
     gitMetadata,
   } = repoBuildOptions;
 
@@ -34,7 +34,7 @@ export default async function createDeploymentInstance(
     installCommand,
     buildCommand,
     envList,
-    bulidType,
+    buildType,
   };
 
   const commands = buildDeploymentCommands(clientOptions, deploymentOptions);
