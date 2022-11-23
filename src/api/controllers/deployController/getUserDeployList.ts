@@ -32,7 +32,7 @@ const getUserDeployList = catchAsync(async (req, res, next) => {
     .populate<{ myRepos: DeploymentData[] }>("myRepos")
     .lean();
 
-  userDeployList = userData?.myRepos;
+  userDeployList = userData?.myRepos || [];
 
   const filteredUserDeployList = userDeployList?.map(deployData => {
     const {
