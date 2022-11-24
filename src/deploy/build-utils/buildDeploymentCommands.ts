@@ -103,6 +103,7 @@ export default function buildDeploymentCommands(
     `npm install pm2 -g`,
     `cd /home/ec2-user/jaamtoast/${REPO_NAME}`,
     `sudo env PATH=$PATH:/home/ec2-user/.nvm/versions/node/v16.18.0/bin /home/ec2-user/.config/yarn/global/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user`,
+    `chmod 711 /home/ec2-user`,
     `${PM2_START_COMMAND}`,
     `export PM2_HOME="/etc/.pm2"`,
     `pm2 save`,
