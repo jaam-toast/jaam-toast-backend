@@ -10,12 +10,12 @@ import { createDeploymentDebug } from "../../../utils/createDebug";
 import { RRType } from "@aws-sdk/client-route-53";
 import { RecordSetResponse } from "../../../types/custom";
 
-let recordChangeInfo: RecordSetResponse | undefined;
-let publicIpAddress: RecordSetResponse["publicIpAddress"];
-let recordIdStatus: RecordSetResponse["recordId"];
-
 const deployDomain = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+
+  let recordChangeInfo: RecordSetResponse | undefined = undefined;
+  let publicIpAddress: RecordSetResponse["publicIpAddress"] = undefined;
+  let recordIdStatus: RecordSetResponse["recordId"] = undefined;
 
   const { repoName, instanceId } = req.deploymentData;
 
