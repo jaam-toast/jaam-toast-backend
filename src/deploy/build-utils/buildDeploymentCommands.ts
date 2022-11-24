@@ -29,8 +29,7 @@ export default function buildDeploymentCommands(
     : Config.NODEJS_GALLIUM;
   const CUSTOM_DOMAIN = `${REPO_NAME}.${Config.SERVER_URL}`;
   const PM2_START_COMMAND = buildType.includes("SPA")
-    ? // ? `pm2 serve build 3000 --spa`
-      `pm2 start npm --name "next" -- start`
+    ? `pm2 start npm --name "react-scripts" -- start`
     : `pm2 start npm --name "next" -- start`;
 
   const isUsingYarn = (command: string) => {
