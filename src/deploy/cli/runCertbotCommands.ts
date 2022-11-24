@@ -33,23 +33,26 @@ async function runCertbotCommands(instanceId: string, subdomain: string) {
     );
 
     ssmCertbotCommands.stdout.on("data", data => {
-      process.stderr.write(`stdout: ssmCertbotCommands - ${data}`);
+      process.stderr.write(`stdout data: ssmCertbotCommands - ${data}`);
+      debug(`stdout data: ssmCertbotCommands - ${data}`);
 
-      debug(`Successfully requesting for a certificate...`);
+      debug(
+        `Successfully requesting for a certificate through ssmCertbotCommands...`,
+      );
     });
 
     ssmCertbotCommands.stderr.on("data", data => {
       debug(
-        `Error: An unexpected error occurred running certbot commands - ${data}`,
+        `Error stderr data: An unexpected error occurred running certbot commands - ${data}`,
       );
       throw new Error(
-        `Error: The command failed. stderr: ssmCertbotCommands - ${data.stderr}`,
+        `Error: The command failed. stderr: ssmCertbotCommands - ${data}`,
       );
     });
 
     ssmCertbotCommands.stderr.on("error", err => {
       debug(
-        `Error: An unexpected error occurred running certbot commands - ${err}`,
+        `Error stderr error: An unexpected error occurred running certbot commands - ${err}`,
       );
       throw new Error(
         `Error: The command failed. Chlid process exited. stderr: ssmCertbotCommands - ${err.name} (${err.message})`,

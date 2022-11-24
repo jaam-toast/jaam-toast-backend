@@ -35,23 +35,28 @@ async function runUpdateDeploymentCommands(
     );
 
     ssmUpdateDeploymentCommands.stdout.on("data", data => {
-      process.stderr.write(`stdout: ssmUpdateDeploymentCommands - ${data}`);
+      process.stderr.write(
+        `stdout data: ssmUpdateDeploymentCommands - ${data}`,
+      );
+      debug(`stdout data: ssmUpdateDeploymentCommands - ${data}`);
 
-      debug(`Successfully requesting git pull commands...`);
+      debug(
+        `Successfully requesting git pull commands through ssmUpdateDeploymentCommands...`,
+      );
     });
 
     ssmUpdateDeploymentCommands.stderr.on("data", data => {
       debug(
-        `Error: An unexpected error occurred running git pull commands - ${data}`,
+        `Error stderr data: An unexpected error occurred running git pull commands - ${data}`,
       );
       throw new Error(
-        `Error: The command failed. stderr: ssmUpdateDeploymentCommands - ${data.stderr}`,
+        `Error stderr data: The command failed. stderr: ssmUpdateDeploymentCommands - ${data}`,
       );
     });
 
     ssmUpdateDeploymentCommands.stderr.on("error", err => {
       debug(
-        `Error: An unexpected error occurred running git pull commands - ${err}`,
+        `Error stderr error: An unexpected error occurred running git pull commands - ${err}`,
       );
       throw new Error(
         `Error: The command failed. Chlid process exited. stderr: ssmUpdateDeploymentCommands - ${err.name} (${err.message})`,
