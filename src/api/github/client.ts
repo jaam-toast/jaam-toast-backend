@@ -14,6 +14,8 @@ type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
 type ListOrgReposResponse = Endpoints["GET /orgs/{org}/repos"]["response"];
 type CreateWebhookResponse =
   Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"];
+type ListCommtisResponse =
+  Endpoints["GET /repos/{owner}/{repo}/commits"]["response"];
 type PullRequestCommitResponse =
   Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"];
 
@@ -112,6 +114,23 @@ export const createRepoWebhook = async (
       },
     },
   );
+};
+
+export const getCommits = async (
+  accessToken: string,
+  repoOwner: string,
+  repoName: string,
+) => {
+  const { data } = await GithubClient.get<ListCommtisResponse["data"]>(
+    `/repos/${repoOwner}/${repoName}/commits`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  return data;
 };
 
 export const getHeadCommitMessage = async (
