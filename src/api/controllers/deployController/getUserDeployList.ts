@@ -2,13 +2,13 @@ import { LeanDocument } from "mongoose";
 
 import Config from "../../../config";
 
-import { User } from "../../../models/User";
+import { DBUser, User } from "../../../models/User";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";
 import { createDeploymentDebug } from "../../../utils/createDebug";
 
-import { DeploymentData } from "../../../types/custom";
+import { DBRepo } from "../../../models/Repo";
 
 const getUserDeployList = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
@@ -26,10 +26,10 @@ const getUserDeployList = catchAsync(async (req, res, next) => {
     );
   }
 
-  let userDeployList: LeanDocument<DeploymentData>[] | undefined = [];
+  let userDeployList: LeanDocument<DBRepo>[] | undefined = [];
 
-  const userData = await User.findOne({ _id: user_id })
-    .populate<{ myRepos: DeploymentData[] }>("myRepos")
+  const userData = await User.findOne<DBUser>({ _id: user_id })
+    .populate<{ myRepos: DBRepo[] }>("myRepos")
     .lean();
 
   userDeployList = userData?.myRepos || [];
@@ -47,7 +47,9 @@ const getUserDeployList = catchAsync(async (req, res, next) => {
       buildType,
       deployedUrl,
       buildingLog,
+      instanceId,
       lastCommitMessage,
+      _id,
     } = deployData;
 
     const filteredDeployData = {
@@ -62,7 +64,9 @@ const getUserDeployList = catchAsync(async (req, res, next) => {
       buildType,
       deployedUrl,
       buildingLog,
+      instanceId,
       lastCommitMessage,
+      repoId: _id,
     };
 
     return filteredDeployData;
