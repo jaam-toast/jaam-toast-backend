@@ -3,16 +3,16 @@ import { DescribeInstancesCommand } from "@aws-sdk/client-ec2";
 import Config from "../../config";
 import ec2Client from "./libs/ec2Client";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { CustomError } from "../../utils/errors";
+import { createGeneralLogDebug } from "../../utils/createDebug";
 
 const describeInstanceIp = async (instanceId: string) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+  const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
 
-  const instancesParams = { InstanceIds: [instanceId] };
+  const instanceParams = { InstanceIds: [instanceId] };
 
   try {
-    const command = new DescribeInstancesCommand(instancesParams);
+    const command = new DescribeInstancesCommand(instanceParams);
 
     const data = await ec2Client.send(command);
 
@@ -40,7 +40,7 @@ const describeInstanceIp = async (instanceId: string) => {
     debug(
       `Error: An unexpected error occurred during DescribeInstancesCommand - ${err}`,
     );
-    throw new DeploymentError({
+    throw new CustomError({
       code: "ec2Client_DescribeInstancesCommand",
       message: "DescribeInstancesCommand didn't work as expected",
     });
