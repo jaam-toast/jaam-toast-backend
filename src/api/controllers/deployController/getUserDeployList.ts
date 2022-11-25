@@ -5,22 +5,22 @@ import Config from "../../../config";
 import { DBUser, User } from "../../../models/User";
 
 import catchAsync from "../../../utils/asyncHandler";
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import { CustomError } from "../../../utils/errors";
+import { createGeneralLogDebug } from "../../../utils/createDebug";
 
 import { DBRepo } from "../../../models/Repo";
 
 const getUserDeployList = catchAsync(async (req, res, next) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+  const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
 
   const { user_id } = req.params;
 
   if (!user_id) {
-    debug("Error: 'user_id' is expected to be strings");
+    debug("Error: 'user_id' is expected to be a string");
 
     return next(
-      new DeploymentError({
-        code: "getUserDeployList",
+      new CustomError({
+        code: "400: getUserDeployList",
         message: "'user_id' is typeof undefined",
       }),
     );
