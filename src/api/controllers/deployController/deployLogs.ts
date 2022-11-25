@@ -27,6 +27,7 @@ const deployLogs = catchAsync(async (req, res, next) => {
   const filteredLogEventMessages = await runGetFilteredLogEvents(
     instanceId as string,
     repoName,
+    req.deploymentData,
   );
 
   req.deploymentData.buildingLog = filteredLogEventMessages;
