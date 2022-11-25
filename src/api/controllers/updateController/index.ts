@@ -1,3 +1,4 @@
 import updateDeployment from "./updateDeployment";
+import deleteDeployment from "./deleteDeployment";
 
-export { updateDeployment };
+export { updateDeployment, deleteDeployment };
