@@ -1,7 +1,7 @@
 import Config from "../../../config";
 
 import describeInstanceIp from "../../../deploy/aws/ec2_describeinstances";
-import createDNSRecord from "../../../deploy/aws/route53_createrecord";
+import changeDNSRecord from "../../../deploy/aws/route53_changerecord";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";
@@ -23,7 +23,7 @@ const deployDomain = catchAsync(async (req, res, next) => {
     const publicIpAddressInterval = setInterval(getPublicIpAddress, 2000);
 
     async function getPublicIpAddress() {
-      const instanceChangeInfo = await describeInstanceIp(instanceId as string);
+      const instanceChangeInfo = await describeInstanceIp(instanceId);
 
       publicIpAddress = instanceChangeInfo?.publicIpAddress;
 
@@ -32,14 +32,15 @@ const deployDomain = catchAsync(async (req, res, next) => {
       if (publicIpAddress) {
         debug(`Created instance public IP: ${publicIpAddress}`);
 
-        const createDNSRecordInput = {
+        const changeDNSRecordInput = {
+          actionType: "CREATE",
           subdomain: repoName,
           recordValue: publicIpAddress,
           recordType: RRType.A,
         };
 
         if (recordIdStatus !== "PENDING" && recordIdStatus !== "INSYNC") {
-          recordChangeInfo = await createDNSRecord(createDNSRecordInput);
+          recordChangeInfo = await changeDNSRecord(changeDNSRecordInput);
         }
 
         if (!recordChangeInfo) {

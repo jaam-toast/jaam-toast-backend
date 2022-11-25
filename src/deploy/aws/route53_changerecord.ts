@@ -9,13 +9,14 @@ import route53Client from "./libs/route53Client";
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
-import { CreateDNSRecordProps } from "../../types/custom";
+import { ChangeDNSRecordProps } from "../../types/custom";
 
-const createDNSRecord = async ({
+const changeDNSRecord = async ({
+  actionType,
   subdomain,
   recordValue,
   recordType = RRType.A,
-}: CreateDNSRecordProps) => {
+}: ChangeDNSRecordProps) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const recordName = `${subdomain}.${Config.SERVER_URL}`;
@@ -23,10 +24,10 @@ const createDNSRecord = async ({
   const recordParams = {
     HostedZoneId: Config.HOSTED_ZONE_ID,
     ChangeBatch: {
-      Comment: "CREATE a record A",
+      Comment: `${actionType} a record A`,
       Changes: [
         {
-          Action: "CREATE",
+          Action: `${actionType}`,
           ResourceRecordSet: {
             Name: recordName,
             Type: recordType,
@@ -56,13 +57,13 @@ const createDNSRecord = async ({
     }
   } catch (err) {
     debug(
-      `Error: An unexpected error occurred during ChangeResourceRecordSetsCommand - ${err}`,
+      `Error: An unexpected error occurred during ChangeResourceRecordSetsCommand_${actionType} - ${err}`,
     );
     throw new DeploymentError({
-      code: "route53Client_ChangeResourceRecordSetsCommand",
-      message: "ChangeResourceRecordSetsCommand didn't work as expected",
+      code: `route53Client_ChangeResourceRecordSetsCommand_${actionType}`,
+      message: `ChangeResourceRecordSetsCommand_${actionType} didn't work as expected`,
     });
   }
 };
 
-export default createDNSRecord;
+export default changeDNSRecord;
