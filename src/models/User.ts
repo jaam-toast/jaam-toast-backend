@@ -1,8 +1,15 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import { User } from "../types/custom";
+export interface DBUser {
+  _id: Types.ObjectId;
+  username: string;
+  userGithubUri: string;
+  userImage?: string;
+  githubAccessToken?: string;
+  myRepos?: Types.ObjectId[];
+}
 
 const Joigoose = joigoose(mongoose);
 
@@ -21,6 +28,6 @@ const joiUserSchema = joi.object({
 const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema), {
   versionKey: false,
 });
-const User = mongoose.model<User>("User", userSchema);
+const User = mongoose.model<DBUser>("User", userSchema);
 
 export { User, joiUserSchema };

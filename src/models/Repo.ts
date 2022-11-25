@@ -1,8 +1,26 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import { DeploymentData } from "../types/custom";
+import { Env } from "../types/custom";
+
+export interface DBRepo {
+  _id: Types.ObjectId;
+  repoName: string;
+  repoOwner: string;
+  repoCloneUrl: string;
+  repoUpdatedAt: string;
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  buildType: string;
+  envList?: Env[];
+  instanceId: string;
+  deployedUrl?: string;
+  recordId?: string;
+  buildingLog?: (string | undefined)[] | undefined;
+  lastCommitMessage?: string;
+}
 
 const Joigoose = joigoose(mongoose);
 
@@ -30,6 +48,6 @@ const joiRepoSchema = joi.object({
 const repoSchema = new mongoose.Schema(Joigoose.convert(joiRepoSchema), {
   versionKey: false,
 });
-const Repo = mongoose.model<DeploymentData>("Repo", repoSchema);
+const Repo = mongoose.model<DBRepo>("Repo", repoSchema);
 
 export { Repo, joiRepoSchema };
