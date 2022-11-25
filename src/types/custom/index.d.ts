@@ -46,6 +46,8 @@ export interface DeploymentData extends RepoBuildOptions {
   lastCommitMessage?: string;
   webhookId?: string;
   repoId?: Types.ObjectId;
+  publicIpAddress?: string;
+  githubAccessToken?: string;
 }
 
 interface ChangeDNSRecordProps {

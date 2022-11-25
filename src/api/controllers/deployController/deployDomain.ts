@@ -2,6 +2,7 @@ import Config from "../../../config";
 
 import describeInstanceIp from "../../../deploy/aws/ec2_describeinstances";
 import changeDNSRecord from "../../../deploy/aws/route53_changerecord";
+import terminateInstance from "../../../deploy/aws/ec2_terminateinstances";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";
@@ -9,9 +10,12 @@ import { createDeploymentDebug } from "../../../utils/createDebug";
 
 import { RRType } from "@aws-sdk/client-route-53";
 import { RecordSetResponse } from "../../../types/custom";
+import { deleteRepoWebhook } from "../../github/client";
 
 const deployDomain = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+
+  const { githubAccessToken } = req.query;
 
   let recordChangeInfo: RecordSetResponse | undefined = undefined;
   let publicIpAddress: RecordSetResponse["publicIpAddress"] = undefined;
@@ -37,6 +41,7 @@ const deployDomain = catchAsync(async (req, res, next) => {
           subdomain: repoName,
           recordValue: publicIpAddress,
           recordType: RRType.A,
+          instanceId,
         };
 
         if (recordIdStatus !== "PENDING" && recordIdStatus !== "INSYNC") {
@@ -65,6 +70,8 @@ const deployDomain = catchAsync(async (req, res, next) => {
           clearInterval(publicIpAddressInterval);
 
           req.deploymentData.recordId = recordChangeInfo.recordId;
+          req.deploymentData.publicIpAddress = recordChangeInfo.publicIpAddress;
+          req.deploymentData.githubAccessToken = githubAccessToken as string;
 
           next();
         }
@@ -72,6 +79,15 @@ const deployDomain = catchAsync(async (req, res, next) => {
     }
   } catch (err) {
     debug(`Error: 'publicIpAddress' is expected to be a string - ${err}`);
+
+    await terminateInstance(instanceId);
+    await deleteRepoWebhook(
+      githubAccessToken as string,
+      req.deploymentData.repoOwner,
+      repoName,
+      Number(req.deploymentData.webhookId),
+    );
+
     throw new DeploymentError({
       code: "ec2Client_DescribeInstancesCommand",
       message: "publicIpAddress is typeof undefined",
