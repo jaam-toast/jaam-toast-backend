@@ -11,6 +11,12 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         req.originalUrl
       } - ${req.method} - ${req.ip}`,
     );
+  } else if (err.name === "CustomError") {
+    Logger.error(
+      `${err.status || 500} - ${err.code} - ${err.message} - ${
+        req.originalUrl
+      } - ${req.method} - ${req.ip}`,
+    );
   } else {
     Logger.error(
       `${err.status || 500} - ${err.message} - ${req.originalUrl} - ${
