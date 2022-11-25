@@ -1,4 +1,4 @@
-import { startSession } from "mongoose";
+import { startSession, Types } from "mongoose";
 
 import Config from "../../../config";
 
@@ -38,6 +38,7 @@ const deploySaveData = catchAsync(async (req, res, next) => {
   }
 
   const session = await startSession();
+  let repoId: Types.ObjectId;
 
   await session.withTransaction(async () => {
     const newRepoArr = await Repo.create(
@@ -50,12 +51,15 @@ const deploySaveData = catchAsync(async (req, res, next) => {
     );
 
     const newRepo = newRepoArr[0].toObject();
+    repoId = newRepo._id;
 
     await User.updateOne(
       { _id: user_id },
       { $push: { myRepos: newRepo._id } },
       { session, new: true },
     );
+
+    req.deploymentData.repoId = repoId;
   });
 
   session.endSession();

@@ -51,7 +51,7 @@ const deployInstance = catchAsync(async (req, res, next) => {
     lastCommitMessage,
   };
 
-  bulidingLogSocket();
+  await bulidingLogSocket();
 
   const { deployedUrl, instanceId } = await createDeploymentInstance(
     repoBuildOptions,
@@ -61,13 +61,20 @@ const deployInstance = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  createRepoWebhook(githubAccessToken as string, repoOwner, repoName);
+  const newWebhookData = await createRepoWebhook(
+    githubAccessToken as string,
+    repoOwner,
+    repoName,
+  );
+
+  const webhookId = newWebhookData.id.toString();
 
   req.deploymentData = {
     ...repoBuildOptions,
     instanceId,
     deployedUrl,
     lastCommitMessage,
+    webhookId,
   };
 
   next();

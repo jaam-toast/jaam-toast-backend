@@ -35,6 +35,8 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     buildType,
     buildingLog,
     lastCommitMessage,
+    repoId,
+    webhookId,
   } = req.deploymentData;
 
   const userDeploymentData = {
@@ -51,6 +53,8 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     buildingLog,
     instanceId,
     lastCommitMessage,
+    repoId,
+    webhookId,
   };
 
   debug(

@@ -44,6 +44,8 @@ export interface DeploymentData extends RepoBuildOptions {
   recordId?: string;
   buildingLog?: (string | undefined)[] | undefined;
   lastCommitMessage?: string;
+  webhookId?: string;
+  repoId?: Types.ObjectId;
 }
 
 interface ChangeDNSRecordProps {
