@@ -6,6 +6,8 @@ import catchAsync from "../../../utils/asyncHandler";
 import terminateInstance from "../../../deploy/aws/ec2_terminateinstances";
 import changeDNSRecord from "../../../deploy/aws/route53_changerecord";
 import describeInstanceIp from "../../../deploy/aws/ec2_describeinstances";
+import deleteLogStream from "../../../deploy/aws/cwl_deletelogstream";
+import { deleteRepoWebhook } from "../../github/client";
 
 import { User } from "../../../models/User";
 import { Repo } from "../../../models/Repo";
@@ -14,7 +16,6 @@ import { CustomError } from "../../../utils/errors";
 import { createGeneralLogDebug } from "../../../utils/createDebug";
 
 import { RRType } from "@aws-sdk/client-route-53";
-import deleteLogStream from "../../../deploy/aws/cwl_deletelogstream";
 
 const deleteDeployment = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
@@ -54,6 +55,15 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
   await terminateInstance(instanceId);
 
   debug(`Successfully deleted an instance - ${instanceId}`);
+
+  await deleteRepoWebhook(
+    githubAccessToken as string,
+    repoOwner,
+    repoName,
+    Number(webhookId),
+  );
+
+  debug(`Successfully deleted a github webook - ${instanceId}`);
 
   const instanceChangeInfo = await describeInstanceIp(instanceId);
 

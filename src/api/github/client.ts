@@ -14,6 +14,8 @@ type ListUserOrgsResponse = Endpoints["GET /users/{username}/orgs"]["response"];
 type ListOrgReposResponse = Endpoints["GET /orgs/{org}/repos"]["response"];
 type CreateWebhookResponse =
   Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"];
+type DeleteWebhookResponse =
+  Endpoints["DELETE /repos/{owner}/{repo}/hooks/{hook_id}"]["response"];
 type ListCommtisResponse =
   Endpoints["GET /repos/{owner}/{repo}/commits"]["response"];
 type PullRequestCommitResponse =
@@ -91,7 +93,7 @@ export const createRepoWebhook = async (
   repoOwner: string,
   repoName: string,
 ) => {
-  const { data } = await GithubClient.post<CreateWebhookResponse>(
+  const { data } = await GithubClient.post<CreateWebhookResponse["data"]>(
     `/repos/${repoOwner}/${repoName}/hooks`,
     {
       name: "web",
@@ -114,6 +116,31 @@ export const createRepoWebhook = async (
       },
     },
   );
+
+  return data;
+};
+
+export const deleteRepoWebhook = async (
+  accessToken: string,
+  repoOwner: string,
+  repoName: string,
+  webhookId: number,
+) => {
+  const { data } = await GithubClient.delete<DeleteWebhookResponse>(
+    `/repos/${repoOwner}/${repoName}/hooks/${webhookId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        owner: `${repoOwner}`,
+        repo: `${repoName}`,
+        hook_id: `${webhookId}`,
+      },
+    },
+  );
+
+  return data;
 };
 
 export const getCommits = async (
