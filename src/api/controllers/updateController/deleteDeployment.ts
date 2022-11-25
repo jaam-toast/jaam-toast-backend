@@ -19,7 +19,7 @@ import deleteLogStream from "../../../deploy/aws/cwl_deletelogstream";
 const deleteDeployment = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
   const { user_id, repo_id } = req.params;
-  const { instanceId, repoName } = req.body;
+  const { instanceId, repoName, repoOwner, webhookId } = req.body;
 
   const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
 

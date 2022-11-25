@@ -20,6 +20,7 @@ export interface DBRepo {
   recordId?: string;
   buildingLog?: (string | undefined)[] | undefined;
   lastCommitMessage?: string;
+  webhookId?: string;
 }
 
 const Joigoose = joigoose(mongoose);
@@ -43,6 +44,7 @@ const joiRepoSchema = joi.object({
   buildingLog: joi.array().items(joi.string()),
   deployedUrl: joi.string().allow(""),
   lastCommitMessage: joi.string(),
+  webhookId: joi.string(),
 });
 
 const repoSchema = new mongoose.Schema(Joigoose.convert(joiRepoSchema), {
