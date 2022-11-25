@@ -1,7 +1,7 @@
 import { RRType, Date } from "@aws-sdk/client-route-53";
 import { Types } from "mongoose";
 
-export interface User {
+export interface UserType {
   username: string;
   userGithubUri: string;
   userImage?: string;
@@ -46,7 +46,8 @@ export interface DeploymentData extends RepoBuildOptions {
   lastCommitMessage?: string;
 }
 
-interface CreateDNSRecordProps {
+interface ChangeDNSRecordProps {
+  actionType: string;
   subdomain: string;
   recordValue: string;
   recordType: RRType;
