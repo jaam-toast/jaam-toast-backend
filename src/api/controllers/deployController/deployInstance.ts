@@ -2,7 +2,7 @@ import createError from "http-errors";
 
 import createDeploymentInstance from "../../../deploy/build-utils/createDeploymentInstance";
 import { bulidingLogSocket } from "../../../deploy/socket";
-import { createRepoWebhook } from "../../github/client";
+import { createRepoWebhook, getCommits } from "../../github/client";
 
 import catchAsync from "../../../utils/asyncHandler";
 
@@ -29,6 +29,15 @@ const deployInstance = catchAsync(async (req, res, next) => {
   }
 
   const repoOwner = repoCloneUrl.split("https://github.com/")[1].split("/")[0];
+
+  const commitList = await getCommits(
+    githubAccessToken as string,
+    repoOwner,
+    repoName,
+  );
+
+  const lastCommitMessage = commitList[0].commit.message;
+
   const repoBuildOptions = {
     repoOwner,
     repoName,
@@ -39,6 +48,7 @@ const deployInstance = catchAsync(async (req, res, next) => {
     buildCommand,
     envList,
     buildType,
+    lastCommitMessage,
   };
 
   bulidingLogSocket();
@@ -57,6 +67,7 @@ const deployInstance = catchAsync(async (req, res, next) => {
     ...repoBuildOptions,
     instanceId,
     deployedUrl,
+    lastCommitMessage,
   };
 
   next();
