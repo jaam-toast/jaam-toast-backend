@@ -10,6 +10,9 @@ import describeInstanceIp from "../../../deploy/aws/ec2_describeinstances";
 import { User } from "../../../models/User";
 import { Repo } from "../../../models/Repo";
 
+import { CustomError } from "../../../utils/errors";
+import { createGeneralLogDebug } from "../../../utils/createDebug";
+
 import { RRType } from "@aws-sdk/client-route-53";
 import deleteLogStream from "../../../deploy/aws/cwl_deletelogstream";
 
@@ -21,7 +24,16 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
   const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
 
   if (!githubAccessToken || !user_id || !repo_id || !instanceId || !repoName) {
+    debug(
+      "Error: 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName' are expected to be strings",
+    );
+
     return next(
+      new CustomError({
+        code: "400: deleteDeployment",
+        message:
+          "Error: 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName' are typeof undefined",
+      }),
     );
   }
 
@@ -35,12 +47,23 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
 
   session.endSession();
 
+  debug(
+    `Successfully deleted the deployment data from database - ${instanceId}`,
+  );
+
   await terminateInstance(instanceId);
+
+  debug(`Successfully deleted an instance - ${instanceId}`);
 
   const instanceChangeInfo = await describeInstanceIp(instanceId);
 
   if (!instanceChangeInfo) {
     return next(
+      new CustomError({
+        code: "401: deleteDeployment_describeInstanceIp",
+        message:
+          "Error: 'instanceChangeInfo.publicIpAddress' is typeof undefined",
+      }),
     );
   }
 
@@ -56,10 +79,20 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
 
   if (!recordChangeInfo) {
     return next(
+      new CustomError({
+        code: "401: deleteDeployment_changeDNSRecord",
+        message: "Error: 'recordChangeInfo.recordId' is typeof undefined",
+      }),
     );
   }
 
+  debug(
+    `Successfully deleted a record (${recordChangeInfo.recordId}) of ${instanceId}`,
+  );
+
   await deleteLogStream(instanceId);
+
+  debug(`Successfully deleted a user-data.log of ${instanceId}`);
 
   return res.json({
     result: "ok",
