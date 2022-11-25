@@ -6,6 +6,7 @@ import verifyToken from "../middlewares/verifyToken";
 import validateSchema from "../middlewares/validateSchema";
 
 import * as DeployController from "../controllers/deployController";
+import * as UpdateController from "../controllers/updateController";
 
 const route = Router();
 
@@ -37,6 +38,17 @@ const deployRouter = (app: Router) => {
       "params[user_id]",
     ),
     DeployController.getUserDeployList,
+  );
+
+  route.delete(
+    "/:user_id/:repo_id",
+    validateSchema(
+      Joi.object({
+        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+      }),
+      "params[user_id]",
+    ),
+    UpdateController.deleteDeployment,
   );
 };
 
