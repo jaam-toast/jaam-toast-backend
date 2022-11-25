@@ -32,6 +32,7 @@ const deployCertbot = catchAsync(async (req, res, next) => {
     instanceId as string,
     recordId as string,
     repoName,
+    req.deploymentData,
   );
 
   debug(`Successfully requested for a certificate`);
