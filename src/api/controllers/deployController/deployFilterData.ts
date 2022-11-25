@@ -49,6 +49,7 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     buildType,
     deployedUrl,
     buildingLog,
+    instanceId,
     lastCommitMessage,
   };
 
@@ -56,7 +57,7 @@ const deployFilterData = catchAsync(async (req, res, next) => {
     "Sending back to client of the newly created deployment buliding log...",
   );
 
-  return res.json({
+  return res.status(201).json({
     result: "ok",
     data: userDeploymentData,
   });
