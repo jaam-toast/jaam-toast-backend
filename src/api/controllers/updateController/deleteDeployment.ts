@@ -59,6 +59,8 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
     );
   }
 
+  await deleteLogStream(instanceId);
+
   return res.json({
     result: "ok",
   });
