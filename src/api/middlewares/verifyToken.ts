@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 import Config from "../../config";
 
-import { User } from "../../types/custom";
+import { UserType } from "../../types/custom";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
@@ -35,7 +35,7 @@ const verifyToken: RequestHandler = (req, res, next) => {
     return next(createError(401));
   }
 
-  req.user = verifiedUserData as User;
+  req.user = verifiedUserData as UserType;
 
   next();
 };
