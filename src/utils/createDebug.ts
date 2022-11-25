@@ -100,3 +100,36 @@ export function createBuildingLogDebug(debug?: boolean) {
 
   return () => {};
 }
+
+export function createGeneralLogDebug(debug?: boolean) {
+  if (debug) {
+    return (...logs: string[]) => {
+      const dayTime = new Date().toISOString();
+      const formattedTime = `${dayTime.split("T")[0]} ${
+        dayTime.split("T")[1].split(".")[0]
+      }.${dayTime.split(".")[1].split("Z")[0]}`;
+
+      process.stderr.write(
+        [
+          chalk.redBright.bold("[general-log-debug]"),
+          chalk.blackBright(`${formattedTime}`),
+          ...logs,
+        ].join(" ") + "\n",
+      );
+
+      fs.open("logs/bulidtime.log", "w", (err, fd) => {
+        if (err) throw Error(err.message);
+
+        logs.forEach(log => {
+          // process.stderr.write(log + " " + "\n");
+
+          fs.write(fd, `[general-log] ${formattedTime} ${log}` + "\n", err => {
+            if (err) throw Error(err.message);
+          });
+        });
+      });
+    };
+  }
+
+  return () => {};
+}
