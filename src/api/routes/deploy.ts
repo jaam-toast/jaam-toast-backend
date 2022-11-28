@@ -21,7 +21,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    DeployController.openBuildingLogSocket,
+    DeployController.connectBuildingLogSocket,
   );
 
   route.post(
