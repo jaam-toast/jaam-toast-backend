@@ -1,7 +1,6 @@
 import createError from "http-errors";
 
 import createDeploymentInstance from "../../../deploy/build-utils/createDeploymentInstance";
-import { bulidingLogSocket } from "../../../deploy/socket";
 import { createRepoWebhook, getCommits } from "../../github/client";
 
 import catchAsync from "../../../utils/asyncHandler";
@@ -50,8 +49,6 @@ const deployInstance = catchAsync(async (req, res, next) => {
     buildType,
     lastCommitMessage,
   };
-
-  await bulidingLogSocket();
 
   const { deployedUrl, instanceId } = await createDeploymentInstance(
     repoBuildOptions,
