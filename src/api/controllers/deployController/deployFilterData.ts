@@ -58,7 +58,7 @@ const deployFilterData = catchAsync(async (req, res, next) => {
   };
 
   debug(
-    "Sending back to client of the newly created deployment buliding log...",
+    "Sending back to client of the newly created deployment building log...",
   );
 
   return res.status(201).json({
