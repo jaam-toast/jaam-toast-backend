@@ -4,6 +4,7 @@ import deployCertbot from "./deployCertbot";
 import deployLogs from "./deployLogs";
 import deploySaveData from "./deploySaveData";
 import deployFilterData from "./deployFilterData";
+import openBuildingLogSocket from "./connectBuildingLogSocket";
 
 import getUserDeployList from "./getUserDeployList";
 
@@ -15,4 +16,5 @@ export {
   deploySaveData,
   deployFilterData,
   getUserDeployList,
+  openBuildingLogSocket,
 };
