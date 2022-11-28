@@ -1,6 +1,6 @@
 import SocketSingleton from "./socketSingleton";
-import bulidingLogSocket from "./bulidingLogSocket";
+import buildingLogSocket from "./buildingLogSocket";
 
-export { bulidingLogSocket };
+export { buildingLogSocket };
 
 export default SocketSingleton;

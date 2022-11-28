@@ -18,7 +18,7 @@ export function createDeploymentDebug(debug: boolean) {
         ].join(" ") + "\n",
       );
 
-      fs.open("logs/bulidtime.log", "w", (err, fd) => {
+      fs.open("logs/buildtime.log", "w", (err, fd) => {
         if (err) throw Error(err.message);
 
         logs.forEach(log => {
@@ -51,7 +51,7 @@ export function createCertbotDebug(debug?: boolean) {
         ].join(" ") + "\n",
       );
 
-      fs.open("logs/bulidtime.log", "w", (err, fd) => {
+      fs.open("logs/buildtime.log", "w", (err, fd) => {
         if (err) throw Error(err.message);
 
         logs.forEach(log => {
@@ -84,7 +84,7 @@ export function createBuildingLogDebug(debug?: boolean) {
         ].join(" ") + "\n",
       );
 
-      fs.open("logs/bulidtime.log", "w", (err, fd) => {
+      fs.open("logs/buildtime.log", "w", (err, fd) => {
         if (err) throw Error(err.message);
 
         logs.forEach(log => {
@@ -117,7 +117,7 @@ export function createGeneralLogDebug(debug?: boolean) {
         ].join(" ") + "\n",
       );
 
-      fs.open("logs/bulidtime.log", "w", (err, fd) => {
+      fs.open("logs/buildtime.log", "w", (err, fd) => {
         if (err) throw Error(err.message);
 
         logs.forEach(log => {

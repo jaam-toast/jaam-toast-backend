@@ -19,7 +19,7 @@ const getFilteredLogEvents = async (instanceId: string, subdomain: string) => {
     filterPattern: Config.LOG_FILTERS.userDataFilter,
   };
 
-  debug("Running getFilteredLogEvents to request a buliding log...");
+  debug("Running getFilteredLogEvents to request a building log...");
 
   try {
     const command = new FilterLogEventsCommand(filterLogEventsParams);
@@ -45,12 +45,12 @@ const getFilteredLogEvents = async (instanceId: string, subdomain: string) => {
       });
 
       debug(
-        "Sending back to client of the newly created deployment buliding log...",
+        "Sending back to client of the newly created deployment building log...",
       );
 
-      filteredLogEventMessages.forEach((bulidingLog, i) =>
+      filteredLogEventMessages.forEach((buildingLog, i) =>
         setTimeout(() => {
-          debugBuildingLog(bulidingLog as string);
+          debugBuildingLog(buildingLog as string);
         }, i * 100),
       );
 
