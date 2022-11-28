@@ -10,12 +10,14 @@ import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 
 import { ChangeDNSRecordProps } from "../../types/custom";
+import terminateInstance from "./ec2_terminateinstances";
 
 const changeDNSRecord = async ({
   actionType,
   subdomain,
   recordValue,
   recordType = RRType.A,
+  instanceId,
 }: ChangeDNSRecordProps) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
@@ -59,6 +61,9 @@ const changeDNSRecord = async ({
     debug(
       `Error: An unexpected error occurred during ChangeResourceRecordSetsCommand_${actionType} - ${err}`,
     );
+
+    await terminateInstance(instanceId as string);
+
     throw new DeploymentError({
       code: `route53Client_ChangeResourceRecordSetsCommand_${actionType}`,
       message: `ChangeResourceRecordSetsCommand_${actionType} didn't work as expected`,

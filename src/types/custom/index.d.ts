@@ -55,6 +55,7 @@ interface ChangeDNSRecordProps {
   subdomain: string;
   recordValue: string;
   recordType: RRType;
+  instanceId?: string;
 }
 
 interface RecordSetResponse {
