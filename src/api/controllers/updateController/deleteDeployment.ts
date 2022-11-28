@@ -52,18 +52,9 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
     `Successfully deleted the deployment data from database - ${instanceId}`,
   );
 
-  await terminateInstance(instanceId);
+  await deleteLogStream(instanceId);
 
-  debug(`Successfully deleted an instance - ${instanceId}`);
-
-  await deleteRepoWebhook(
-    githubAccessToken as string,
-    repoOwner,
-    repoName,
-    Number(webhookId),
-  );
-
-  debug(`Successfully deleted a github webook - ${instanceId}`);
+  debug(`Successfully deleted a user-data.log of ${instanceId}`);
 
   const instanceChangeInfo = await describeInstanceIp(instanceId);
 
@@ -100,9 +91,18 @@ const deleteDeployment = catchAsync(async (req, res, next) => {
     `Successfully deleted a record (${recordChangeInfo.recordId}) of ${instanceId}`,
   );
 
-  await deleteLogStream(instanceId);
+  await terminateInstance(instanceId);
 
-  debug(`Successfully deleted a user-data.log of ${instanceId}`);
+  debug(`Successfully deleted an instance - ${instanceId}`);
+
+  await deleteRepoWebhook(
+    githubAccessToken as string,
+    repoOwner,
+    repoName,
+    Number(webhookId),
+  );
+
+  debug(`Successfully deleted a github webook - ${instanceId}`);
 
   return res.json({
     result: "ok",
