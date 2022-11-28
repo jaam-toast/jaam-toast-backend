@@ -31,9 +31,9 @@ const joiRepoSchema = joi.object({
   repoCloneUrl: joi.string(),
   repoUpdatedAt: joi.string(),
   nodeVersion: joi.string(),
-  installCommand: joi.string().allow("").default(""),
-  buildCommand: joi.string().allow("").default(""),
-  buildType: joi.string().allow("").default(""),
+  installCommand: joi.string().allow("").default("npm install"),
+  buildCommand: joi.string().allow("").default("npm run build"),
+  buildType: joi.string().allow("").default("Next.js"),
   envList: joi.array().items(
     joi.object({
       key: joi.string(),
