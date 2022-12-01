@@ -4,12 +4,16 @@
 import Debug from "debug";
 import http from "http";
 import { AddressInfo } from "net";
-import SocketSingleton from "../deploy/socket";
+import SocketSingleton, { buildingLogSocket } from "../deploy/socket";
 
 import app from "../app";
+
+import Config from "../config";
 import Logger from "../loaders/logger";
+import { createGeneralLogDebug } from "../utils/createDebug";
 
 const debug = Debug("jaam-toast-backend:server");
+const customDebug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
 
 /**
  * Get port from environment and store in Express.
@@ -24,6 +28,11 @@ app.set("port", port);
 
 const server = http.createServer(app);
 export const socketIO = new SocketSingleton(server);
+
+buildingLogSocket();
+customDebug(
+  `Socket instance for building log is initiated - SocketSingleton Class`,
+);
 
 /**
  * Listen on provided port, on all network interfaces.
