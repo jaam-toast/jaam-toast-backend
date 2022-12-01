@@ -26,10 +26,6 @@ export default async function getRecordInstanceStatus(
       `instanceState: [${instanceState}]`,
     );
 
-    debug(
-      `Waiting before requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
-    );
-
     const runCertbotResponse = {
       recordStatus,
       instanceState,
