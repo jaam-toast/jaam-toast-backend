@@ -47,6 +47,11 @@ export default async function runCertbot(
         instanceState === InstanceStateName.running
       ) {
         clearInterval(recordStatusInterval);
+
+        debug(
+          `EC2 instance and record are ready. Waiting before requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
+        );
+
         await runCertbotCommandsDelay(120000);
 
         resolve(recordInstaceStatus);
