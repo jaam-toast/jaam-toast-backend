@@ -1,4 +1,4 @@
-const { startSession } = require("mongoose");
+import mongoose from "mongoose";
 
 import Config from "../../../config";
 
@@ -62,7 +62,7 @@ const updateDeployment = catchAsync(async (req, res, next) => {
 
     const lastCommitMessage = commit.message;
 
-    const session = await startSession();
+    const session = await mongoose.startSession();
     let userRepo;
     let instanceId;
 
