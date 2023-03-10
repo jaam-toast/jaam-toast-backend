@@ -1,19 +1,19 @@
 import { startSession } from "mongoose";
 
-import Config from "../../../config";
-import catchAsync from "../../../utils/asyncHandler";
+import Config from "../../config";
+import catchAsync from "../../utils/asyncHandler";
 
-import terminateInstance from "../../../services/deploy/aws/ec2_terminateinstances";
-import changeDNSRecord from "../../../services/deploy/aws/route53_changerecord";
-import describeInstanceIp from "../../../services/deploy/aws/ec2_describeinstances";
-import deleteLogStream from "../../../services/deploy/aws/cwl_deletelogstream";
-import { deleteRepoWebhook } from "../../../services/github/client";
+import terminateInstance from "../../services/deploy/aws/ec2_terminateinstances";
+import changeDNSRecord from "../../services/deploy/aws/route53_changerecord";
+import describeInstanceIp from "../../services/deploy/aws/ec2_describeinstances";
+import deleteLogStream from "../../services/deploy/aws/cwl_deletelogstream";
+import { deleteRepoWebhook } from "../../services/github/client";
 
-import { User } from "../../../models/User";
-import { Repo } from "../../../models/Repo";
+import { User } from "../../models/User";
+import { Repo } from "../../models/Repo";
 
-import { CustomError } from "../../../utils/errors";
-import { createGeneralLogDebug } from "../../../utils/createDebug";
+import { CustomError } from "../../utils/errors";
+import { createGeneralLogDebug } from "../../utils/createDebug";
 
 import { RRType } from "@aws-sdk/client-route-53";
 

@@ -1,16 +1,16 @@
-import Config from "../../../config";
+import Config from "../../config";
 
-import describeInstanceIp from "../../../services/deploy/aws/ec2_describeinstances";
-import changeDNSRecord from "../../../services/deploy/aws/route53_changerecord";
-import terminateInstance from "../../../services/deploy/aws/ec2_terminateinstances";
+import describeInstanceIp from "../../services/deploy/aws/ec2_describeinstances";
+import changeDNSRecord from "../../services/deploy/aws/route53_changerecord";
+import terminateInstance from "../../services/deploy/aws/ec2_terminateinstances";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import catchAsync from "../../utils/asyncHandler";
+import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../utils/createDebug";
 
 import { RRType } from "@aws-sdk/client-route-53";
-import { RecordSetResponse } from "../../../types/custom";
-import { deleteRepoWebhook } from "../../../services/github/client";
+import { RecordSetResponse } from "../../types/custom";
+import { deleteRepoWebhook } from "../../services/github/client";
 
 const deployDomain = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

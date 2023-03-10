@@ -1,13 +1,13 @@
 import { startSession, Types } from "mongoose";
 
-import Config from "../../../config";
+import Config from "../../config";
 
-import { User } from "../../../models/User";
-import { Repo } from "../../../models/Repo";
+import { User } from "../../models/User";
+import { Repo } from "../../models/Repo";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import catchAsync from "../../utils/asyncHandler";
+import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../utils/createDebug";
 
 const deploySaveData = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

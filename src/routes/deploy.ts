@@ -5,8 +5,8 @@ import Joi from "joi";
 import verifyToken from "../api/middlewares/verifyToken";
 import validateSchema from "../api/middlewares/validateSchema";
 
-import * as DeployController from "../api/controllers/deployController";
-import * as UpdateController from "../api/controllers/updateController";
+import * as DeployController from "../controllers/deployController";
+import * as UpdateController from "../controllers/updateController";
 
 const route = Router();
 

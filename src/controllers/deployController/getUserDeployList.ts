@@ -1,14 +1,14 @@
 import { LeanDocument } from "mongoose";
 
-import Config from "../../../config";
+import Config from "../../config";
 
-import { DBUser, User } from "../../../models/User";
+import { DBUser, User } from "../../models/User";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { CustomError } from "../../../utils/errors";
-import { createGeneralLogDebug } from "../../../utils/createDebug";
+import catchAsync from "../../utils/asyncHandler";
+import { CustomError } from "../../utils/errors";
+import { createGeneralLogDebug } from "../../utils/createDebug";
 
-import { DBRepo } from "../../../models/Repo";
+import { DBRepo } from "../../models/Repo";
 
 const getUserDeployList = catchAsync(async (req, res, next) => {
   const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);

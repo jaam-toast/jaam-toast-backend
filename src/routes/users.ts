@@ -5,7 +5,7 @@ import Joi from "joi";
 import verifyToken from "../api/middlewares/verifyToken";
 import validateSchema from "../api/middlewares/validateSchema";
 
-import * as UserController from "../api/controllers/user";
+import * as UserController from "../controllers/user";
 
 const route = Router();
 

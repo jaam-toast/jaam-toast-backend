@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
-import Config from "../../../config";
+import Config from "../../config";
 
-import { getHeadCommitMessage } from "../../../services/github/client";
-import runUpdateDeploymentCommands from "../../../services/deploy/cli/runUpdateDeploymentCommands";
+import { getHeadCommitMessage } from "../../services/github/client";
+import runUpdateDeploymentCommands from "../../services/deploy/cli/runUpdateDeploymentCommands";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { Repo } from "../../../models/Repo";
+import catchAsync from "../../utils/asyncHandler";
+import { createDeploymentDebug } from "../../utils/createDebug";
+import { Repo } from "../../models/Repo";
 
 interface PullRequestData {
   prAction: boolean;

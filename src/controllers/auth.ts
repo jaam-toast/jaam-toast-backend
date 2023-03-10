@@ -1,10 +1,10 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "../../config";
-import { User } from "../../models/User";
+import Config from "../config";
+import { User } from "../models/User";
 
-import catchAsync from "../../utils/asyncHandler";
+import catchAsync from "../utils/asyncHandler";
 
 export const login = catchAsync(async (req, res, next) => {
   const { username, userGithubUri, userImage, githubAccessToken } = req.user;

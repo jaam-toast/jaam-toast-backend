@@ -1,10 +1,10 @@
-import Config from "../../../config";
+import Config from "../../config";
 
-import runGetFilteredLogEvents from "../../../services/deploy/build-utils/runGetFilteredLogEvents";
+import runGetFilteredLogEvents from "../../services/deploy/build-utils/runGetFilteredLogEvents";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import catchAsync from "../../utils/asyncHandler";
+import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../utils/createDebug";
 
 const deployLogs = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

@@ -1,10 +1,10 @@
-import Config from "../../../config";
+import Config from "../../config";
 
-import runCertbot from "../../../services/deploy/build-utils/runCertbot";
+import runCertbot from "../../services/deploy/build-utils/runCertbot";
 
-import catchAsync from "../../../utils/asyncHandler";
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import catchAsync from "../../utils/asyncHandler";
+import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../utils/createDebug";
 
 const deployCertbot = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

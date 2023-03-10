@@ -1,9 +1,9 @@
 import createError from "http-errors";
 
-import createDeploymentInstance from "../../../services/deploy/build-utils/createDeploymentInstance";
-import { createRepoWebhook, getCommits } from "../../../services/github/client";
+import createDeploymentInstance from "../../services/deploy/build-utils/createDeploymentInstance";
+import { createRepoWebhook, getCommits } from "../../services/github/client";
 
-import catchAsync from "../../../utils/asyncHandler";
+import catchAsync from "../../utils/asyncHandler";
 
 const deployInstance = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
