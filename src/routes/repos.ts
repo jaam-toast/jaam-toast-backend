@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import verifyGithubSignature from "../api/middlewares/verifyGithubSignature";
+import verifyGithubSignature from "../middlewares/verifyGithubSignature";
 
 import * as UpdateController from "../controllers/updateController";
 

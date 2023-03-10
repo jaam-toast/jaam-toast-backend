@@ -1,10 +1,10 @@
 import { RequestHandler } from "express";
 import { createHmac } from "crypto";
 
-import Config from "../../config";
+import Config from "../config";
 
-import { DeploymentError } from "../../utils/errors";
-import { createBuildingLogDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../utils/errors";
+import { createBuildingLogDebug } from "../utils/createDebug";
 
 const verifyGithubSignature: RequestHandler = (req, res, next) => {
   const debug = createBuildingLogDebug(Config.CLIENT_OPTIONS.debug);

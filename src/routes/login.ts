@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import verifyGithubCode from "../api/middlewares/verifyGithubCode";
+import verifyGithubCode from "../middlewares/verifyGithubCode";
 
 import * as AuthController from "../controllers/auth";
 

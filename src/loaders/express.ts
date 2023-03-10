@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import routes from "../routes";
 
-import errorHandler from "../api/middlewares/errorHandler";
+import errorHandler from "../middlewares/errorHandler";
 
 const expressLoader = (app: Express) => {
   app.get("/status", (req, res) => {

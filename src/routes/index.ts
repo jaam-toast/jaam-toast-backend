@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import morganMiddleware from "../api/middlewares/morganMiddleware";
+import morganMiddleware from "../middlewares/morganMiddleware";
 
 import loginRouter from "./login";
 import deployRouter from "./deploy";

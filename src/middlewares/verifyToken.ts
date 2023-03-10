@@ -2,9 +2,9 @@ import { RequestHandler } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "../../config";
+import Config from "../config";
 
-import { UserType } from "../../types/custom";
+import { UserType } from "../types/custom";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;

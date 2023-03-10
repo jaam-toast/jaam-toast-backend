@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
 import createError from "http-errors";
 
-import Logger from "../../loaders/logger";
+import Logger from "../loaders/logger";
 
 const validateSchema = (schema: ObjectSchema, property: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
