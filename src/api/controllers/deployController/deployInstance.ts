@@ -1,7 +1,7 @@
 import createError from "http-errors";
 
 import createDeploymentInstance from "../../../services/deploy/build-utils/createDeploymentInstance";
-import { createRepoWebhook, getCommits } from "../../github/client";
+import { createRepoWebhook, getCommits } from "../../../services/github/client";
 
 import catchAsync from "../../../utils/asyncHandler";
 

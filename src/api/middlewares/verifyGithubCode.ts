@@ -1,8 +1,8 @@
 import createError from "http-errors";
 
 import catchAsync from "../../utils/asyncHandler";
-import { getGithubToken } from "../github/oauth";
-import { getUserData } from "../github/client";
+import { getGithubToken } from "../../services/github/oauth";
+import { getUserData } from "../../services/github/client";
 
 const verifyGithubCode = catchAsync(async (req, res, next) => {
   const { code } = req.body;

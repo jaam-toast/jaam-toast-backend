@@ -10,7 +10,7 @@ import { createDeploymentDebug } from "../../../utils/createDebug";
 
 import { RRType } from "@aws-sdk/client-route-53";
 import { RecordSetResponse } from "../../../types/custom";
-import { deleteRepoWebhook } from "../../github/client";
+import { deleteRepoWebhook } from "../../../services/github/client";
 
 const deployDomain = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

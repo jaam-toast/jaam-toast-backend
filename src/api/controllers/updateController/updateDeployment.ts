@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 import Config from "../../../config";
 
-import { getHeadCommitMessage } from "../../github/client";
+import { getHeadCommitMessage } from "../../../services/github/client";
 import runUpdateDeploymentCommands from "../../../services/deploy/cli/runUpdateDeploymentCommands";
 
 import catchAsync from "../../../utils/asyncHandler";
