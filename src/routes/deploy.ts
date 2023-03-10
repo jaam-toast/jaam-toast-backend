@@ -2,11 +2,11 @@ import { Router } from "express";
 
 import Joi from "joi";
 
-import verifyToken from "../middlewares/verifyToken";
-import validateSchema from "../middlewares/validateSchema";
+import verifyToken from "../api/middlewares/verifyToken";
+import validateSchema from "../api/middlewares/validateSchema";
 
-import * as DeployController from "../controllers/deployController";
-import * as UpdateController from "../controllers/updateController";
+import * as DeployController from "../api/controllers/deployController";
+import * as UpdateController from "../api/controllers/updateController";
 
 const route = Router();
 

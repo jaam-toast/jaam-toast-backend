@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import routes from "../api";
+import routes from "../routes";
 
 import errorHandler from "../api/middlewares/errorHandler";
 

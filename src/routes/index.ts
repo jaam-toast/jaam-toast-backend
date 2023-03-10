@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-import morganMiddleware from "./middlewares/morganMiddleware";
+import morganMiddleware from "../api/middlewares/morganMiddleware";
 
-import loginRouter from "./routes/login";
-import deployRouter from "./routes/deploy";
-import usersRouter from "./routes/users";
-import reposRouter from "./routes/repos";
+import loginRouter from "./login";
+import deployRouter from "./deploy";
+import usersRouter from "./users";
+import reposRouter from "./repos";
 
 const routes = () => {
   const app = Router();

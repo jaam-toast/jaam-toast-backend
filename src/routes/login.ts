@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import verifyGithubCode from "../middlewares/verifyGithubCode";
+import verifyGithubCode from "../api/middlewares/verifyGithubCode";
 
-import * as AuthController from "../controllers/auth";
+import * as AuthController from "../api/controllers/auth";
 
 const route = Router();
 

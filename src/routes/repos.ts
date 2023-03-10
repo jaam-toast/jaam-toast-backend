@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import verifyGithubSignature from "../middlewares/verifyGithubSignature";
+import verifyGithubSignature from "../api/middlewares/verifyGithubSignature";
 
-import * as UpdateController from "../controllers/updateController";
+import * as UpdateController from "../api/controllers/updateController";
 
 const route = Router();
 
