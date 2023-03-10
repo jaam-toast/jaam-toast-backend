@@ -1,15 +1,15 @@
-import Config from "../../config";
+import Config from "../../../config";
 import getFilteredLogEvents from "../aws/cwl_filterlogeventscommand";
 import getLogStreamStatus from "./getLogStreamStatus";
 import terminateInstance from "../aws/ec2_terminateinstances";
 import changeDNSRecord from "../aws/route53_changerecord";
-import { deleteRepoWebhook } from "../../api/github/client";
+import { deleteRepoWebhook } from "../../../api/github/client";
 
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
 
 import { RRType } from "@aws-sdk/client-route-53";
-import { DeploymentData } from "../../types/custom";
+import { DeploymentData } from "../../../types/custom";
 
 export default async function runGetFilteredLogEvents(
   instanceId: string,

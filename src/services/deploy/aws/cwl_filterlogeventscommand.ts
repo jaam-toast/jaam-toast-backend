@@ -1,13 +1,13 @@
 import { FilterLogEventsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../config";
+import Config from "../../../config";
 import cwlClient from "./libs/cloudWatchLogsClient";
 
-import { DeploymentError } from "../../utils/errors";
+import { DeploymentError } from "../../../utils/errors";
 import {
   createDeploymentDebug,
   createBuildingLogDebug,
-} from "../../utils/createDebug";
+} from "../../../utils/createDebug";
 
 const getFilteredLogEvents = async (instanceId: string, subdomain: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

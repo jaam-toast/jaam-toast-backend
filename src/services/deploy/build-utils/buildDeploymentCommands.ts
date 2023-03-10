@@ -1,7 +1,7 @@
-import Config from "../../config";
+import Config from "../../../config";
 
-import { ClientOptions, DeploymentOptions } from "../../types/custom";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { ClientOptions, DeploymentOptions } from "../../../types/custom";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 import setNginxScript from "../aws/config/setNginxScript";
 
 export default function buildDeploymentCommands(

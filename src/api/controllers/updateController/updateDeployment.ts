@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import Config from "../../../config";
 
 import { getHeadCommitMessage } from "../../github/client";
-import runUpdateDeploymentCommands from "../../../deploy/cli/runUpdateDeploymentCommands";
+import runUpdateDeploymentCommands from "../../../services/deploy/cli/runUpdateDeploymentCommands";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { createDeploymentDebug } from "../../../utils/createDebug";

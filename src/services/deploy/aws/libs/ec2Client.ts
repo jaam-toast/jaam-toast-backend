@@ -1,6 +1,6 @@
 import { EC2Client } from "@aws-sdk/client-ec2";
 
-import Config from "../../../config";
+import Config from "../../../../config";
 
 const REGION = Config.INSTANCE_REGION;
 

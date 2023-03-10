@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 
-import Config from "../../config";
+import Config from "../../../config";
 
-import { DeploymentError } from "../../utils/errors";
-import { createCertbotDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createCertbotDebug } from "../../../utils/createDebug";
 
 async function runCertbotCommands(instanceId: string, subdomain: string) {
   const debug = createCertbotDebug(Config.CLIENT_OPTIONS.debug);

@@ -1,8 +1,8 @@
 import Config from "../../../config";
 
-import describeInstanceIp from "../../../deploy/aws/ec2_describeinstances";
-import changeDNSRecord from "../../../deploy/aws/route53_changerecord";
-import terminateInstance from "../../../deploy/aws/ec2_terminateinstances";
+import describeInstanceIp from "../../../services/deploy/aws/ec2_describeinstances";
+import changeDNSRecord from "../../../services/deploy/aws/route53_changerecord";
+import terminateInstance from "../../../services/deploy/aws/ec2_terminateinstances";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";

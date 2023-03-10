@@ -1,10 +1,10 @@
 import { GetChangeCommand } from "@aws-sdk/client-route-53";
 
-import Config from "../../config";
+import Config from "../../../config";
 import route53Client from "./libs/route53Client";
 
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
 
 const describeRecord = async (Id: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

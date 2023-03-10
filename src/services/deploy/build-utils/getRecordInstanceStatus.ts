@@ -1,9 +1,9 @@
-import Config from "../../config";
+import Config from "../../../config";
 import describeInstanceIp from "../aws/ec2_describeinstances";
 import describeRecord from "../aws/route53_describerecord";
 
-import { createCertbotDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import { createCertbotDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
 
 export default async function getRecordInstanceStatus(
   instanceId: string,

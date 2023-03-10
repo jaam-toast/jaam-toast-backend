@@ -3,13 +3,13 @@ import {
   RRType,
 } from "@aws-sdk/client-route-53";
 
-import Config from "../../config";
+import Config from "../../../config";
 import route53Client from "./libs/route53Client";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
-import { ChangeDNSRecordProps } from "../../types/custom";
+import { ChangeDNSRecordProps } from "../../../types/custom";
 import terminateInstance from "./ec2_terminateinstances";
 
 const changeDNSRecord = async ({

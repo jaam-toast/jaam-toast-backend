@@ -3,11 +3,11 @@ import {
   LogStream,
 } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../config";
+import Config from "../../../config";
 import cwlClient from "./libs/cloudWatchLogsClient";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
 const describeLogStreams = async (instanceId: string) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

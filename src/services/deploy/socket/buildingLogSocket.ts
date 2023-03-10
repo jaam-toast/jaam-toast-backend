@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import { Socket } from "socket.io";
 
-import Config from "../../config";
-import { socketIO } from "../../bin/www";
+import Config from "../../../config";
+import { socketIO } from "../../../bin/www";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
 export default async function buildingLogSocket() {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

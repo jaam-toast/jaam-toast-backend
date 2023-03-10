@@ -1,6 +1,6 @@
 import Config from "../../../config";
 
-import runCertbot from "../../../deploy/build-utils/runCertbot";
+import runCertbot from "../../../services/deploy/build-utils/runCertbot";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";

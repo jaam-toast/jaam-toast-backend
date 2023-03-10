@@ -1,9 +1,9 @@
-import Config from "../../config";
+import Config from "../../../config";
 
 import describeLogStreams from "../aws/cwl_describelogstreams";
 
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
 
 export default async function getLogStreamStatus(
   instanceId: string,

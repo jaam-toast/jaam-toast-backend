@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 
-import Config from "../../config";
+import Config from "../../../config";
 
-import { DeploymentError } from "../../utils/errors";
-import { createBuildingLogDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createBuildingLogDebug } from "../../../utils/createDebug";
 
 async function runUpdateDeploymentCommands(
   instanceId: string,

@@ -1,6 +1,6 @@
 import Config from "../../../config";
 
-import runGetFilteredLogEvents from "../../../deploy/build-utils/runGetFilteredLogEvents";
+import runGetFilteredLogEvents from "../../../services/deploy/build-utils/runGetFilteredLogEvents";
 
 import catchAsync from "../../../utils/asyncHandler";
 import { DeploymentError } from "../../../utils/errors";

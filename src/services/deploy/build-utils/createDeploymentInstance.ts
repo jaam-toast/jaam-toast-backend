@@ -1,12 +1,12 @@
-import Config from "../../config";
+import Config from "../../../config";
 
 import createInstance from "../aws/ec2_createinstances";
 import buildDeploymentCommands from "./buildDeploymentCommands";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
-import { RepoBuildOptions } from "../../types/custom";
+import { RepoBuildOptions } from "../../../types/custom";
 
 export default async function createDeploymentInstance(
   repoBuildOptions: RepoBuildOptions,

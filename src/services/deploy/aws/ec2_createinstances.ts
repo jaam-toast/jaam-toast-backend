@@ -1,10 +1,10 @@
 import { RunInstancesCommand } from "@aws-sdk/client-ec2";
 
-import Config from "../../config";
+import Config from "../../../config";
 import ec2Client from "./libs/ec2Client";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import { DeploymentError } from "../../../utils/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
 const createInstance = async (commands: string[]) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

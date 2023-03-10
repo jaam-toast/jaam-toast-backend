@@ -3,7 +3,7 @@ import { Server as socketServer } from "socket.io";
 
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
-import Config from "../../config";
+import Config from "../../../config";
 
 class SocketSingleton extends socketServer {
   private static instance: socketServer<

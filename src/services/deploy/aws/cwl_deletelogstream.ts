@@ -1,10 +1,10 @@
 import { DeleteLogStreamCommand } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../config";
+import Config from "../../../config";
 import cwlClient from "./libs/cloudWatchLogsClient";
 
-import { CustomError } from "../../utils/errors";
-import { createGeneralLogDebug } from "../../utils/createDebug";
+import { CustomError } from "../../../utils/errors";
+import { createGeneralLogDebug } from "../../../utils/createDebug";
 
 const deleteLogStream = async (instanceId: string) => {
   const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
