@@ -4,7 +4,7 @@
 import Debug from "debug";
 import http from "http";
 import { AddressInfo } from "net";
-import SocketSingleton, { buildingLogSocket } from "../deploy/socket";
+import SocketSingleton, { buildingLogSocket } from "../services/deploy/socket";
 
 import app from "../app";
 
