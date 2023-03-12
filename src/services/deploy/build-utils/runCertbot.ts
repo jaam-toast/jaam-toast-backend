@@ -6,7 +6,7 @@ import runCertbotCommands from "../cli/runCertbotCommands";
 import getRecordInstanceStatus from "./getRecordInstanceStatus";
 import terminateInstance from "../aws/ec2_terminateinstances";
 import changeDNSRecord from "../aws/route53_changerecord";
-import { deleteRepoWebhook } from "../../github/client";
+import { deleteRepoWebhook } from "../../GithubService/client";
 
 import { createCertbotDebug } from "../../../utils/createDebug";
 import { DeploymentError } from "../../../utils/errors";
