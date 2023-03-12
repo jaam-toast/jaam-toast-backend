@@ -1,3 +1,4 @@
+import deployProject from "./deployProject";
 import deployInstance from "./deployInstance";
 import deployDomain from "./deployDomain";
 import deployCertbot from "./deployCertbot";
@@ -8,6 +9,7 @@ import deployFilterData from "./deployFilterData";
 import getUserDeployList from "./getUserDeployList";
 
 export {
+  deployProject,
   deployInstance,
   deployDomain,
   deployCertbot,
