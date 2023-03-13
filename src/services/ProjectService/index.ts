@@ -1,35 +1,42 @@
 import Service from "../Service";
+import setGithubInfo from "./setGithubInfo";
+import createInstance from "./createInstance";
+import createWebhook from "./createWebhook";
+import waitPublicIpAdreessCreation from "./waitPublicIpAdressCreation";
+import createDomain from "./createDomain";
+import waitDnsRecordCreation from "./waitDnsRecordCreation";
+import createHttpsCertification from "./createHttpsCertification";
+import waitInstanceLogStremCreation from "./waitInstanceLogStremCreation";
+import getInstanceFilteredLogs from "./getInstanceFilteredLogs";
 
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
-
-import Config from "../../config";
 import { Env } from "../../types/custom";
 
 type BuildOption = {
-  repoName: string,
-  repoCloneUrl: string,
-  repoUpdatedAt: string,
-  nodeVersion: string,
-  installCommand: string,
-  buildCommand: string,
-  envList: Env[],
-  buildType: string,
-}
+  repoName: string;
+  repoCloneUrl: string;
+  repoUpdatedAt: string;
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  envList: Env[];
+  buildType: string;
+  githubAccessToken: string;
+  userId: string;
+};
 
 class ProjectService extends Service {
   /* build options */
-  public githubAccessToken?: string;
-  public repoName?: string;
-  public repoOwner?: string;
-  public repoCloneUrl?: string;
-  public repoUpdatedAt?: string;
-
-  public nodeVersion?: string;
-  public installCommand?: string;
-  public buildCommand?: string;
-  public envList?: Env[];
-  public buildType?: string;
+  public githubAccessToken;
+  public repoName;
+  public repoCloneUrl;
+  public repoUpdatedAt;
+  public subdomain;
+  public userId;
+  public nodeVersion;
+  public installCommand;
+  public buildCommand;
+  public envList;
+  public buildType;
 
   /* build data */
   public instanceId?: string;
@@ -38,47 +45,38 @@ class ProjectService extends Service {
   public webhookId?: string;
   public recordId?: string;
   public publicIpAddress?: string;
+  public buildingLog?: (string | undefined)[];
+  public repoId?: string;
+  public repoOwner?: string;
 
   constructor(buildOption: BuildOption) {
     super();
 
+    this.githubAccessToken = buildOption.githubAccessToken;
     this.repoName = buildOption.repoName;
     this.repoCloneUrl = buildOption.repoCloneUrl;
     this.repoUpdatedAt = buildOption.repoUpdatedAt;
+    this.subdomain = buildOption.repoName;
     this.nodeVersion = buildOption.nodeVersion;
     this.installCommand = buildOption.installCommand;
     this.buildCommand = buildOption.buildCommand;
     this.envList = buildOption.envList;
     this.buildType = buildOption.buildType;
+    this.userId = buildOption.userId;
   }
-
-  /* handlers */
-  public throwError(error: { code: string, message: string }) {
-    throw new DeploymentError(error);
-  }
-  // to Be
-  public debug = createDeploymentDebug(false);
-
-  static createInstance = () => { };
-  static createWebhook = () => { };
-  static setGitHubInfo = () => { };
-  static createDomain = () => { };
-  static createHTTPS = () => { };
-  static getInstanceLog = () => { };
-  static getSaveData = () => { };
-  static getFilterData = () => { };
 
   /* methods */
-  public deployProject() {
-    return ProjectService.use(
-      ProjectService.setGitHubInfo,
-      ProjectService.createInstance,
-      ProjectService.createWebhook,
-      ProjectService.createDomain,
-      ProjectService.createHTTPS,
-      ProjectService.getInstanceLog,
-      ProjectService.getSaveData,
-      ProjectService.getFilterData,
+  public async deployProject() {
+    return await ProjectService.use<ProjectService>(
+      setGithubInfo,
+      createInstance,
+      createWebhook,
+      waitPublicIpAdreessCreation,
+      createDomain,
+      waitDnsRecordCreation,
+      createHttpsCertification,
+      waitInstanceLogStremCreation,
+      getInstanceFilteredLogs,
     );
   }
 }
