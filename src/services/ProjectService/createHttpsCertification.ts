@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 
 import Config from "../../config";
+import getRunScriptCerbotCommands from "./utils/getRunScriptCerbotCommands";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
@@ -33,20 +34,11 @@ const createHttpsCertification = async (
   );
 
   try {
-    const ssmCertbotCommands = spawn(
-      "aws",
-      [
-        "ssm",
-        "send-command",
-        "--document-name",
-        "AWS-RunShellScript",
-        "--targets",
-        `[{"Key":"InstanceIds","Values":["${instanceId}"]}]`,
-        "--parameters",
-        `{"commands":["#!/bin/bash","yum -y update","source /root/.nvm/nvm.sh","cd /home/ec2-user","certbot --nginx --non-interactive --agree-tos -d ${subdomain}.${Config.SERVER_URL} -m taewan.seoul@gmail.com","cd /etc","echo 39      1,13    *       *       *       root    certbot renew --no-self-upgrade >> crontab","systemctl restart crond","service nginx restart"]}`,
-      ],
-      { signal },
+    const commands = getRunScriptCerbotCommands(
+      instanceId,
+      `${subdomain}.${Config.SERVER_URL}`,
     );
+    const ssmCertbotCommands = spawn("aws", commands, { signal });
 
     ssmCertbotCommands.stdout.on("data", data => {
       process.stderr.write(`stdout data: ssmCertbotCommands - ${data}`);

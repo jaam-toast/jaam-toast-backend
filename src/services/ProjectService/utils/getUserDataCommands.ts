@@ -1,10 +1,9 @@
 import Config from "../../../config";
-
+import getNginxScript from "./getNginxScript";
 import { ClientOptions, DeploymentOptions } from "../../../types/custom";
 import { createDeploymentDebug } from "../../../utils/createDebug";
-import setNginxScript from "../../deploy/aws/config/setNginxScript";
 
-function getUserDataCommands(
+const getUserDataCommands = (
   clientOptions: ClientOptions,
   deploymentOptions: DeploymentOptions = {
     nodeVersion: "16.x",
@@ -12,7 +11,7 @@ function getUserDataCommands(
     buildCommand: "",
     buildType: "SSR",
   },
-) {
+) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
 
   const { repoCloneUrl, repoName } = clientOptions;
@@ -43,7 +42,7 @@ function getUserDataCommands(
     ? `yarn build`
     : `npm run build`;
 
-  const NGINX_SCRIPT = setNginxScript(buildType, CUSTOM_DOMAIN, REPO_NAME);
+  const NGINX_SCRIPT = getNginxScript(buildType, CUSTOM_DOMAIN, REPO_NAME);
 
   debug(
     `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}, PM2_START_COMMAND: ${PM2_START_COMMAND},INSTALL_COMMAND: ${INSTALL_COMMAND}, BUILD_COMMAND: ${BUILD_COMMAND}, NGINX_SCRIPT: ${NGINX_SCRIPT}`,
@@ -124,6 +123,6 @@ function getUserDataCommands(
   ];
 
   return commands;
-}
+};
 
 export default getUserDataCommands;
