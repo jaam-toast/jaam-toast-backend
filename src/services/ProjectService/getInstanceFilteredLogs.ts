@@ -7,6 +7,7 @@ import {
   createBuildingLogDebug,
 } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
+import sleep from "./utils/sleep";
 
 import ProjectService from ".";
 
@@ -30,15 +31,16 @@ const getInstanceFilteredLogs = async (
     });
   }
 
-  const filterLogEventsOptions = {
-    logGroupName: "user-data.log",
-    logStreamNames: [instanceId],
-    filterPattern: Config.LOG_FILTERS.userDataFilter,
-  };
-
   debug("Running getFilteredLogEvents to request a building log...");
 
+  await sleep(60000);
+
   try {
+    const filterLogEventsOptions = {
+      logGroupName: "user-data.log",
+      logStreamNames: [instanceId],
+      filterPattern: Config.LOG_FILTERS.userDataFilter,
+    };
     const command = new FilterLogEventsCommand(filterLogEventsOptions);
     const data = await cwlClient.send(command);
 

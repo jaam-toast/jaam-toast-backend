@@ -4,6 +4,7 @@ import Config from "../../config";
 import getRunScriptCerbotCommands from "./utils/getRunScriptCerbotCommands";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
+import sleep from "./utils/sleep";
 
 import ProjectService from ".";
 
@@ -32,6 +33,8 @@ const createHttpsCertification = async (
     `letsencrypt - Plugins selected: Authenticator nginx, Installer nginx`,
     `Requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}`,
   );
+
+  await sleep(120000);
 
   try {
     const commands = getRunScriptCerbotCommands(

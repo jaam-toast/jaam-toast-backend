@@ -57,9 +57,6 @@ const waitInstanceLogStremCreation = async (
       }
       clearInterval(logStreamStatusInterval);
 
-      // TODO: add sleep 60000ms
-      // const filteredLogEventMessages = await filteredLogDelay(60000);
-
       next();
     }, 2000);
   } catch (error) {
