@@ -9,6 +9,7 @@ import createHttpsCertification from "./createHttpsCertification";
 import waitInstanceLogStremCreation from "./waitInstanceLogStremCreation";
 import getInstanceFilteredLogs from "./getInstanceFilteredLogs";
 
+import { Types } from "mongoose";
 import { Env } from "../../types/custom";
 
 type BuildOption = {
@@ -46,7 +47,7 @@ class ProjectService extends Service {
   public recordId?: string;
   public publicIpAddress?: string;
   public buildingLog?: (string | undefined)[];
-  public repoId?: string;
+  public repoId?: Types.ObjectId;
   public repoOwner?: string;
 
   constructor(buildOption: BuildOption) {
