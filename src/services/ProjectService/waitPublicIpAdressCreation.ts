@@ -1,5 +1,5 @@
 import Config from "../../config";
-import describeInstanceIp from "../../services/deploy/aws/ec2_describeinstances";
+import InstanceClient from "../InstanceClient";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
@@ -9,6 +9,7 @@ const waitPublicIpAdreessCreation = async (
   service: ProjectService,
   next: Function,
 ) => {
+  const instanceClient = new InstanceClient();
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const { instanceId } = service;
 
@@ -27,7 +28,7 @@ const waitPublicIpAdreessCreation = async (
 
   try {
     const publicIpAddressInterval = setInterval(async () => {
-      const instanceChangeInfo = await describeInstanceIp(instanceId);
+      const instanceChangeInfo = await instanceClient.getState(instanceId);
 
       if (!instanceChangeInfo?.publicIpAddress) {
         return;
