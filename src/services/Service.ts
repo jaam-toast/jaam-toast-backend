@@ -21,7 +21,7 @@ abstract class Service {
   static async handle() {
     const next = async (message?: string) => {
       if (message) {
-        this.layerIndex >= this.layers.length;
+        this.layerIndex = this.layers.length;
       }
       if (this.layerIndex >= this.layers.length) {
         return;
