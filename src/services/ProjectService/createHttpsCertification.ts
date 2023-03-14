@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 
 import Config from "../../config";
-import getRunScriptCerbotCommands from "./utils/getRunScriptCerbotCommands";
+import getCerbotCommands from "./utils/getCerbotCommands";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 import sleep from "./utils/sleep";
@@ -37,7 +37,7 @@ const createHttpsCertification = async (
   await sleep(120000);
 
   try {
-    const commands = getRunScriptCerbotCommands(
+    const commands = getCerbotCommands(
       instanceId,
       `${subdomain}.${Config.SERVER_URL}`,
     );
