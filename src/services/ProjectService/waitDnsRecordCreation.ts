@@ -1,13 +1,8 @@
-import { InstanceStateName } from "@aws-sdk/client-ec2";
-
 import Config from "../../config";
-import getRecordInstanceStatus from "../deploy/build-utils/getRecordInstanceStatus";
-import terminateInstance from "../deploy/aws/ec2_terminateinstances";
-import changeDNSRecord from "../deploy/aws/route53_changerecord";
+import DomainClient from "../DomainClient";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
-import { RRType } from "@aws-sdk/client-route-53";
 import ProjectService from "./";
 
 const waitDnsRecordCreation = async (
@@ -15,6 +10,7 @@ const waitDnsRecordCreation = async (
   next: Function,
 ) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+  const domainClient = new DomainClient();
   const { subdomain, instanceId, recordId } = service;
 
   if (!instanceId || !recordId) {
@@ -49,19 +45,9 @@ const waitDnsRecordCreation = async (
         });
       }
 
-      // TODO
-      // 개별 확인
-      const recordInstaceStatus = await getRecordInstanceStatus(
-        instanceId,
-        recordId,
-        subdomain,
-      );
-      const { recordStatus, instanceState } = recordInstaceStatus;
+      const recordStatus = await domainClient.getStatus(recordId);
 
-      if (
-        recordStatus !== "INSYNC" ||
-        instanceState !== InstanceStateName.running
-      ) {
+      if (recordStatus !== "INSYNC") {
         triesLeft -= 1;
         return;
       }
@@ -79,13 +65,7 @@ const waitDnsRecordCreation = async (
       `Error: An unexpected error occurred during waiting for DNS Record created. - ${error}.`,
     );
 
-    await terminateInstance(instanceId);
-    await changeDNSRecord({
-      actionType: "DELETE",
-      subdomain,
-      recordValue: service.publicIpAddress as string,
-      recordType: RRType.A,
-    });
+    // TODO: add role back logic.
 
     throw new DeploymentError({
       code: "Projectservice_waitDnsRecordCreation",
