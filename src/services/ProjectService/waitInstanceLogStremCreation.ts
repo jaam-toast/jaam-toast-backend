@@ -2,7 +2,6 @@ import Config from "../../config";
 import terminateInstance from "../deploy/aws/ec2_terminateinstances";
 import changeDNSRecord from "../deploy/aws/route53_changerecord";
 import getLogStreamStatus from "../deploy/build-utils/getLogStreamStatus";
-import { deleteRepoWebhook } from "../GithubService/client";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
@@ -65,12 +64,6 @@ const waitInstanceLogStremCreation = async (
     );
 
     await terminateInstance(instanceId);
-    await deleteRepoWebhook(
-      service.githubAccessToken as string,
-      repoOwner,
-      subdomain,
-      Number(service.webhookId),
-    );
     await changeDNSRecord({
       actionType: "DELETE",
       subdomain,

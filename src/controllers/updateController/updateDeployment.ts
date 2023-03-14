@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 import Config from "../../config";
 
-import { getHeadCommitMessage } from "../../services/GithubService/client";
+import GithubClient from "../../services/GithubClient";
 import runUpdateDeploymentCommands from "../../services/deploy/cli/runUpdateDeploymentCommands";
 
 import catchAsync from "../../utils/asyncHandler";
@@ -24,9 +24,7 @@ interface PullRequestData {
 
 const updateDeployment = catchAsync(async (req, res, next) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-
   const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
-
   const githubPullRequestPayload = req.body;
 
   if (
@@ -53,8 +51,8 @@ const updateDeployment = catchAsync(async (req, res, next) => {
       cloneUrl: repository.clone_url,
     };
 
-    const { commit } = await getHeadCommitMessage(
-      githubAccessToken as string,
+    const githubClient = new GithubClient(githubAccessToken as string);
+    const { commit } = await githubClient.getHeadCommitMessage(
       pullRequestData.repoOwner,
       pullRequestData.repoName,
       pullRequestData.headRef,

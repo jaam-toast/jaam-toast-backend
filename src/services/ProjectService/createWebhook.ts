@@ -1,4 +1,4 @@
-import { createRepoWebhook } from "../GithubService/client";
+import GithubClient from "../GithubClient";
 import { DeploymentError } from "../../utils/errors";
 
 import ProjectService from "./";
@@ -19,8 +19,8 @@ const createWebhook = async (service: ProjectService, next: Function) => {
   }
 
   try {
-    const newWebhookData = await createRepoWebhook(
-      githubAccessToken as string,
+    const githubClient = new GithubClient(githubAccessToken as string);
+    const newWebhookData = await githubClient.createRepoWebhook(
       repoOwner,
       repoName,
     );
