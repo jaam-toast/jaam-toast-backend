@@ -1,26 +1,22 @@
 import createError from "http-errors";
 
 import catchAsync from "../utils/asyncHandler";
-import { getRepos, getOrgs, getOrgRepos } from "../services/GithubService/client";
+import GithubClient from "../services/GithubClient";
 
-export const getOrganizations = catchAsync(async (req, res, next) => {
+const getOrganizations = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
 
   if (!githubAccessToken) {
     return next(createError(400));
   }
 
-  const organizations = await getOrgs(githubAccessToken as string);
-
-  const orgsData = organizations.map(org => {
-    const orgData = {
-      spaceName: org.login,
-      spaceUrl: org.repos_url,
-      spaceImage: org.avatar_url,
-    };
-
-    return orgData;
-  });
+  const githubClient = new GithubClient(githubAccessToken as string);
+  const organizations = await githubClient.getOrgs();
+  const orgsData = organizations.map(org => ({
+    spaceName: org.login,
+    spaceUrl: org.repos_url,
+    spaceImage: org.avatar_url,
+  }));
 
   return res.json({
     result: "ok",
@@ -28,15 +24,16 @@ export const getOrganizations = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getUserRepos = catchAsync(async (req, res, next) => {
+const getUserRepos = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
 
   if (!githubAccessToken) {
     return next(createError(400));
   }
 
-  const publicRepos = await getRepos(githubAccessToken as string, "public");
-  const privateRepos = await getRepos(githubAccessToken as string, "private");
+  const githubClient = new GithubClient(githubAccessToken as string);
+  const publicRepos = await githubClient.getRepos("public");
+  const privateRepos = await githubClient.getRepos("private");
 
   if (!publicRepos || !privateRepos) {
     return next(createError(401));
@@ -66,7 +63,7 @@ export const getUserRepos = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getOrganizationRepos = catchAsync(async (req, res, next) => {
+const getOrganizationRepos = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
   const { org } = req.params;
 
@@ -74,24 +71,23 @@ export const getOrganizationRepos = catchAsync(async (req, res, next) => {
     return next(createError(400));
   }
 
-  const organizationRepos = await getOrgRepos(githubAccessToken as string, org);
+  const githubClient = new GithubClient(githubAccessToken as string);
+  const organizationRepos = await githubClient.getOrgRepos(org);
 
   if (!organizationRepos) {
     return next(createError(401));
   }
 
-  const organizationReposList = organizationRepos.map(repo => {
-    const repoData = {
-      repoName: repo.full_name,
-      repoCloneUrl: repo.clone_url,
-      repoUpdatedAt: repo.updated_at,
-    };
-
-    return repoData;
-  });
+  const organizationReposList = organizationRepos.map(repo => ({
+    repoName: repo.full_name,
+    repoCloneUrl: repo.clone_url,
+    repoUpdatedAt: repo.updated_at,
+  }));
 
   return res.json({
     result: "ok",
     data: organizationReposList,
   });
 });
+
+export { getOrganizations, getUserRepos, getOrganizationRepos };

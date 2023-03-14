@@ -1,4 +1,4 @@
-import { getCommits } from "../GithubService/client";
+import GithubClient from "../GithubClient";
 import { DeploymentError } from "../../utils/errors";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import Config from "../../config";
@@ -10,14 +10,11 @@ const setGithubInfo = async (service: ProjectService, next: Function) => {
   const { githubAccessToken, repoName, repoCloneUrl } = service;
 
   try {
+    const githubClient = new GithubClient(githubAccessToken as string);
     const repoOwner = repoCloneUrl
       .split("https://github.com/")[1]
       .split("/")[0];
-    const commitList = await getCommits(
-      githubAccessToken as string,
-      repoOwner,
-      repoName,
-    );
+    const commitList = await githubClient.getCommits(repoOwner, repoName);
     const lastCommitMessage = commitList[0].commit.message;
 
     service.repoOwner = repoOwner;
