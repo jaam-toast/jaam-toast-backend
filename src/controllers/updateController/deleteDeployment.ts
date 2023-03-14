@@ -7,7 +7,7 @@ import terminateInstance from "../../services/deploy/aws/ec2_terminateinstances"
 import changeDNSRecord from "../../services/deploy/aws/route53_changerecord";
 import describeInstanceIp from "../../services/deploy/aws/ec2_describeinstances";
 import deleteLogStream from "../../services/deploy/aws/cwl_deletelogstream";
-import { deleteRepoWebhook } from "../../services/github/client";
+import { deleteRepoWebhook } from "../../services/GithubService/client";
 
 import { User } from "../../models/User";
 import { Repo } from "../../models/Repo";

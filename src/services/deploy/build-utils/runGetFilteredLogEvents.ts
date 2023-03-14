@@ -3,7 +3,7 @@ import getFilteredLogEvents from "../aws/cwl_filterlogeventscommand";
 import getLogStreamStatus from "./getLogStreamStatus";
 import terminateInstance from "../aws/ec2_terminateinstances";
 import changeDNSRecord from "../aws/route53_changerecord";
-import { deleteRepoWebhook } from "../../github/client";
+import { deleteRepoWebhook } from "../../GithubService/client";
 
 import { createDeploymentDebug } from "../../../utils/createDebug";
 import { DeploymentError } from "../../../utils/errors";

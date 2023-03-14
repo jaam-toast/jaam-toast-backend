@@ -21,12 +21,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    DeployController.deployInstance,
-    DeployController.deployDomain,
-    DeployController.deployCertbot,
-    DeployController.deployLogs,
-    DeployController.deploySaveData,
-    DeployController.deployFilterData,
+    DeployController.deployProject,
   );
 
   route.get(
