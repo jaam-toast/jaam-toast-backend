@@ -30,7 +30,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting user data to github client.",
+      );
     }
   }
 
@@ -49,7 +51,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting repository data to github client.",
+      );
     }
   }
 
@@ -61,7 +65,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting organization data to github client.",
+      );
     }
   }
 
@@ -80,7 +86,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting organization repository data to github client.",
+      );
     }
   }
 
@@ -109,7 +117,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by creating webhook to github repository.",
+      );
     }
   }
 
@@ -121,7 +131,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting commit data to github client.",
+      );
     }
   }
 
@@ -137,7 +149,9 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error();
+      throw new Error(
+        "Error: Run failed by requesting commit message data to github client.",
+      );
     }
   }
 }
