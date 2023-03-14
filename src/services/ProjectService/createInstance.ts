@@ -1,5 +1,5 @@
 import Config from "../../config";
-import createEC2Instance from "../deploy/aws/ec2_createinstances";
+import InstanceClient from "../InstanceClient";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import getUserDataCommands from "./utils/getUserDataCommands";
 import { DeploymentError } from "../../utils/errors";
@@ -49,7 +49,8 @@ const createInstance = async (service: ProjectService, next: Function) => {
   try {
     debug("Created build commands to create a new instance");
 
-    const instanceId = await createEC2Instance(commands);
+    const instanceClient = new InstanceClient();
+    const instanceId = await instanceClient.create(commands);
     const deployedUrl = `${repoName}.${Config.SERVER_URL}`;
 
     service.instanceId = instanceId;
