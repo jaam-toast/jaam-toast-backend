@@ -1,22 +1,14 @@
 import Config from "../../config";
-import changeDNSRecord from "../../services/deploy/aws/route53_changerecord";
-import terminateInstance from "../../services/deploy/aws/ec2_terminateinstances";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
 import ProjectService from ".";
-import { RRType } from "@aws-sdk/client-route-53";
+import DomainClient from "../DomainClient";
 
 const createDomain = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-  const {
-    githubAccessToken,
-    subdomain,
-    repoOwner,
-    instanceId,
-    webhookId,
-    publicIpAddress,
-  } = service;
+  const { subdomain, repoOwner, instanceId, webhookId, publicIpAddress } =
+    service;
 
   if (!repoOwner || !instanceId || !webhookId || !publicIpAddress) {
     debug("Error: Cannot find environment data before creating DNS Record.");
@@ -28,15 +20,11 @@ const createDomain = async (service: ProjectService, next: Function) => {
   }
 
   try {
-    const DNSRecordChangeOptions = {
-      actionType: "CREATE",
-      subdomain: subdomain,
-      recordValue: publicIpAddress,
-      recordType: RRType.A,
-      instanceId,
-    };
-
-    const recordChangeInfo = await changeDNSRecord(DNSRecordChangeOptions);
+    const domainClient = new DomainClient();
+    const recordChangeInfo = await domainClient.createARecord(
+      `${subdomain}.${Config.SERVER_URL}`,
+      publicIpAddress,
+    );
 
     if (!recordChangeInfo?.recordId) {
       debug(`Error: Cannot find record id after creating DNS Record.`);
@@ -57,7 +45,7 @@ const createDomain = async (service: ProjectService, next: Function) => {
       `Error: An unexpected error occurred during creating DNS Record. - ${error}.`,
     );
 
-    await terminateInstance(instanceId);
+    // TODO: role back rogic.
 
     throw new DeploymentError({
       code: "Projectservice_createDomain",
