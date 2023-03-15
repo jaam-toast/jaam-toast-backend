@@ -9,7 +9,7 @@ const createWebhook = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const { githubAccessToken, repoOwner, repoName } = service;
 
-  if (!repoOwner) {
+  if (!repoOwner || !repoName) {
     debug("Error: Cannot find 'repoOwner' before creating EC2 instance.");
 
     throw new DeploymentError({

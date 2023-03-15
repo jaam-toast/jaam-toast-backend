@@ -9,6 +9,15 @@ const setGithubInfo = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const { githubAccessToken, repoName, repoCloneUrl } = service;
 
+  if (!repoCloneUrl || !repoName) {
+    debug("Error: Cannot find environment data before setting github info.");
+
+    throw new DeploymentError({
+      code: "Projectservice_setGithubInfo",
+      message: "setGithubInfo didn't work as expected",
+    });
+  }
+
   try {
     const githubClient = new GithubClient(githubAccessToken as string);
     const repoOwner = repoCloneUrl

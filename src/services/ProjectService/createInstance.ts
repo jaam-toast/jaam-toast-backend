@@ -20,7 +20,16 @@ const createInstance = async (service: ProjectService, next: Function) => {
     buildType,
   } = service;
 
-  if (!repoOwner) {
+  if (
+    !repoOwner ||
+    !repoName ||
+    !repoCloneUrl ||
+    !repoUpdatedAt ||
+    !nodeVersion ||
+    !installCommand ||
+    !buildCommand ||
+    !buildType
+  ) {
     debug("Error: Cannot find 'repoOwner' before creating EC2 instance.");
 
     throw new DeploymentError({
