@@ -65,7 +65,7 @@ const waitDnsRecordCreation = async (
       `Error: An unexpected error occurred during waiting for DNS Record created. - ${error}.`,
     );
 
-    // TODO: add role back logic.
+    service.deleteDeployment();
 
     throw new DeploymentError({
       code: "Projectservice_waitDnsRecordCreation",

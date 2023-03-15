@@ -9,6 +9,10 @@ import createHttpsCertification from "./createHttpsCertification";
 import waitInstanceLogStremCreation from "./waitInstanceLogStremCreation";
 import getInstanceFilteredLogs from "./getInstanceFilteredLogs";
 import saveProject from "./saveProject";
+import clearDeployment from "./clearDeployment";
+import updateInstance from "./updateInstace";
+import removeProject from "./removeProject";
+import updateProject from "./updateProject";
 
 import { Types } from "mongoose";
 import { Env } from "../../types/custom";
@@ -79,6 +83,50 @@ class ProjectService extends Service {
       getInstanceFilteredLogs,
       saveProject,
     );
+
+    return this;
+  }
+
+  async redeployProject({
+    repoCloneUrl,
+    lastCommitMessage,
+    repoName,
+  }: {
+    repoCloneUrl: string;
+    lastCommitMessage: string;
+    repoName: string;
+  }) {
+    await this.use(updateProject, updateInstance);
+
+    return this;
+  }
+
+  async deleteDeployment() {
+    await this.use(clearDeployment);
+
+    return this;
+  }
+
+  async deleteProject({
+    instanceId,
+    subdomain,
+    publicIpAddress,
+    userId,
+    repoId,
+  }: {
+    instanceId?: string;
+    subdomain?: string;
+    publicIpAddress?: string;
+    userId?: string;
+    repoId?: Types.ObjectId;
+  }) {
+    this.userId = userId;
+    this.repoId = repoId;
+    this.instanceId = instanceId;
+    this.subdomain = subdomain;
+    this.publicIpAddress = publicIpAddress;
+
+    await this.use(clearDeployment, removeProject);
 
     return this;
   }

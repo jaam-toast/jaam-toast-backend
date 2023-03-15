@@ -1,11 +1,8 @@
 import Config from "../../config";
-import terminateInstance from "../deploy/aws/ec2_terminateinstances";
-import changeDNSRecord from "../deploy/aws/route53_changerecord";
 import getLogStreamStatus from "../deploy/build-utils/getLogStreamStatus";
 import { createDeploymentDebug } from "../../utils/createDebug";
 import { DeploymentError } from "../../utils/errors";
 
-import { RRType } from "@aws-sdk/client-route-53";
 import ProjectService from ".";
 
 const waitInstanceLogStremCreation = async (
@@ -15,7 +12,7 @@ const waitInstanceLogStremCreation = async (
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const { subdomain, instanceId, repoOwner, publicIpAddress } = service;
 
-  if (!instanceId || !repoOwner || !publicIpAddress) {
+  if (!instanceId || !repoOwner || !publicIpAddress || !subdomain) {
     debug(
       "Error: Cannot find environment data before waiting for checking EC2 instance Runtimelog status.",
     );
@@ -63,13 +60,7 @@ const waitInstanceLogStremCreation = async (
       `Error: An unexpected error occurred during waiting for checking EC2 instance Runtimelog status. - ${error}.`,
     );
 
-    await terminateInstance(instanceId);
-    await changeDNSRecord({
-      actionType: "DELETE",
-      subdomain,
-      recordValue: publicIpAddress as string,
-      recordType: RRType.A,
-    });
+    service.deleteDeployment();
 
     throw new DeploymentError({
       code: "Projectservice_waitInstanceLogStremCreation",
