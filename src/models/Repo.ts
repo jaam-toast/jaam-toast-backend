@@ -21,6 +21,9 @@ export interface DBRepo {
   buildingLog?: (string | undefined)[] | undefined;
   lastCommitMessage?: string;
   webhookId?: string;
+  subdomain?: string;
+  publicIpAddress?: string;
+  userId?: string;
 }
 
 const Joigoose = joigoose(mongoose);
