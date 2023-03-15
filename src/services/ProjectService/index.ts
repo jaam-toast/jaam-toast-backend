@@ -8,6 +8,7 @@ import waitDnsRecordCreation from "./waitDnsRecordCreation";
 import createHttpsCertification from "./createHttpsCertification";
 import waitInstanceLogStremCreation from "./waitInstanceLogStremCreation";
 import getInstanceFilteredLogs from "./getInstanceFilteredLogs";
+import saveProject from "./saveProject";
 
 import { Types } from "mongoose";
 import { Env } from "../../types/custom";
@@ -27,31 +28,32 @@ type BuildOption = {
 
 class ProjectService extends Service {
   /* build options */
-  public githubAccessToken;
-  public repoName;
-  public repoCloneUrl;
-  public repoUpdatedAt;
-  public subdomain;
-  public userId;
-  public nodeVersion;
-  public installCommand;
-  public buildCommand;
-  public envList;
-  public buildType;
+  githubAccessToken?: string;
+  repoName?: string;
+  repoCloneUrl?: string;
+  repoUpdatedAt?: string;
+  subdomain?: string;
+  userId?: string;
+  nodeVersion?: string;
+  installCommand?: string;
+  buildCommand?: string;
+  envList?: Env[];
+  buildType?: string;
 
   /* build data */
-  public instanceId?: string;
-  public deployedUrl?: string;
-  public lastCommitMessage?: string;
-  public webhookId?: string;
-  public recordId?: string;
-  public publicIpAddress?: string;
-  public buildingLog?: (string | undefined)[];
-  public repoId?: Types.ObjectId;
-  public repoOwner?: string;
+  instanceId?: string;
+  deployedUrl?: string;
+  lastCommitMessage?: string;
+  webhookId?: string;
+  recordId?: string;
+  publicIpAddress?: string;
+  buildingLog?: (string | undefined)[];
+  repoId?: Types.ObjectId;
+  repoOwner?: string;
 
-  constructor(buildOption: BuildOption) {
-    super();
+  /* methods */
+  async deployProject(buildOption: BuildOption) {
+    console.log("start deploy");
 
     this.githubAccessToken = buildOption.githubAccessToken;
     this.repoName = buildOption.repoName;
@@ -64,11 +66,8 @@ class ProjectService extends Service {
     this.envList = buildOption.envList;
     this.buildType = buildOption.buildType;
     this.userId = buildOption.userId;
-  }
 
-  /* methods */
-  public async deployProject() {
-    return await ProjectService.use<ProjectService>(
+    await this.use(
       setGithubInfo,
       createInstance,
       createWebhook,
@@ -78,7 +77,10 @@ class ProjectService extends Service {
       createHttpsCertification,
       waitInstanceLogStremCreation,
       getInstanceFilteredLogs,
+      saveProject,
     );
+
+    return this;
   }
 }
 

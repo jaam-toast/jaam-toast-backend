@@ -2,14 +2,12 @@ type Next = Function;
 type ServiceHandler<T> = (service: T, next: Next) => void | Promise<void>;
 
 abstract class Service {
-  static layers: ServiceHandler<any>[] = [];
-  static layerIndex = 0;
+  public layers: ServiceHandler<this>[] = [];
+  public layerIndex = 0;
 
-  static async use<T>(...handlers: ServiceHandler<T>[]) {
+  public async use(...handlers: ServiceHandler<this>[]) {
     if (this.layerIndex !== this.layers.length) {
-      throw new Error(
-        "service.use cannot be called from inside a service handler.",
-      );
+      this.layerIndex = this.layers.length;
     }
 
     this.layers.push(...handlers);
@@ -18,7 +16,7 @@ abstract class Service {
     return this;
   }
 
-  static async handle() {
+  public async handle() {
     const next = async (message?: string) => {
       if (message) {
         this.layerIndex = this.layers.length;
