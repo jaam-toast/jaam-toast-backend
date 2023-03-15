@@ -1,13 +1,9 @@
-import mongoose from "mongoose";
+import createError from "http-errors";
 
 import Config from "../../config";
-
 import GithubClient from "../../services/GithubClient";
-import runUpdateDeploymentCommands from "../../services/deploy/cli/runUpdateDeploymentCommands";
-
+import ProjectService from "../../services/ProjectService";
 import catchAsync from "../../utils/asyncHandler";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { Repo } from "../../models/Repo";
 
 interface PullRequestData {
   prAction: boolean;
@@ -23,73 +19,58 @@ interface PullRequestData {
 }
 
 const updateDeployment = catchAsync(async (req, res, next) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-  const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
-  const githubPullRequestPayload = req.body;
+  const { action, pull_request, repository } = req.body;
 
-  if (
-    githubPullRequestPayload.action === "closed" &&
-    githubPullRequestPayload.pull_request.merged
-  ) {
-    const { action, pull_request, repository } = githubPullRequestPayload;
-
-    debug(
-      `Successfully received githubPullRequestPayload of the new pull request through Github webhook - A pull request is ${action}`,
-      `The status of merged pull request is - ${pull_request.merged}`,
-    );
-
-    const pullRequestData: PullRequestData = {
-      prAction: action,
-      merged: pull_request.merged,
-      title: pull_request.title,
-      updatedAt: pull_request.updated_at,
-      headRef: pull_request.head.ref,
-      headSha: pull_request.head.sha,
-      prUser: pull_request.user.login,
-      repoOwner: repository.owner.login,
-      repoName: repository.name,
-      cloneUrl: repository.clone_url,
-    };
-
-    const githubClient = new GithubClient(githubAccessToken as string);
-    const { commit } = await githubClient.getHeadCommitMessage(
-      pullRequestData.repoOwner,
-      pullRequestData.repoName,
-      pullRequestData.headRef,
-    );
-
-    const lastCommitMessage = commit.message;
-
-    const session = await mongoose.startSession();
-    let userRepo;
-    let instanceId;
-
-    await session.withTransaction(async () => {
-      userRepo = await Repo.findOne(
-        {
-          repoCloneUrl: pullRequestData.cloneUrl,
-        },
-        null,
-        { session },
-      ).lean();
-
-      await Repo.updateOne(
-        { repoCloneUrl: pullRequestData.cloneUrl },
-        { $set: { lastCommitMessage } },
-        { session },
-      );
-
-      instanceId = userRepo?.instanceId;
-    });
-
-    session.endSession();
-
-    runUpdateDeploymentCommands(`${instanceId}`, pullRequestData.repoName);
-
-    debug(
-      `Successfully requested for deploymnet updates of the new pull request from Github webhook`,
+  if (action !== "closed" || !pull_request.merged) {
+    return next(
+      createError(
+        401,
+        "Received abnormal PR data or PR that has not yet been merged.",
+      ),
     );
   }
+
+  const {
+    merged,
+    title,
+    updated_at,
+    head: { ref, sha },
+    user: { login: prUser },
+  } = pull_request;
+  const {
+    owner: { login: repoOwner },
+    name,
+    clone_url,
+  } = repository;
+
+  const pullRequestData: PullRequestData = {
+    prAction: action,
+    merged,
+    title,
+    updatedAt: updated_at,
+    headRef: ref,
+    headSha: sha,
+    prUser,
+    repoOwner,
+    repoName: name,
+    cloneUrl: clone_url,
+  };
+
+  const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
+  const githubClient = new GithubClient(githubAccessToken as string);
+  const { commit } = await githubClient.getHeadCommitMessage(
+    pullRequestData.repoOwner,
+    pullRequestData.repoName,
+    pullRequestData.headRef,
+  );
+  const lastCommitMessage = commit.message;
+
+  const project = new ProjectService();
+  await project.redeployProject({
+    repoCloneUrl: pullRequestData.cloneUrl,
+    lastCommitMessage,
+    repoName: pullRequestData.repoName,
+  });
 
   return res.json({
     result: "ok",
