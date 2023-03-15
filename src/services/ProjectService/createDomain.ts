@@ -45,7 +45,7 @@ const createDomain = async (service: ProjectService, next: Function) => {
       `Error: An unexpected error occurred during creating DNS Record. - ${error}.`,
     );
 
-    // TODO: role back rogic.
+    service.deleteDeployment();
 
     throw new DeploymentError({
       code: "Projectservice_createDomain",
