@@ -8,7 +8,13 @@ import {
 import Config from "../../config";
 
 class DomainClient {
-  client = new Route53Client({ region: Config.INSTANCE_REGION });
+  client = new Route53Client({
+    credentials: {
+      accessKeyId: Config.ACCESS_KEY_ID,
+      secretAccessKey: Config.SECRET_ACCESS_KEY,
+    },
+    region: Config.INSTANCE_REGION,
+  });
 
   async createARecord(recordName: string, recordValue: string) {
     try {
