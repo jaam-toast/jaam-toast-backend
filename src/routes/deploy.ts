@@ -5,8 +5,7 @@ import Joi from "joi";
 import verifyToken from "../middlewares/verifyToken";
 import validateSchema from "../middlewares/validateSchema";
 
-import * as DeployController from "../controllers/deployController";
-import * as UpdateController from "../controllers/updateController";
+import * as DeployController from "../controllers/deploy";
 
 const route = Router();
 
@@ -43,7 +42,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    UpdateController.deleteDeployment,
+    DeployController.deleteDeployment,
   );
 };
 
