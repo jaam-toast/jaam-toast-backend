@@ -79,6 +79,8 @@ const createHttpsCertification = async (
         `A new certificate for ${subdomain}.${Config.SERVER_URL} has been requested`,
       );
     });
+
+    next();
   } catch (error) {
     controller.abort();
 
