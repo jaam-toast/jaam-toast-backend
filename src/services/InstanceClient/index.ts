@@ -1,13 +1,19 @@
 import {
   EC2Client,
   RunInstancesCommand,
-  DescribeInstancesCommand,
   TerminateInstancesCommand,
+  DescribeInstancesCommand,
 } from "@aws-sdk/client-ec2";
 import Config from "../../config";
 
 class InstanceClient {
-  client = new EC2Client({ region: Config.INSTANCE_REGION });
+  client = new EC2Client({
+    credentials: {
+      accessKeyId: Config.ACCESS_KEY_ID,
+      secretAccessKey: Config.SECRET_ACCESS_KEY,
+    },
+    region: Config.INSTANCE_REGION,
+  });
 
   async create(userDataScripts: string[]) {
     try {
