@@ -23,8 +23,6 @@ const removeProject = async (service: ProjectService, next: Function) => {
     await session.withTransaction(async () => {
       await User.updateOne({ _id: userId }, { $pull: { myRepos: repoId } });
       await Repo.findByIdAndDelete(repoId);
-
-      // await deleteLogStream(instanceId);
     });
 
     session.endSession();
