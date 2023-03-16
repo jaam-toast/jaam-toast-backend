@@ -71,8 +71,6 @@ class ProjectService extends Service {
 
   /* methods */
   async deployProject(buildOptions: BuildOptions) {
-    console.log("start deploy");
-
     this.githubAccessToken = buildOptions.githubAccessToken;
     this.repoName = buildOptions.repoName;
     this.repoCloneUrl = buildOptions.repoCloneUrl;
@@ -97,13 +95,11 @@ class ProjectService extends Service {
         waitInstanceLogStremCreation,
         getInstanceFilteredLogs,
         saveProject,
-        () => console.log("🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳"),
       );
 
       return this;
     } catch (error) {
       console.error(error);
-      throw new Error();
     }
   }
 
