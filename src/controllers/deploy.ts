@@ -89,7 +89,7 @@ export const getUserDeployList = catchAsync(async (req, res, next) => {
     return next(
       new CustomError({
         code: "400: getUserDeployList",
-        message: "'user_id' is typeof undefined",
+        message: "Error: Cannot find environment data 'user_id'",
       }),
     );
   }
@@ -220,7 +220,7 @@ export const deleteDeployment = catchAsync(async (req, res, next) => {
       new CustomError({
         code: "400: deleteDeployment",
         message:
-          "Error: 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName' are typeof undefined",
+          "Error: Cannot find environment data 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName'",
       }),
     );
   }
