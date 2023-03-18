@@ -3,7 +3,7 @@ import createError from "http-errors";
 import catchAsync from "@src/controllers/utils/asyncHandler";
 import GithubClient from "@src/services/GithubClient";
 
-const getOrganizations = catchAsync(async (req, res, next) => {
+export const getOrganizations = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
 
   if (!githubAccessToken) {
@@ -24,7 +24,7 @@ const getOrganizations = catchAsync(async (req, res, next) => {
   });
 });
 
-const getUserRepos = catchAsync(async (req, res, next) => {
+export const getUserRepos = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
 
   if (!githubAccessToken) {
@@ -63,7 +63,7 @@ const getUserRepos = catchAsync(async (req, res, next) => {
   });
 });
 
-const getOrganizationRepos = catchAsync(async (req, res, next) => {
+export const getOrganizationRepos = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
   const { org } = req.params;
 
@@ -89,5 +89,3 @@ const getOrganizationRepos = catchAsync(async (req, res, next) => {
     data: organizationReposList,
   });
 });
-
-export { getOrganizations, getUserRepos, getOrganizationRepos };
