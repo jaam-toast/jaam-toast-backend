@@ -1,11 +1,14 @@
-import express, { Express } from "express";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import routes from "../routes";
 
-import errorHandler from "../middlewares/errorHandler";
+import requestLogger from "@src/middlewares/morganMiddleware";
+import errorHandler from "@src/middlewares/errorHandler";
+import routes from "@src/routes";
 
-const expressLoader = (app: Express) => {
+import { Express } from "express";
+
+const expressLoader = async (app: Express): Promise<void> => {
   app.get("/status", (req, res) => {
     res.status(200).end();
   });
@@ -17,6 +20,7 @@ const expressLoader = (app: Express) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(cors());
   app.use(helmet());
+  app.use(requestLogger);
 
   app.use("/api", routes());
 
