@@ -107,8 +107,7 @@ class ProjectService extends Service {
   throw(message: string, error?: unknown): never {
     log.buildError(message);
 
-    // throw new Error(message);
-    throw new Error("123");
+    throw new Error(message);
   }
 
   async redeployProject(options: RedeployOptions): Promise<ProjectService> {
