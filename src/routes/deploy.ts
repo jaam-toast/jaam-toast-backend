@@ -2,10 +2,13 @@ import { Router } from "express";
 
 import Joi from "joi";
 
-import verifyToken from "../middlewares/verifyToken";
-import validateSchema from "../middlewares/validateSchema";
-
-import * as DeployController from "../controllers/deploy";
+import {
+  deployProject,
+  deleteDeployment,
+  getUserDeployList,
+} from "@src/controllers/deploy";
+import verifyToken from "@src/middlewares/verifyToken";
+import validateSchema from "@src/middlewares/validateSchema";
 
 const route = Router();
 
@@ -20,7 +23,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    DeployController.deployProject,
+    deployProject,
   );
 
   route.get(
@@ -31,7 +34,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    DeployController.getUserDeployList,
+    getUserDeployList,
   );
 
   route.delete(
@@ -42,7 +45,7 @@ const deployRouter = (app: Router) => {
       }),
       "params[user_id]",
     ),
-    DeployController.deleteDeployment,
+    deleteDeployment,
   );
 };
 
