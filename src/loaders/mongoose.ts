@@ -1,13 +1,17 @@
 import mongoose from "mongoose";
-import Config from "../config";
 
-const mongooseLoader = async () => {
+import Config from "@src/config";
+import log from "@src/services/Logger";
+
+const mongooseLoader = async (): Promise<void> => {
   try {
-    const { connection } = await mongoose.connect(Config.DATABASE_URL);
+    await mongoose.connect(Config.DATABASE_URL);
 
-    return connection.db;
+    log.debug("🌱 MongoDB connected!");
   } catch (error) {
-    console.error(error);
+    log.serverError("❌ MongoDB not connected!");
+
+    throw error;
   }
 };
 

@@ -1,11 +1,22 @@
 import express from "express";
-import loaders from "./loaders";
+
+import mongooseLoader from "@src/loaders/mongoose";
+import expressLoader from "@src/loaders/express";
+import serverLoader from "@src/loaders/server";
+import socketLoader from "@src/loaders/socket";
+
+import { Express } from "express";
 
 const app = express();
 
-async function startServer() {
-  await loaders(app);
-}
-startServer();
+async function startServer(app: Express): Promise<void> {
+  await mongooseLoader();
 
-export default app;
+  await expressLoader(app);
+
+  const server = await serverLoader(app);
+
+  await socketLoader(server);
+}
+
+startServer(app);
