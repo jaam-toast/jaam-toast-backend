@@ -16,15 +16,12 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.209.0",
     "@aws-sdk/client-ec2": "^3.204.0",
     "@aws-sdk/client-route-53": "^3.206.0",
-    "@aws-sdk/client-s3": "^3.199.0",
     "axios": "^1.1.3",
     "chalk": "4.1.2",
-    "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "debug": "^4.3.4",
     "dotenv": "^16.0.3",
-    "execa": "6.1.0",
     "express": "~4.16.1",
     "helmet": "^6.0.0",
     "http-errors": "^2.0.0",
@@ -33,8 +30,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.5",
     "morgan": "^1.10.0",
-    "socket.io": "^4.5.3",
-    "winston": "^3.8.2"
+    "socket.io": "^4.5.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",
@@ -53,7 +49,6 @@
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
-    "concurrently": "^7.4.0",
     "eslint": "^8.25.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
