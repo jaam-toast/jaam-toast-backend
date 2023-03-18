@@ -1,14 +1,15 @@
-import { LeanDocument, startSession } from "mongoose";
+import { startSession } from "mongoose";
 import createError from "http-errors";
 
-import Config from "../config";
-import { DBUser, User } from "../models/User";
-import { DBRepo, Repo } from "../models/Repo";
-import ProjectService from "../services/ProjectService";
-import GithubClient from "../services/GithubClient";
-import catchAsync from "../utils/asyncHandler";
-import { CustomError } from "../utils/errors";
-import { createGeneralLogDebug } from "../utils/createDebug";
+import Config from "@src/config";
+import catchAsync from "@src/controllers/utils/asyncHandler";
+import UserModel from "@src/models/User";
+import RepoModel from "@src/models/Repo";
+import ProjectService from "@src/services/ProjectService";
+import GithubClient from "@src/services/GithubClient";
+
+import { LeanDocument } from "mongoose";
+import { Repo } from "@src/types";
 
 interface PullRequestData {
   prAction: boolean;
@@ -79,25 +80,16 @@ export const deployProject = catchAsync(async (req, res, next) => {
 });
 
 export const getUserDeployList = catchAsync(async (req, res, next) => {
-  const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
-
   const { user_id } = req.params;
 
   if (!user_id) {
-    debug("Error: 'user_id' is expected to be a string");
-
-    return next(
-      new CustomError({
-        code: "400: getUserDeployList",
-        message: "Error: Cannot find environment data 'user_id'",
-      }),
-    );
+    return next(createError(401, "Cannot find environment data 'user_id'"));
   }
 
-  let userDeployList: LeanDocument<DBRepo>[] | undefined = [];
+  let userDeployList: LeanDocument<Repo>[] | undefined = [];
 
-  const userData = await User.findOne<DBUser>({ _id: user_id })
-    .populate<{ myRepos: DBRepo[] }>("myRepos")
+  const userData = await UserModel.findOne({ _id: user_id })
+    .populate<{ myRepos: Repo[] }>("myRepos")
     .lean();
 
   userDeployList = userData?.myRepos || [];
@@ -206,31 +198,28 @@ export const updateDeployment = catchAsync(async (req, res, next) => {
 });
 
 export const deleteDeployment = catchAsync(async (req, res, next) => {
-  const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
   const { githubAccessToken } = req.query;
   const { user_id, repo_id } = req.params;
   const { instanceId, repoName } = req.body;
 
   if (!githubAccessToken || !user_id || !repo_id || !instanceId || !repoName) {
-    debug(
-      "Error: 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName' are expected to be strings",
-    );
-
     return next(
-      new CustomError({
-        code: "400: deleteDeployment",
-        message:
-          "Error: Cannot find environment data 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName'",
-      }),
+      createError(
+        400,
+        "Cannot find environment data 'githubAccessToken', 'user_id', 'repo_id', 'instanceId', and 'repoName'",
+      ),
     );
   }
 
   const session = await startSession();
 
   await session.withTransaction(async () => {
-    await User.updateOne({ _id: user_id }, { $pull: { myRepos: repo_id } });
+    await UserModel.updateOne(
+      { _id: user_id },
+      { $pull: { myRepos: repo_id } },
+    );
 
-    const repo = await Repo.findByIdAndDelete(repo_id);
+    const repo = await RepoModel.findByIdAndDelete(repo_id);
 
     if (!repo) {
       throw new Error();
@@ -248,8 +237,6 @@ export const deleteDeployment = catchAsync(async (req, res, next) => {
   });
 
   session.endSession();
-
-  debug(`Successfully deleted an instance - ${instanceId}`);
 
   return res.json({
     result: "ok",

@@ -1,7 +1,7 @@
 import createError from "http-errors";
 
-import catchAsync from "../utils/asyncHandler";
-import GithubClient from "../services/GithubClient";
+import catchAsync from "@src/controllers/utils/asyncHandler";
+import GithubClient from "@src/services/GithubClient";
 
 const getOrganizations = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
