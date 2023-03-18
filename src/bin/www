@@ -1,19 +1,12 @@
 /**
  * Module dependencies.
  */
-import Debug from "debug";
 import http from "http";
 import { AddressInfo } from "net";
-import SocketSingleton, { buildingLogSocket } from "../services/deploy/socket";
+import Socket from "../services/Socket";
 
 import app from "../app";
-
-import Config from "../config";
-import Logger from "../loaders/logger";
-import { createGeneralLogDebug } from "../utils/createDebug";
-
-const debug = Debug("jaam-toast-backend:server");
-const customDebug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
+import log from "../services/Logger";
 
 /**
  * Get port from environment and store in Express.
@@ -27,10 +20,11 @@ app.set("port", port);
  */
 
 const server = http.createServer(app);
-export const socketIO = new SocketSingleton(server);
+export const socketIO = new Socket(server);
 
-buildingLogSocket();
-customDebug(
+Socket.init();
+
+log.debug(
   `Socket instance for building log is initiated - SocketSingleton Class`,
 );
 
@@ -76,11 +70,11 @@ function onError(error: { syscall: string; code: any }) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case "EACCES":
-      console.error(`${bind} requires elevated privileges`);
+      log.serverError(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case "EADDRINUSE":
-      console.error(`${bind} is already in use`);
+      log.serverError(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
@@ -95,7 +89,7 @@ function onError(error: { syscall: string; code: any }) {
 function onListening() {
   const addr = server.address() as string | AddressInfo;
   const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`;
-  debug(`Listening on ${bind}`);
 
-  Logger.info(`🟢 Server is listening on ${bind}`);
+  log.debug(`Listening on ${bind}`);
+  log.debug(`🟢 Server is listening on ${bind}`);
 }
