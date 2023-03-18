@@ -1,10 +1,9 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "../config";
-import { User } from "../models/User";
-
-import catchAsync from "../utils/asyncHandler";
+import Config from "@src/config";
+import catchAsync from "@src/controllers/utils/asyncHandler";
+import UserModel from "@src/models/User";
 
 export const login = catchAsync(async (req, res, next) => {
   const { username, userGithubUri, userImage, githubAccessToken } = req.user;
@@ -13,10 +12,10 @@ export const login = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  let userData = await User.findOne({ userGithubUri });
+  let userData = await UserModel.findOne({ userGithubUri });
 
   if (!userData) {
-    userData = await User.create({
+    userData = await UserModel.create({
       username,
       userGithubUri,
       userImage,
