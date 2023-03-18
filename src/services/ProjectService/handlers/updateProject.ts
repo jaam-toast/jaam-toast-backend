@@ -1,30 +1,29 @@
-import ProjectService from "..";
-import Config from "../../../config";
-import { Repo } from "../../../models/Repo";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../config/errors";
+import RepoModel from "@src/models/Repo";
 
-async function updateProject(service: ProjectService, next: Function) {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+import ProjectService from "@src/services/ProjectService";
+
+async function updateProject(
+  service: ProjectService,
+  next: Function,
+): Promise<void> {
   const { repoCloneUrl, lastCommitMessage } = service;
 
   try {
-    const userRepo = await Repo.findOne({
+    const userRepo = await RepoModel.findOne({
       repoCloneUrl,
     }).lean();
 
     service.instanceId = userRepo?.instanceId;
 
-    await Repo.updateOne({ repoCloneUrl }, { $set: { lastCommitMessage } });
-  } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during updating project. - ${error}.`,
+    await RepoModel.updateOne(
+      { repoCloneUrl },
+      { $set: { lastCommitMessage } },
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_updateProject",
-      message: "updateProject didn't work as expected",
-    });
+  } catch (error) {
+    service.throw(
+      "An unexpected error occurred during updating project.",
+      error,
+    );
   }
 
   next();

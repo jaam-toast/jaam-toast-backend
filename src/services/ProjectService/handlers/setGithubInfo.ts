@@ -1,21 +1,15 @@
-import GithubClient from "../../GithubClient";
-import { DeploymentError } from "../../../config/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import Config from "../../../config";
+import GithubClient from "@src/services/GithubClient";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
-const setGithubInfo = async (service: ProjectService, next: Function) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+const setGithubInfo = async (
+  service: ProjectService,
+  next: Function,
+): Promise<void> => {
   const { githubAccessToken, repoName, repoCloneUrl } = service;
 
   if (!repoCloneUrl || !repoName) {
-    debug("Error: Cannot find environment data before setting github info.");
-
-    throw new DeploymentError({
-      code: "Projectservice_setGithubInfo",
-      message: "setGithubInfo didn't work as expected",
-    });
+    service.throw("Cannot find environment data before setting github info.");
   }
 
   try {
@@ -29,14 +23,9 @@ const setGithubInfo = async (service: ProjectService, next: Function) => {
     service.repoOwner = repoOwner;
     service.lastCommitMessage = lastCommitMessage;
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during setting github infomations - ${error}.`,
+    service.throw(
+      "An unexpected error occurred during setting github infomations.",
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_setGithubInfo",
-      message: "setGithubInfo didn't work as expected",
-    });
   }
 
   next();

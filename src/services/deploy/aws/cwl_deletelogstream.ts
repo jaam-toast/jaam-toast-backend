@@ -1,14 +1,9 @@
 import { DeleteLogStreamCommand } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../../config";
 import cwlClient from "./libs/cloudWatchLogsClient";
-
-import { CustomError } from "../../../utils/errors";
-import { createGeneralLogDebug } from "../../../utils/createDebug";
+import log from "@src/services/Logger";
 
 const deleteLogStream = async (instanceId: string) => {
-  const debug = createGeneralLogDebug(Config.CLIENT_OPTIONS.debug);
-
   const logStreamsParams = {
     logGroupName: "user-data.log",
     logStreamName: instanceId,
@@ -19,15 +14,15 @@ const deleteLogStream = async (instanceId: string) => {
 
     const data = await cwlClient.send(command);
 
-    debug(`Successfully deleted a user-data.log of ${instanceId} - ${data}`);
-  } catch (err) {
-    debug(
-      `Error: An unexpected error occurred during DeleteLogStreamCommand_user-data.log - ${err}`,
+    log.debug(
+      `Successfully deleted a user-data.log of ${instanceId} - ${data}`,
     );
-    throw new CustomError({
-      code: "cloudWatchLogsClient_DeleteLogStreamCommand_user-data.log",
-      message: "DeleteLogStreamCommand_user-data.log didn't work as expected",
-    });
+  } catch (error) {
+    log.serverError(
+      `An unexpected error occurred during DeleteLogStreamCommand_user-data.log - ${error}`,
+    );
+
+    throw error;
   }
 };
 

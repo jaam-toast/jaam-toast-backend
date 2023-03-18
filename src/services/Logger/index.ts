@@ -27,29 +27,43 @@ type LogMessage = string;
 
 class Logger extends Observer {
   /* logging handlers */
-  private static logConsole(...messages: LogMessage[]) {
+  private static commonLog(...messages: LogMessage[]) {
     const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
 
     for (const message of messages) {
       process.stderr.write(
         [
-          chalk.greenBright.bold("[common] "),
+          chalk.greenBright.bold("[COMMON]"),
           chalk.blackBright(messageHead),
-          message,
+          chalk.greenBright(message),
         ].join(" ") + "\n",
       );
     }
   }
 
-  private static logError(...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}] `;
+  private static buildLog(...messages: LogMessage[]) {
+    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
 
     for (const message of messages) {
       process.stderr.write(
         [
-          chalk.redBright.bold("[error] "),
+          chalk.cyanBright.bold("[BUILD]"),
           chalk.blackBright(messageHead),
-          message,
+          chalk.cyanBright(message),
+        ].join(" ") + "\n",
+      );
+    }
+  }
+
+  private static errorLog(...messages: LogMessage[]) {
+    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
+
+    for (const message of messages) {
+      process.stderr.write(
+        [
+          chalk.redBright.bold("[ERROR]"),
+          chalk.redBright(messageHead),
+          chalk.redBright(message),
         ].join(" ") + "\n",
       );
     }
@@ -74,7 +88,7 @@ class Logger extends Observer {
   /* logging methods */
   static build(...messages: LogMessage[]) {
     if (Config.CLIENT_OPTIONS.debug) {
-      Logger.logConsole(...messages);
+      Logger.buildLog(...messages);
     }
 
     Logger.writefile(FileType.Deployment, ...messages);
@@ -83,7 +97,7 @@ class Logger extends Observer {
 
   static buildError(...messages: LogMessage[]) {
     if (Config.CLIENT_OPTIONS.debug) {
-      Logger.logError(...messages);
+      Logger.errorLog(...messages);
     }
 
     Logger.writefile(FileType.Error, ...messages);
@@ -92,12 +106,12 @@ class Logger extends Observer {
 
   static debug(...messages: LogMessage[]) {
     Logger.writefile(FileType.Server, ...messages);
-    Logger.logConsole(...messages);
+    Logger.commonLog(...messages);
   }
 
   static serverError(...messages: LogMessage[]) {
     Logger.writefile(FileType.Error, ...messages);
-    Logger.logError(...messages);
+    Logger.errorLog(...messages);
   }
 }
 

@@ -1,15 +1,9 @@
-import Config from "../../../config";
-import getFilteredLogEvents from "../aws/cwl_filterlogeventscommand";
-import getLogStreamStatus from "./getLogStreamStatus";
-import terminateInstance from "../aws/ec2_terminateinstances";
-import changeDNSRecord from "../aws/route53_changerecord";
-import { deleteRepoWebhook } from "../../GithubService/client";
-
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../utils/errors";
+import getLogStreamStatus from "@src/services/deploy/build-utils/getLogStreamStatus";
+import getFilteredLogEvents from "@src/services/deploy/aws/cwl_filterlogeventscommand";
+import log from "@src/services/Logger";
 
 import { RRType } from "@aws-sdk/client-route-53";
-import { DeploymentData } from "../../../types/custom";
+import { DeploymentData } from "@src/types/custom";
 
 export default async function runGetFilteredLogEvents(
   instanceId: string,
@@ -18,7 +12,6 @@ export default async function runGetFilteredLogEvents(
   ms = 2000,
   triesLeft = 50,
 ) {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const defaultTriesLeft = triesLeft;
 
   return new Promise<(string | undefined)[] | undefined>((resolve, reject) => {
@@ -42,29 +35,29 @@ export default async function runGetFilteredLogEvents(
         resolve(filteredLogEventMessages);
       } else if (triesLeft <= 1) {
         clearInterval(logStreamStatusInterval);
-        debug(
-          `Error: 'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expected`,
+
+        log.buildError(
+          `'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expected`,
         );
 
-        await terminateInstance(instanceId);
-        await deleteRepoWebhook(
-          deploymentData.githubAccessToken as string,
-          deploymentData.repoOwner,
-          deploymentData.repoName,
-          Number(deploymentData.webhookId),
-        );
-        await changeDNSRecord({
-          actionType: "DELETE",
-          subdomain: deploymentData.repoName,
-          recordValue: deploymentData.publicIpAddress as string,
-          recordType: RRType.A,
-        });
+        // await terminateInstance(instanceId);
+        // await deleteRepoWebhook(
+        //   deploymentData.githubAccessToken as string,
+        //   deploymentData.repoOwner,
+        //   deploymentData.repoName,
+        //   Number(deploymentData.webhookId),
+        // );
+        // await changeDNSRecord({
+        //   actionType: "DELETE",
+        //   subdomain: deploymentData.repoName,
+        //   recordValue: deploymentData.publicIpAddress as string,
+        //   recordType: RRType.A,
+        // });
 
         reject(
-          new DeploymentError({
-            code: "runGetFilteredLogEvents_logStreamStatusInterval",
-            message: `'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expected`,
-          }),
+          new Error(
+            "'logStreamStatusInterval' attempted more than ${defaultTriesLeft} times, but didn't work as expecte",
+          ),
         );
       }
 

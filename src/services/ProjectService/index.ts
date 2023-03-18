@@ -1,4 +1,5 @@
-import Service from "../Service";
+import Service from "@src/services/Service";
+import log from "@src/services/Logger";
 import setGithubInfo from "./handlers/setGithubInfo";
 import createInstance from "./handlers/createInstance";
 import createWebhook from "./handlers/createWebhook";
@@ -15,7 +16,7 @@ import removeProject from "./handlers/removeProject";
 import updateProject from "./handlers/updateProject";
 
 import { Types } from "mongoose";
-import { Env } from "../../types/custom";
+import { Env } from "@src/types/custom";
 
 type RedeployOptions = {
   repoCloneUrl: string;
@@ -70,7 +71,7 @@ class ProjectService extends Service {
   repoOwner?: string;
 
   /* methods */
-  async deployProject(buildOptions: BuildOptions) {
+  async deployProject(buildOptions: BuildOptions): Promise<ProjectService> {
     this.githubAccessToken = buildOptions.githubAccessToken;
     this.repoName = buildOptions.repoName;
     this.repoCloneUrl = buildOptions.repoCloneUrl;
@@ -87,6 +88,7 @@ class ProjectService extends Service {
       await this.use(
         setGithubInfo,
         createInstance,
+        createWebhook,
         waitPublicIpAdreessCreation,
         createDomain,
         waitDnsRecordCreation,
@@ -98,34 +100,53 @@ class ProjectService extends Service {
 
       return this;
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 
-  async redeployProject(options: RedeployOptions) {
+  throw(message: string, error?: unknown): never {
+    log.buildError(message);
+
+    // throw new Error(message);
+    throw new Error("123");
+  }
+
+  async redeployProject(options: RedeployOptions): Promise<ProjectService> {
     this.lastCommitMessage = options.lastCommitMessage;
     this.repoCloneUrl = options.repoCloneUrl;
     this.repoName = options.repoName;
 
-    await this.use(updateProject, updateInstance);
+    try {
+      await this.use(updateProject, updateInstance);
+    } catch (error) {
+      throw error;
+    }
 
     return this;
   }
 
-  async deleteDeployment() {
-    await this.use(clearDeployment);
+  async deleteDeployment(): Promise<ProjectService> {
+    try {
+      await this.use(clearDeployment);
+    } catch (error) {
+      throw error;
+    }
 
     return this;
   }
 
-  async deleteProject(options: ProjectDeleteOptions) {
+  async deleteProject(options: ProjectDeleteOptions): Promise<ProjectService> {
     this.userId = options.userId;
     this.repoId = options.repoId;
     this.instanceId = options.instanceId;
     this.subdomain = options.subdomain;
     this.publicIpAddress = options.publicIpAddress;
 
-    await this.use(clearDeployment, removeProject);
+    try {
+      await this.use(clearDeployment, removeProject);
+    } catch (error) {
+      throw error;
+    }
 
     return this;
   }

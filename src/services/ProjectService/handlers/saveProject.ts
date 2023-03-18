@@ -1,15 +1,15 @@
 import { startSession } from "mongoose";
 
-import Config from "../../../config";
-import { User } from "../../../models/User";
-import { Repo } from "../../../models/Repo";
-import { DeploymentError } from "../../../config/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import UserModel from "@src/models/User";
+import RepoModel from "@src/models/Repo";
+import log from "@src/services/Logger";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
-const saveProject = async (service: ProjectService, next: Function) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+const saveProject = async (
+  service: ProjectService,
+  next: Function,
+): Promise<void> => {
   const {
     repoName,
     repoCloneUrl,
@@ -36,19 +36,14 @@ const saveProject = async (service: ProjectService, next: Function) => {
     !lastCommitMessage ||
     !buildingLog
   ) {
-    debug("Error: Cannot find environment data before saving project.");
-
-    throw new DeploymentError({
-      code: "Projectservice_saveProject",
-      message: "saveProject didn't work as expected",
-    });
+    service.throw("Cannot find environment data before saving project.");
   }
 
   try {
     const session = await startSession();
 
     await session.withTransaction(async () => {
-      const newRepoArr = await Repo.create(
+      const newRepoArr = await RepoModel.create(
         [
           {
             repoName,
@@ -73,7 +68,7 @@ const saveProject = async (service: ProjectService, next: Function) => {
       const newRepo = newRepoArr[0].toObject();
       const repoId = newRepo._id;
 
-      await User.updateOne(
+      await UserModel.updateOne(
         { _id: userId },
         { $push: { myRepos: newRepo._id } },
         { session, new: true },
@@ -84,17 +79,10 @@ const saveProject = async (service: ProjectService, next: Function) => {
 
     session.endSession();
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during saving project. - ${error}.`,
-    );
-
-    throw new DeploymentError({
-      code: "Projectservice_saveProject",
-      message: "saveProject didn't work as expected",
-    });
+    service.throw("An unexpected error occurred during saving project.", error);
   }
 
-  debug("A new deployment's data is saved successfully!");
+  log.build("A new deployment's data is saved successfully!");
 
   next();
 };

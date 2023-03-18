@@ -1,11 +1,10 @@
 import { Server } from "http";
 import { Server as socketServer, Socket } from "socket.io";
 
+import Config from "../config";
 import log from "./Logger";
 
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-
-import Config from "../config";
 
 class SocketSingleton extends socketServer {
   private static instance: socketServer<
@@ -19,6 +18,7 @@ class SocketSingleton extends socketServer {
     super();
 
     if (SocketSingleton.instance) {
+      log.serverError("An attempt was made to create more than one socket.");
       throw new Error("You can only create one instance!");
     }
 
@@ -29,15 +29,15 @@ class SocketSingleton extends socketServer {
       },
     });
 
-    process.stderr.write("A new socket instance is created");
+    log.debug("🚀 A new socket instance is created");
   }
 
-  static init() {
-    if (!this.instance) {
+  init() {
+    if (!SocketSingleton.instance) {
       return;
     }
 
-    this.instance.on("connection", (socket: Socket) => {
+    SocketSingleton.instance.on("connection", (socket: Socket) => {
       socket.on("connection", () => {
         log.debug(
           "Socket is connected in order to send back to client the newly created deployment building log",

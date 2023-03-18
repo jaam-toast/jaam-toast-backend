@@ -1,7 +1,7 @@
-import Config from "../../../config";
+import Config from "@src/config";
 import getNginxScript from "./getNginxScript";
-import { ClientOptions, DeploymentOptions } from "../../../types/custom";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import log from "@src/services/Logger";
+import { ClientOptions, DeploymentOptions } from "@src/types/custom";
 
 const getUserDataCommands = (
   clientOptions: ClientOptions,
@@ -11,9 +11,7 @@ const getUserDataCommands = (
     buildCommand: "",
     buildType: "SSR",
   },
-) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-
+): string[] => {
   const { repoCloneUrl, repoName } = clientOptions;
   const { nodeVersion, installCommand, buildCommand, envList, buildType } =
     deploymentOptions;
@@ -44,9 +42,9 @@ const getUserDataCommands = (
 
   const NGINX_SCRIPT = getNginxScript(buildType, CUSTOM_DOMAIN, REPO_NAME);
 
-  debug(
-    `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}, PM2_START_COMMAND: ${PM2_START_COMMAND},INSTALL_COMMAND: ${INSTALL_COMMAND}, BUILD_COMMAND: ${BUILD_COMMAND}, NGINX_SCRIPT: ${NGINX_SCRIPT}`,
-  );
+  // log.build(
+  //   `GIT_CLONE_URL: ${repoCloneUrl}, REPO_NAME: ${repoName}, NODE_VERSION: ${NODE_VERSION}, CUSTOM_DOMAIN: ${REPO_NAME}.${Config.SERVER_URL}, PM2_START_COMMAND: ${PM2_START_COMMAND},INSTALL_COMMAND: ${INSTALL_COMMAND}, BUILD_COMMAND: ${BUILD_COMMAND}, NGINX_SCRIPT: ${NGINX_SCRIPT}`,
+  // );
 
   const yumUpdate = [
     `#!/usr/bin/bash`,

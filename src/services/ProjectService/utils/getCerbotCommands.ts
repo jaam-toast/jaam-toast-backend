@@ -1,4 +1,7 @@
-const getRunScriptCerbotCommands = (instanceId: string, url: string) => {
+const getRunScriptCerbotCommands = (
+  instanceId: string,
+  url: string,
+): string[] => {
   const targets = JSON.stringify([
     {
       Key: "InstanceIds",
