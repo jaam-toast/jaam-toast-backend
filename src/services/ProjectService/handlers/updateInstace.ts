@@ -1,10 +1,10 @@
 import { spawn } from "child_process";
 
-import Config from "../../config";
-import ProjectService from ".";
-import { createBuildingLogDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
-import getUpdateInstanceCommands from "./utils/getUpdateCommands";
+import Config from "../../../config";
+import ProjectService from "..";
+import { createBuildingLogDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
+import getUpdateInstanceCommands from "../utils/getUpdateCommands";
 
 async function updateInstance(service: ProjectService, next: Function) {
   const debug = createBuildingLogDebug(Config.CLIENT_OPTIONS.debug);

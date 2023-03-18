@@ -1,8 +1,8 @@
-import ProjectService from ".";
-import Config from "../../config";
-import { Repo } from "../../models/Repo";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import ProjectService from "..";
+import Config from "../../../config";
+import { Repo } from "../../../models/Repo";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
 
 async function updateProject(service: ProjectService, next: Function) {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

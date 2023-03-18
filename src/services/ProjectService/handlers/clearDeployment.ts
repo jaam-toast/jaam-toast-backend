@@ -1,9 +1,9 @@
-import ProjectService from ".";
+import ProjectService from "..";
 
-import Config from "../../config";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import DomainClient from "../DomainClient";
-import InstanceClient from "../InstanceClient";
+import Config from "../../../config";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import DomainClient from "../../DomainClient";
+import InstanceClient from "../../InstanceClient";
 
 const clearDeployment = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

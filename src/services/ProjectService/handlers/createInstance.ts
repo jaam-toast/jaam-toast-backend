@@ -1,10 +1,10 @@
-import Config from "../../config";
-import InstanceClient from "../InstanceClient";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import getUserDataCommands from "./utils/getUserDataCommands";
-import { DeploymentError } from "../../utils/errors";
+import Config from "../../../config";
+import InstanceClient from "../../InstanceClient";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import getUserDataCommands from "../utils/getUserDataCommands";
+import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from "./";
+import ProjectService from "..";
 
 const createInstance = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
