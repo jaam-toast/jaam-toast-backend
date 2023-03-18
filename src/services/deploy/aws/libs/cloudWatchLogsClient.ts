@@ -1,6 +1,6 @@
 import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../../../config";
+import Config from "@src/config";
 
 const REGION = Config.INSTANCE_REGION;
 

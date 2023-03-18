@@ -5,7 +5,7 @@ import {
   GetChangeCommand,
 } from "@aws-sdk/client-route-53";
 
-import Config from "../../config";
+import Config from "@src/config";
 
 class DomainClient {
   client = new Route53Client({
@@ -55,9 +55,7 @@ class DomainClient {
 
       return recordCreationInfo;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by creating project DNS A Record commands to AWS Route53 Client.",
-      );
+      throw error;
     }
   }
 
@@ -88,7 +86,9 @@ class DomainClient {
         !data.ChangeInfo?.Status ||
         !data.ChangeInfo?.SubmittedAt
       ) {
-        throw new Error();
+        throw new Error(
+          "Cannot find the data required to create a DNS record.",
+        );
       }
 
       const { Id, Status, SubmittedAt } = data.ChangeInfo;
@@ -100,9 +100,7 @@ class DomainClient {
 
       return recordCreationInfo;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by removing project DNS A Record commands to AWS Route53 Client.",
-      );
+      throw error;
     }
   }
 
@@ -115,9 +113,7 @@ class DomainClient {
 
       return recordStatus;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by sending describe domain state commands to AWS Route53 Client.",
-      );
+      throw error;
     }
   }
 }

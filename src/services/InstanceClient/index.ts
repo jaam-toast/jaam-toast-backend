@@ -34,9 +34,7 @@ class InstanceClient {
 
       return instanceId;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by sending create instance commands to AWS EC2 Client.",
-      );
+      throw error;
     }
   }
 
@@ -57,9 +55,7 @@ class InstanceClient {
         instanceStateName,
       };
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by sending describe instance state commands to AWS EC2 Client.",
-      );
+      throw error;
     }
   }
 
@@ -73,9 +69,7 @@ class InstanceClient {
 
       await this.client.send(command);
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by sending terminate instance commands to AWS EC2 Client.",
-      );
+      throw error;
     }
   }
 }

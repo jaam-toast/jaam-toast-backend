@@ -1,30 +1,23 @@
-import Config from "../../../config";
-import DomainClient from "../../DomainClient";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../config/errors";
+import Config from "@src/config";
+import DomainClient from "@src/services/DomainClient";
+import log from "@src/services/Logger";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
 const waitDnsRecordCreation = async (
   service: ProjectService,
   next: Function,
-) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+): Promise<void> => {
   const domainClient = new DomainClient();
   const { subdomain, instanceId, recordId } = service;
 
   if (!instanceId || !recordId) {
-    debug(
-      "Error: Cannot find environment data before waiting for DNS Record created.",
+    service.throw(
+      "Cannot find environment data before waiting for DNS Record created.",
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_waitDnsRecordCreation",
-      message: "waitDnsRecordCreation didn't work as expected",
-    });
   }
 
-  debug(
+  log.build(
     `Requesting for a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
   );
 
@@ -35,14 +28,9 @@ const waitDnsRecordCreation = async (
       if (triesLeft <= 1) {
         clearInterval(recordStatusInterval);
 
-        debug(
-          `Error: Checking the DNS record was attempted more than 50 times but didn't work as expected.`,
+        service.throw(
+          "Checking the DNS record was attempted more than 50 times but didn't work as expected.",
         );
-
-        throw new DeploymentError({
-          code: "Projectservice_waitDnsRecordCreation",
-          message: "waitDnsRecordCreation didn't work as expected",
-        });
       }
 
       const recordStatus = await domainClient.getStatus(recordId);
@@ -54,23 +42,23 @@ const waitDnsRecordCreation = async (
 
       clearInterval(recordStatusInterval);
 
-      debug(
+      log.build(
         `EC2 instance and record are ready. Waiting before requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
       );
 
       next();
     }, 2000);
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during waiting for DNS Record created. - ${error}.`,
+    log.buildError(
+      `An error has occurred during deployment and the deployment data is currently being deleted...`,
     );
 
     service.deleteDeployment();
 
-    throw new DeploymentError({
-      code: "Projectservice_waitDnsRecordCreation",
-      message: "waitDnsRecordCreation didn't work as expected",
-    });
+    service.throw(
+      "An unexpected error occurred while waiting for domain creation.",
+      error,
+    );
   }
 };
 

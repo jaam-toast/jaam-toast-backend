@@ -1,17 +1,9 @@
-import {
-  DescribeLogStreamsCommand,
-  LogStream,
-} from "@aws-sdk/client-cloudwatch-logs";
+import { DescribeLogStreamsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../../config";
 import cwlClient from "./libs/cloudWatchLogsClient";
-
-import { DeploymentError } from "../../../utils/errors";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import log from "@src/services/Logger";
 
 const describeLogStreams = async (instanceId: string) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-
   const logStreamsParams = {
     logGroupName: "user-data.log",
     logStreamNamePrefix: instanceId,
@@ -22,19 +14,12 @@ const describeLogStreams = async (instanceId: string) => {
 
     const data = await cwlClient.send(command);
 
-    if (data.logStreams) {
-      const logStream: LogStream = data.logStreams[0];
-
-      return logStream;
-    }
+    return data?.logStreams?.[0];
   } catch (err) {
-    debug(
-      `Error: An unexpected error occurred during DescribeLogStreamsCommand - ${err}`,
+    log.buildError(
+      `An unexpected error occurred during DescribeLogStreamsCommand - ${err}`,
     );
-    throw new DeploymentError({
-      code: "cloudWatchLogsClient_DescribeLogStreamsCommand",
-      message: "DescribeLogStreamsCommand didn't work as expected",
-    });
+    throw new Error("DescribeLogStreamsCommand didn't work as expected");
   }
 };
 

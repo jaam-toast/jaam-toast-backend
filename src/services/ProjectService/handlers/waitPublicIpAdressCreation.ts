@@ -1,30 +1,22 @@
-import Config from "../../../config";
-import InstanceClient from "../../InstanceClient";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../config/errors";
+import InstanceClient from "@src/services/InstanceClient";
+import log from "@src/services/Logger";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
 const waitPublicIpAdreessCreation = async (
   service: ProjectService,
   next: Function,
-) => {
+): Promise<void> => {
   const instanceClient = new InstanceClient();
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
   const { instanceId } = service;
 
   if (!instanceId) {
-    debug(
-      "Error: Cannot find environment data before waiting to check the EC2 instance created.",
+    service.throw(
+      "Cannot find environment data before waiting to check the EC2 instance created.",
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_waitPublicIpAdreessCreation",
-      message: "waitPublicIpAdreessCreation didn't work as expected",
-    });
   }
 
-  debug("Creating instance public IP...");
+  log.build("Creating instance public IP...");
 
   try {
     const publicIpAddressInterval = setInterval(async () => {
@@ -34,24 +26,21 @@ const waitPublicIpAdreessCreation = async (
         return;
       }
 
-      debug(
+      log.build(
         `Created instance public IP: ${instanceChangeInfo.publicIpAddress}`,
       );
 
       service.publicIpAddress = instanceChangeInfo.publicIpAddress;
 
       clearInterval(publicIpAddressInterval);
+
       next();
     }, 2000);
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during waiting to check the EC2 instance created. - ${error}.`,
+    service.throw(
+      "An unexpected error occurred during waiting to check the EC2 instance created.",
+      error,
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_waitPublicIpAdreessCreation",
-      message: "waitPublicIpAdreessCreation didn't work as expected",
-    });
   }
 };
 

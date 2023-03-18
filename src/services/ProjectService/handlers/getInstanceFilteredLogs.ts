@@ -1,37 +1,25 @@
 import { FilterLogEventsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
-import Config from "../../../config";
-import cwlClient from "../../deploy/aws/libs/cloudWatchLogsClient";
-import {
-  createDeploymentDebug,
-  createBuildingLogDebug,
-} from "../../../utils/createDebug";
-import { DeploymentError } from "../../../config/errors";
+import Config from "@src/config";
+import cwlClient from "@src/services/deploy/aws/libs/cloudWatchLogsClient";
+import log from "@src/services/Logger";
 import sleep from "../utils/sleep";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
 const getInstanceFilteredLogs = async (
   service: ProjectService,
   next: Function,
 ) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-  const debugBuildingLog = createBuildingLogDebug(Config.CLIENT_OPTIONS.debug);
-
   const { instanceId, subdomain } = service;
 
   if (!instanceId) {
-    debug(
-      "Error: Cannot find 'instanceId' before getting Instance runtime logs.",
+    service.throw(
+      "Cannot find 'instanceId' before getting Instance runtime logs.",
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_getInstanceFilteredLogs",
-      message: "getInstanceFilteredLogs didn't work as expected",
-    });
   }
 
-  debug("Running getFilteredLogEvents to request a building log...");
+  log.build("Running getFilteredLogEvents to request a building log...");
 
   await sleep(60000);
 
@@ -44,7 +32,7 @@ const getInstanceFilteredLogs = async (
     const command = new FilterLogEventsCommand(filterLogEventsOptions);
     const data = await cwlClient.send(command);
 
-    debug(
+    log.build(
       `A building log of newly created deployment - ${subdomain}.${Config.SERVER_URL} has been requested`,
     );
 
@@ -52,7 +40,7 @@ const getInstanceFilteredLogs = async (
       return;
     }
 
-    debug(
+    log.build(
       `Successfully requested for a building log of ${subdomain}.${Config.SERVER_URL}...`,
     );
 
@@ -64,26 +52,22 @@ const getInstanceFilteredLogs = async (
       return filteredMessage;
     });
 
-    debug(
+    log.build(
       "Sending back to client of the newly created deployment building log...",
     );
 
     filteredLogEventMessages.forEach((buildingLog, i) =>
       setTimeout(() => {
-        debugBuildingLog(buildingLog as string);
+        log.build(buildingLog as string);
       }, i * 100),
     );
 
     service.buildingLog = filteredLogEventMessages;
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during getting Instance runtime logs. - ${error}.`,
+    service.throw(
+      "An unexpected error occurred during getting Instance runtime logs.",
+      error,
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_getInstanceFilteredLogs",
-      message: "getInstanceFilteredLogs didn't work as expected",
-    });
   }
 
   next();

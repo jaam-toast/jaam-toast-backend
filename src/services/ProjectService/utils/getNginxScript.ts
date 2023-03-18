@@ -2,7 +2,7 @@ const getNginxScript = (
   buildType: string,
   CUSTOM_DOMAIN: string,
   REPO_NAME: string,
-) => {
+): string[] => {
   if (buildType.includes("SPA")) {
     const nginxScript = [
       `cd /etc/nginx/conf.d`,

@@ -1,23 +1,25 @@
-import ProjectService from "..";
+import Config from "@src/config";
+import log from "@src/services/Logger";
+import DomainClient from "@src/services/DomainClient";
+import InstanceClient from "@src/services/InstanceClient";
 
-import Config from "../../../config";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import DomainClient from "../../DomainClient";
-import InstanceClient from "../../InstanceClient";
+import ProjectService from "@src/services/ProjectService";
 
-const clearDeployment = async (service: ProjectService, next: Function) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+const clearDeployment = async (
+  service: ProjectService,
+  next: Function,
+): Promise<void> => {
   const { instanceId, subdomain, publicIpAddress } = service;
 
   try {
-    debug("Start project clearly.");
+    log.build("Start project clearly.");
 
     /* delete instance */
     if (instanceId) {
       const instanceClient = new InstanceClient();
       await instanceClient.remove(instanceId);
 
-      debug(`Successfully terminated an instance (${instanceId}).`);
+      log.build(`Successfully terminated an instance.`);
     }
     /* delete Domain Record */
     if (publicIpAddress) {
@@ -28,13 +30,14 @@ const clearDeployment = async (service: ProjectService, next: Function) => {
         publicIpAddress,
       );
 
-      debug(`Successfully terminated A record.`);
+      log.build(`Successfully terminated Domain Record.`);
     }
 
-    debug("Successfully clear the project data.");
-  } catch (err) {
-    throw new Error(
-      "Error: An unexpected error occurred during the clearing project.",
+    log.build("Successfully clear the project data.");
+  } catch (error) {
+    service.throw(
+      "An unexpected error occurred during the clearing project.",
+      error,
     );
   }
 };

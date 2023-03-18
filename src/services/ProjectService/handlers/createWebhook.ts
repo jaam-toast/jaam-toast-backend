@@ -1,21 +1,15 @@
-import GithubClient from "../../GithubClient";
-import { DeploymentError } from "../../../config/errors";
+import GithubClient from "@src/services/GithubClient";
 
-import ProjectService from "..";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import Config from "../../../config";
+import ProjectService from "@src/services/ProjectService";
 
-const createWebhook = async (service: ProjectService, next: Function) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+const createWebhook = async (
+  service: ProjectService,
+  next: Function,
+): Promise<void> => {
   const { githubAccessToken, repoOwner, repoName } = service;
 
   if (!repoOwner || !repoName) {
-    debug("Error: Cannot find 'repoOwner' before creating EC2 instance.");
-
-    throw new DeploymentError({
-      code: "Projectservice_createWebhook",
-      message: "createWebhook didn't work as expected",
-    });
+    service.throw("Cannot find 'repoOwner' before creating EC2 instance.");
   }
 
   try {
@@ -28,14 +22,10 @@ const createWebhook = async (service: ProjectService, next: Function) => {
 
     service.webhookId = webhookId;
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during creating github repository webhook. - ${error}.`,
+    service.throw(
+      "An unexpected error occurred during creating github repository webhook.",
+      error,
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_createWebhook",
-      message: "createWebhook didn't work as expected",
-    });
   }
 
   next();

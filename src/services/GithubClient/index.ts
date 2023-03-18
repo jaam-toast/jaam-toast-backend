@@ -1,5 +1,7 @@
 import axios from "axios";
-import Config from "../../config";
+
+import Config from "@src/config";
+import log from "@src/services/Logger";
 import {
   GithubUser,
   ListUserReposResponse,
@@ -8,7 +10,7 @@ import {
   CreateWebhookResponse,
   ListCommtisResponse,
   PullRequestCommitResponse,
-} from "../../types/github";
+} from "@src/types/github";
 
 class GithubClient {
   client;
@@ -30,9 +32,8 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting user data to github client.",
-      );
+      log.serverError("An error occurred while retrieving GitHub user data.");
+      throw error;
     }
   }
 
@@ -51,9 +52,10 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting repository data to github client.",
+      log.serverError(
+        "An error occurred while retrieving GitHub repository data.",
       );
+      throw error;
     }
   }
 
@@ -65,9 +67,10 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting organization data to github client.",
+      log.serverError(
+        "An error occurred while retrieving GitHub oranization data.",
       );
+      throw error;
     }
   }
 
@@ -86,9 +89,10 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting organization repository data to github client.",
+      log.serverError(
+        "An error occurred while retrieving GitHub organization repository data.",
       );
+      throw error;
     }
   }
 
@@ -117,9 +121,10 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by creating webhook to github repository.",
+      log.serverError(
+        "An error occurred while creating a GitHub repository webhook.",
       );
+      throw error;
     }
   }
 
@@ -131,9 +136,8 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting commit data to github client.",
-      );
+      log.serverError("An error occurred while retrieving GitHub commit data.");
+      throw error;
     }
   }
 
@@ -149,9 +153,10 @@ class GithubClient {
 
       return data;
     } catch (error) {
-      throw new Error(
-        "Error: Run failed by requesting commit message data to github client.",
+      log.serverError(
+        "An error occurred while retrieving GitHub head commit data.",
       );
+      throw error;
     }
   }
 }

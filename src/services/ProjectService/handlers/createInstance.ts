@@ -1,13 +1,14 @@
-import Config from "../../../config";
-import InstanceClient from "../../InstanceClient";
-import { createDeploymentDebug } from "../../../utils/createDebug";
+import Config from "@src/config";
+import InstanceClient from "@src/services/InstanceClient";
+import log from "@src/services/Logger";
 import getUserDataCommands from "../utils/getUserDataCommands";
-import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
-const createInstance = async (service: ProjectService, next: Function) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+const createInstance = async (
+  service: ProjectService,
+  next: Function,
+): Promise<void> => {
   const {
     repoOwner,
     repoName,
@@ -30,15 +31,10 @@ const createInstance = async (service: ProjectService, next: Function) => {
     !buildCommand ||
     !buildType
   ) {
-    debug("Error: Cannot find 'repoOwner' before creating EC2 instance.");
-
-    throw new DeploymentError({
-      code: "Projectservice_createInstance",
-      message: "createInstance didn't work as expected",
-    });
+    service.throw("Cannot find 'repoOwner' before creating EC2 instance.");
   }
 
-  debug("Creating deployment...", "Creating build commands...");
+  log.build("Create a new project and begin a new deployment...");
 
   const clientOptions = {
     repoOwner,
@@ -56,7 +52,9 @@ const createInstance = async (service: ProjectService, next: Function) => {
   const commands = getUserDataCommands(clientOptions, deploymentOptions);
 
   try {
-    debug("Created build commands to create a new instance");
+    log.build(
+      "Command creation for instance has been completed. Beginning instance creation.",
+    );
 
     const instanceClient = new InstanceClient();
     const instanceId = await instanceClient.create(commands);
@@ -65,25 +63,16 @@ const createInstance = async (service: ProjectService, next: Function) => {
     service.instanceId = instanceId;
     service.deployedUrl = deployedUrl;
 
-    debug(`Created instance: ${instanceId}`);
+    log.build("Instance creation has been completed.");
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during creating EC2 instance - ${error}.`,
+    service.throw(
+      "An unexpected error occurred during instance creation.",
+      error,
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_createInstance",
-      message: "createInstance didn't work as expected",
-    });
   }
 
   if (!service.deployedUrl || !service.instanceId) {
-    debug("Error: Cannot find EC2 instance data after creating EC2 instance.");
-
-    throw new DeploymentError({
-      code: "Projectservice_createInstance",
-      message: "createInstance didn't work as expected",
-    });
+    service.throw("Cannot find instance data after instance creation.");
   }
 
   next();

@@ -11,7 +11,12 @@ abstract class Service {
     }
 
     this.layers.push(...handlers);
-    await this.handle();
+
+    try {
+      await this.handle();
+    } catch (error) {
+      throw error;
+    }
 
     return this;
   }
@@ -27,7 +32,12 @@ abstract class Service {
 
       const handler = this.layers[this.layerIndex];
       this.layerIndex += 1;
-      await handler(this, next);
+
+      try {
+        await handler(this, next);
+      } catch (error) {
+        throw error;
+      }
     };
 
     next();

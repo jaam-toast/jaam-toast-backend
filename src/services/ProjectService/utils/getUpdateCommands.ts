@@ -1,4 +1,7 @@
-const getUpdateInstanceCommands = (instanceId: string, repoName: string) => {
+const getUpdateInstanceCommands = (
+  instanceId: string,
+  repoName: string,
+): string[] => {
   const targets = JSON.stringify([
     {
       Key: "InstanceIds",

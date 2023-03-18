@@ -1,35 +1,28 @@
-import Config from "../../../config";
-
+import Config from "@src/config";
 import describeLogStreams from "../aws/cwl_describelogstreams";
-
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../utils/errors";
+import log from "@src/services/Logger";
 
 export default async function getLogStreamStatus(
   instanceId: string,
   subdomain: string,
 ) {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
-
   let logStreamStatus;
 
   try {
     logStreamStatus = await describeLogStreams(instanceId);
 
-    debug(`logStreamStatus: [${logStreamStatus?.logStreamName}]`);
+    log.build(`logStreamStatus: [${logStreamStatus?.logStreamName}]`);
 
-    debug(
+    log.build(
       `Waiting before requesting a building log of ${subdomain}.${Config.SERVER_URL}...`,
     );
 
     return logStreamStatus;
-  } catch (err) {
-    debug(
-      `Error: An unexpected error occurred during DescribeLogStreamsCommand - ${err}`,
+  } catch (error) {
+    log.build(
+      `An unexpected error occurred during DescribeLogStreamsCommand - ${error}`,
     );
-    throw new DeploymentError({
-      code: "cloudWatchLogsClient_DescribeLogStreamsCommand",
-      message: "logStreamStatus.logStreamName is typeof undefined",
-    });
+
+    throw error;
   }
 }

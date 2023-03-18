@@ -1,29 +1,22 @@
-import Config from "../../../config";
-import getLogStreamStatus from "../../deploy/build-utils/getLogStreamStatus";
-import { createDeploymentDebug } from "../../../utils/createDebug";
-import { DeploymentError } from "../../../config/errors";
+import Config from "@src/config";
+import getLogStreamStatus from "@src/services/deploy/build-utils/getLogStreamStatus";
+import log from "@src/services/Logger";
 
-import ProjectService from "..";
+import ProjectService from "@src/services/ProjectService";
 
 const waitInstanceLogStremCreation = async (
   service: ProjectService,
   next: Function,
-) => {
-  const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);
+): Promise<void> => {
   const { subdomain, instanceId, repoOwner, publicIpAddress } = service;
 
   if (!instanceId || !repoOwner || !publicIpAddress || !subdomain) {
-    debug(
-      "Error: Cannot find environment data before waiting for checking EC2 instance Runtimelog status.",
+    service.throw(
+      "Cannot find environment data before waiting for checking EC2 instance Runtimelog status.",
     );
-
-    throw new DeploymentError({
-      code: "Projectservice_waitInstanceLogStremCreation",
-      message: "waitInstanceLogStremCreation didn't work as expected",
-    });
   }
 
-  debug(
+  log.build(
     `Requesting for a building log on ${subdomain}.${Config.SERVER_URL}...`,
   );
 
@@ -34,14 +27,9 @@ const waitInstanceLogStremCreation = async (
       if (triesLeft <= 1) {
         clearInterval(logStreamStatusInterval);
 
-        debug(
-          `Error: Checking the EC2 instance Runtimelog status was attempted more than 50 times but didn't work as expected.`,
+        service.throw(
+          "Checking the EC2 instance Runtimelog status was attempted more than 50 times but didn't work as expected.",
         );
-
-        throw new DeploymentError({
-          code: "Projectservice_waitInstanceLogStremCreation",
-          message: "waitInstanceLogStremCreation didn't work as expected",
-        });
       }
 
       const logStremStatus = await getLogStreamStatus(instanceId, subdomain);
@@ -56,16 +44,16 @@ const waitInstanceLogStremCreation = async (
       next();
     }, 2000);
   } catch (error) {
-    debug(
-      `Error: An unexpected error occurred during waiting for checking EC2 instance Runtimelog status. - ${error}.`,
+    log.buildError(
+      `An error has occurred during deployment and the deployment data is currently being deleted...`,
     );
 
     service.deleteDeployment();
 
-    throw new DeploymentError({
-      code: "Projectservice_waitInstanceLogStremCreation",
-      message: "waitInstanceLogStremCreation didn't work as expected",
-    });
+    service.throw(
+      "An unexpected error occurred during waiting for checking EC2 instance Runtimelog status.",
+      error,
+    );
   }
 };
 
