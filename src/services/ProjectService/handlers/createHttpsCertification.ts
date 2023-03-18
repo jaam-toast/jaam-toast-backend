@@ -1,12 +1,12 @@
 import { spawn } from "child_process";
 
-import Config from "../../config";
-import getCerbotCommands from "./utils/getCerbotCommands";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
-import sleep from "./utils/sleep";
+import Config from "../../../config";
+import getCerbotCommands from "../utils/getCerbotCommands";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
+import sleep from "../utils/sleep";
 
-import ProjectService from ".";
+import ProjectService from "..";
 
 const createHttpsCertification = async (
   service: ProjectService,

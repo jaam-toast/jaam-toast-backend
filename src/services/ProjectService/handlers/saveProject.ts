@@ -1,12 +1,12 @@
 import { startSession } from "mongoose";
 
-import Config from "../../config";
-import { User } from "../../models/User";
-import { Repo } from "../../models/Repo";
-import { DeploymentError } from "../../utils/errors";
-import { createDeploymentDebug } from "../../utils/createDebug";
+import Config from "../../../config";
+import { User } from "../../../models/User";
+import { Repo } from "../../../models/Repo";
+import { DeploymentError } from "../../../config/errors";
+import { createDeploymentDebug } from "../../../utils/createDebug";
 
-import ProjectService from ".";
+import ProjectService from "..";
 
 const saveProject = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

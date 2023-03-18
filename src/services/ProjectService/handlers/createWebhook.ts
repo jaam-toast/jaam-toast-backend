@@ -1,9 +1,9 @@
-import GithubClient from "../GithubClient";
-import { DeploymentError } from "../../utils/errors";
+import GithubClient from "../../GithubClient";
+import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from "./";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import Config from "../../config";
+import ProjectService from "..";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import Config from "../../../config";
 
 const createWebhook = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

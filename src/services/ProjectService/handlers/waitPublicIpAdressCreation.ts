@@ -1,9 +1,9 @@
-import Config from "../../config";
-import InstanceClient from "../InstanceClient";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import Config from "../../../config";
+import InstanceClient from "../../InstanceClient";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from ".";
+import ProjectService from "..";
 
 const waitPublicIpAdreessCreation = async (
   service: ProjectService,

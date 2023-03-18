@@ -1,9 +1,9 @@
-import Config from "../../config";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import Config from "../../../config";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from ".";
-import DomainClient from "../DomainClient";
+import ProjectService from "..";
+import DomainClient from "../../DomainClient";
 
 const createDomain = async (service: ProjectService, next: Function) => {
   const debug = createDeploymentDebug(Config.CLIENT_OPTIONS.debug);

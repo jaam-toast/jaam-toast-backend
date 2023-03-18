@@ -1,9 +1,9 @@
-import Config from "../../config";
-import DomainClient from "../DomainClient";
-import { createDeploymentDebug } from "../../utils/createDebug";
-import { DeploymentError } from "../../utils/errors";
+import Config from "../../../config";
+import DomainClient from "../../DomainClient";
+import { createDeploymentDebug } from "../../../utils/createDebug";
+import { DeploymentError } from "../../../config/errors";
 
-import ProjectService from "./";
+import ProjectService from "..";
 
 const waitDnsRecordCreation = async (
   service: ProjectService,

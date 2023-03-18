@@ -1,18 +1,18 @@
 import Service from "../Service";
-import setGithubInfo from "./setGithubInfo";
-import createInstance from "./createInstance";
-import createWebhook from "./createWebhook";
-import waitPublicIpAdreessCreation from "./waitPublicIpAdressCreation";
-import createDomain from "./createDomain";
-import waitDnsRecordCreation from "./waitDnsRecordCreation";
-import createHttpsCertification from "./createHttpsCertification";
-import waitInstanceLogStremCreation from "./waitInstanceLogStremCreation";
-import getInstanceFilteredLogs from "./getInstanceFilteredLogs";
-import saveProject from "./saveProject";
-import clearDeployment from "./clearDeployment";
-import updateInstance from "./updateInstace";
-import removeProject from "./removeProject";
-import updateProject from "./updateProject";
+import setGithubInfo from "./handlers/setGithubInfo";
+import createInstance from "./handlers/createInstance";
+import createWebhook from "./handlers/createWebhook";
+import waitPublicIpAdreessCreation from "./handlers/waitPublicIpAdressCreation";
+import createDomain from "./handlers/createDomain";
+import waitDnsRecordCreation from "./handlers/waitDnsRecordCreation";
+import createHttpsCertification from "./handlers/createHttpsCertification";
+import waitInstanceLogStremCreation from "./handlers/waitInstanceLogStremCreation";
+import getInstanceFilteredLogs from "./handlers/getInstanceFilteredLogs";
+import saveProject from "./handlers/saveProject";
+import clearDeployment from "./handlers/clearDeployment";
+import updateInstance from "./handlers/updateInstace";
+import removeProject from "./handlers/removeProject";
+import updateProject from "./handlers/updateProject";
 
 import { Types } from "mongoose";
 import { Env } from "../../types/custom";
@@ -87,7 +87,6 @@ class ProjectService extends Service {
       await this.use(
         setGithubInfo,
         createInstance,
-        createWebhook,
         waitPublicIpAdreessCreation,
         createDomain,
         waitDnsRecordCreation,
