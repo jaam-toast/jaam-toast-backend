@@ -1,19 +1,17 @@
-import { RequestHandler } from "express";
+import createError from "http-errors";
 import { createHmac } from "crypto";
 
 import Config from "../config";
+import log from "@src/services/Logger";
 
-import { DeploymentError } from "../utils/errors";
-import { createBuildingLogDebug } from "../utils/createDebug";
+import { RequestHandler } from "express";
 
 const verifyGithubSignature: RequestHandler = (req, res, next) => {
-  const debug = createBuildingLogDebug(Config.CLIENT_OPTIONS.debug);
-
   const githubSignature = req.header("X-Hub-Signature-256");
   const eventName = req.header("X-GitHub-Event");
   const payload = req.body;
 
-  debug(
+  log.build(
     `A POST request is received from Github webhook, and the event name is - ${eventName}`,
   );
 
@@ -26,17 +24,18 @@ const verifyGithubSignature: RequestHandler = (req, res, next) => {
   const calculatedSignature = "sha256=" + hmacResult;
 
   if (calculatedSignature !== githubSignature) {
-    debug(
+    log.buildError(
       `Invalid hash from the request. It may not be the proper request received from Github webhook`,
     );
-    throw new DeploymentError({
-      code: "github-webhook_verifyGithubSignature",
-      message:
+    next(
+      createError(
+        401,
         "The result of calculatedSignature and githubSignature from Github webhook doesn't match",
-    });
+      ),
+    );
   }
 
-  debug(
+  log.build(
     `The result of calculatedSignature and githubSignature from Github webhook match properly`,
   );
 
