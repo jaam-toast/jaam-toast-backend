@@ -43,7 +43,8 @@ const waitDnsRecordCreation = async (
       clearInterval(recordStatusInterval);
 
       log.build(
-        `EC2 instance and record are ready. Waiting before requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
+        "instance and record are ready.",
+        `Waiting before requesting a certificate to enable HTTPS on ${subdomain}.${Config.SERVER_URL}...`,
       );
 
       next();

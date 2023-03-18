@@ -37,7 +37,7 @@ const createHttpsCertification = async (
     const ssmCertbotCommands = spawn("aws", commands, { signal });
 
     ssmCertbotCommands.stdout.on("data", data => {
-      log.build(
+      log.debug(
         `stdout data: ssmCertbotCommands - ${data}`,
         `Successfully requesting for a certificate through ssmCertbotCommands...`,
       );
@@ -53,8 +53,7 @@ const createHttpsCertification = async (
 
     ssmCertbotCommands.on("close", code => {
       log.build(
-        `stdout: ssmCertbotCommands child process exits with code - ${code}`,
-        `A new certificate for ${subdomain}.${Config.SERVER_URL} has been requested`,
+        `A new certificate for ${subdomain}.${Config.SERVER_URL} has been requested.`,
       );
     });
 

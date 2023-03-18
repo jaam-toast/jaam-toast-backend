@@ -26,9 +26,7 @@ const waitPublicIpAdreessCreation = async (
         return;
       }
 
-      log.build(
-        `Created instance public IP: ${instanceChangeInfo.publicIpAddress}`,
-      );
+      log.build("Public IP creation has been completed.");
 
       service.publicIpAddress = instanceChangeInfo.publicIpAddress;
 
