@@ -17,63 +17,108 @@ import getFormattedKoreaTime from "./utils/getFormattedKoreaTime";
  *   ㄴ> server log (ex: connect server, morgan log, etc..)
  */
 
-enum FileType {
-  Deployment = "deployment.log",
-  Server = "server.log",
-  Error = "error.log",
+enum LogType {
+  Server,
+  Request,
+  Deployment,
+  Error,
 }
 
 type LogMessage = string;
 
 class Logger extends Observer {
   /* logging handlers */
-  private static commonLog(...messages: LogMessage[]) {
+  private static console(logType: LogType, ...messages: LogMessage[]) {
     const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
 
-    for (const message of messages) {
-      process.stderr.write(
-        [
-          chalk.greenBright.bold("[COMMON]"),
-          chalk.blackBright(messageHead),
-          chalk.greenBright(message),
-        ].join(" ") + "\n",
-      );
+    switch (logType) {
+      case LogType.Server: {
+        for (const message of messages) {
+          process.stdout.write(
+            [
+              chalk.greenBright.bold("[COMMON]"),
+              chalk.blackBright(messageHead),
+              chalk.greenBright(message),
+            ].join(" ") + "\n",
+          );
+        }
+
+        break;
+      }
+      case LogType.Request: {
+        for (const message of messages) {
+          process.stdout.write(
+            [
+              chalk.magentaBright.bold("[REQUEST]"),
+              chalk.blackBright(messageHead),
+              chalk.magentaBright(message),
+            ].join(" ") + "\n",
+          );
+        }
+
+        break;
+      }
+      case LogType.Deployment: {
+        for (const message of messages) {
+          process.stdout.write(
+            [
+              chalk.hex("#EE9560").bold("[BUILD]"),
+              chalk.blackBright(messageHead),
+              chalk.hex("#EE9560")(message),
+            ].join(" ") + "\n",
+          );
+        }
+
+        break;
+      }
+      case LogType.Error: {
+        for (const message of messages) {
+          process.stderr.write(
+            [
+              chalk.redBright.bold("[ERROR]"),
+              chalk.redBright(messageHead),
+              chalk.redBright.bold(message),
+            ].join(" ") + "\n",
+          );
+        }
+
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 
-  private static buildLog(...messages: LogMessage[]) {
+  private static async writefile(logType: LogType, ...messages: LogMessage[]) {
     const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
 
-    for (const message of messages) {
-      process.stderr.write(
-        [
-          chalk.cyanBright.bold("[BUILD]"),
-          chalk.blackBright(messageHead),
-          chalk.cyanBright(message),
-        ].join(" ") + "\n",
-      );
-    }
-  }
-
-  private static errorLog(...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
-
-    for (const message of messages) {
-      process.stderr.write(
-        [
-          chalk.redBright.bold("[ERROR]"),
-          chalk.redBright(messageHead),
-          chalk.redBright(message),
-        ].join(" ") + "\n",
-      );
-    }
-  }
-
-  private static async writefile(file: FileType, ...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
-
-    for (const message of messages) {
-      await fs.appendFile(`logs/${file}`, `${messageHead} ${message}`);
+    switch (logType) {
+      case LogType.Server:
+      case LogType.Request: {
+        for (const message of messages) {
+          await fs.appendFile(
+            `logs/server.log`,
+            `${messageHead} ${message} \n`,
+          );
+        }
+      }
+      case LogType.Deployment: {
+        for (const message of messages) {
+          await fs.appendFile(
+            `logs/deployment.log`,
+            `${messageHead} ${message} \n`,
+          );
+        }
+      }
+      case LogType.Error: {
+        for (const message of messages) {
+          await fs.appendFile(`logs/error.log`, `${messageHead} ${message} \n`);
+        }
+      }
+      default: {
+        break;
+      }
     }
   }
 
@@ -88,30 +133,31 @@ class Logger extends Observer {
   /* logging methods */
   static build(...messages: LogMessage[]) {
     if (Config.CLIENT_OPTIONS.debug) {
-      Logger.buildLog(...messages);
+      Logger.console(LogType.Deployment, ...messages);
     }
 
-    Logger.writefile(FileType.Deployment, ...messages);
+    Logger.writefile(LogType.Deployment, ...messages);
     Logger.notify(...messages);
   }
 
   static buildError(...messages: LogMessage[]) {
-    if (Config.CLIENT_OPTIONS.debug) {
-      Logger.errorLog(...messages);
-    }
-
-    Logger.writefile(FileType.Error, ...messages);
+    Logger.writefile(LogType.Error, ...messages);
+    Logger.writefile(LogType.Deployment, ...messages);
     Logger.notify(...messages);
   }
 
   static debug(...messages: LogMessage[]) {
-    Logger.writefile(FileType.Server, ...messages);
-    Logger.commonLog(...messages);
+    Logger.writefile(LogType.Server, ...messages);
+    Logger.console(LogType.Server, ...messages);
   }
 
   static serverError(...messages: LogMessage[]) {
-    Logger.writefile(FileType.Error, ...messages);
-    Logger.errorLog(...messages);
+    Logger.writefile(LogType.Error, ...messages);
+    Logger.console(LogType.Error, ...messages);
+  }
+
+  static request(...messages: LogMessage[]) {
+    Logger.console(LogType.Request, ...messages);
   }
 }
 

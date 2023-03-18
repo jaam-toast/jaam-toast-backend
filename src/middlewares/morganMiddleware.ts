@@ -4,7 +4,7 @@ import log from "@src/services/Logger";
 import { StreamOptions } from "morgan";
 
 const stream: StreamOptions = {
-  write: message => log.debug(message),
+  write: message => log.request(message),
 };
 
 const skip = () => {
