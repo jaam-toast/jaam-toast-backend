@@ -1,8 +1,10 @@
-import morgan, { StreamOptions } from "morgan";
-import Logger from "../loaders/logger";
+import morgan from "morgan";
+import log from "@src/services/Logger";
+
+import { StreamOptions } from "morgan";
 
 const stream: StreamOptions = {
-  write: message => Logger.http(message),
+  write: message => log.debug(message),
 };
 
 const skip = () => {
@@ -11,9 +13,9 @@ const skip = () => {
   return !isDevelopment;
 };
 
-const morganMiddleware = morgan(
+const requestLogger = morgan(
   ":method :url :status :res[content-length] - :response-time ms",
   { stream, skip },
 );
 
-export default morganMiddleware;
+export default requestLogger;

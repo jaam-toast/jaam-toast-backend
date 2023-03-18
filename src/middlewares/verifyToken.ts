@@ -1,20 +1,30 @@
-import { RequestHandler } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "../config";
+import Config from "@src/config";
 
-import { UserType } from "../types/custom";
+import { RequestHandler } from "express";
+import { UserType } from "@src/types/custom";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
 
   if (!authToken) {
-    return next(createError(401));
+    return next(
+      createError(
+        401,
+        "Authentication failed because the authorization header could not be found.",
+      ),
+    );
   }
 
   if (authToken.split(" ")[0] !== "Bearer") {
-    return next(createError(401));
+    return next(
+      createError(
+        401,
+        "Authentication failed because the authorization header did not start with 'Bearer'.",
+      ),
+    );
   }
 
   const accessToken = authToken.split(" ")[1];
@@ -32,7 +42,12 @@ const verifyToken: RequestHandler = (req, res, next) => {
   const verifiedUserData = getVerifiedUserData(accessToken);
 
   if (!verifiedUserData) {
-    return next(createError(401));
+    return next(
+      createError(
+        401,
+        "Authentication failed because the access token does not match.",
+      ),
+    );
   }
 
   req.user = verifiedUserData as UserType;
