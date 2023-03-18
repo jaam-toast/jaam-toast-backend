@@ -15,6 +15,7 @@ const createDomain = async (
     service.throw("Cannot find environment data before creating DNS Record.");
   }
 
+  log.build("creating a domain record for the project.");
   try {
     const domainClient = new DomainClient();
     const recordChangeInfo = await domainClient.createARecord(
@@ -27,7 +28,7 @@ const createDomain = async (
     }
 
     log.build(
-      `A new A record '${recordChangeInfo.recordId}' for ${publicIpAddress} has been requested: [${recordChangeInfo.recordStatus}] - at ${recordChangeInfo.recordCreatedAt}`,
+      `A new A record '${recordChangeInfo.recordId}' for ${publicIpAddress} has been requested.`,
     );
 
     service.recordId = recordChangeInfo.recordId;

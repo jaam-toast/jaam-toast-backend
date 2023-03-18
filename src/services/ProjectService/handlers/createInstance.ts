@@ -34,7 +34,7 @@ const createInstance = async (
     service.throw("Cannot find 'repoOwner' before creating EC2 instance.");
   }
 
-  log.build("Create a new project and begin a new deployment...");
+  log.build("Create a new project and begin a new deployment...", "");
 
   const clientOptions = {
     repoOwner,
@@ -53,7 +53,8 @@ const createInstance = async (
 
   try {
     log.build(
-      "Command creation for instance has been completed. Beginning instance creation.",
+      "Command creation for instance has been completed.",
+      "Beginning instance creation....",
     );
 
     const instanceClient = new InstanceClient();
