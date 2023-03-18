@@ -4,12 +4,16 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "outDir": "dist",
+    "outDir": "ts-build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "typeRoots": ["node_modules/@types", "src/types/**/**/*"]
+    "typeRoots": ["node_modules/@types", "src/types/**/**/*"],
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    },
   },
   "include": ["src/**/**/*", "index.d.ts"],
   "exclude": ["node_modules", "**/*.(spec|test).ts"]
