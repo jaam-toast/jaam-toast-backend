@@ -1,5 +1,4 @@
-type Next = Function;
-type ServiceHandler<T> = (service: T, next: Next) => void | Promise<void>;
+import { ServiceHandler } from "@src/types";
 
 abstract class Service {
   public layers: ServiceHandler<this>[] = [];

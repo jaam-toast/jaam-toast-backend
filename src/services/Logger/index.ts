@@ -1,9 +1,11 @@
 import fs from "fs/promises";
 import chalk from "chalk";
 
-import Config from "../../config";
-import Observer from "../Observer";
+import Config from "@src/config";
+import Observer from "@src/services/Observer";
 import getFormattedKoreaTime from "./utils/getFormattedKoreaTime";
+
+import { LogMessage, LogType } from "@src/types";
 
 /*
  * how to use
@@ -16,15 +18,6 @@ import getFormattedKoreaTime from "./utils/getFormattedKoreaTime";
  * log.debug(logType, message, [...message]);
  *   ㄴ> server log (ex: connect server, morgan log, etc..)
  */
-
-enum LogType {
-  Server,
-  Request,
-  Deployment,
-  Error,
-}
-
-type LogMessage = string;
 
 class Logger extends Observer {
   /* logging handlers */

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
-import { User } from "../types";
+
+import { User } from "@src/types";
 
 const joiUserSchema = joi.object({
   username: joi.string().required(),

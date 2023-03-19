@@ -1,12 +1,9 @@
-import { User, DeploymentData } from "../custom";
-
-export {};
+import { User } from "@src/types";
 
 declare global {
   namespace Express {
     export interface Request {
       user: User;
-      deploymentData: DeploymentData;
     }
   }
 

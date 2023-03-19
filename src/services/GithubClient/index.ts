@@ -4,12 +4,12 @@ import Config from "@src/config";
 import log from "@src/services/Logger";
 import {
   GithubUser,
-  ListUserReposResponse,
-  ListUserOrgsResponse,
-  ListOrgReposResponse,
-  CreateWebhookResponse,
-  ListCommtisResponse,
-  PullRequestCommitResponse,
+  GithubOrgs,
+  GithubRepos,
+  GithubOrgRepos,
+  GithubWebhooks,
+  GithubCommits,
+  GithubPullRequestCommits,
 } from "@src/types/github";
 
 class GithubClient {
@@ -39,16 +39,13 @@ class GithubClient {
 
   async getRepos(repoType: string) {
     try {
-      const { data } = await this.client.get<ListUserReposResponse["data"]>(
-        "/user/repos",
-        {
-          params: {
-            visibility: `${repoType}`,
-            affiliation: "owner",
-            sort: "updated",
-          },
+      const { data } = await this.client.get<GithubRepos>("/user/repos", {
+        params: {
+          visibility: `${repoType}`,
+          affiliation: "owner",
+          sort: "updated",
         },
-      );
+      });
 
       return data;
     } catch (error) {
@@ -61,9 +58,7 @@ class GithubClient {
 
   async getOrgs() {
     try {
-      const { data } = await this.client.get<ListUserOrgsResponse["data"]>(
-        "/user/orgs",
-      );
+      const { data } = await this.client.get<GithubOrgs>("/user/orgs");
 
       return data;
     } catch (error) {
@@ -76,7 +71,7 @@ class GithubClient {
 
   async getOrgRepos(org: string) {
     try {
-      const { data } = await this.client.get<ListOrgReposResponse["data"]>(
+      const { data } = await this.client.get<GithubOrgRepos>(
         `/orgs/${org}/repos`,
         {
           params: {
@@ -98,7 +93,7 @@ class GithubClient {
 
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.post<CreateWebhookResponse["data"]>(
+      const { data } = await this.client.post<GithubWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           name: "web",
@@ -130,7 +125,7 @@ class GithubClient {
 
   async getCommits(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<ListCommtisResponse["data"]>(
+      const { data } = await this.client.get<GithubCommits>(
         `/repos/${repoOwner}/${repoName}/commits`,
       );
 
@@ -147,7 +142,7 @@ class GithubClient {
     commitRef: string,
   ) {
     try {
-      const { data } = await this.client.get<PullRequestCommitResponse["data"]>(
+      const { data } = await this.client.get<GithubPullRequestCommits>(
         `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
       );
 

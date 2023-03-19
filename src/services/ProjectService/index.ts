@@ -16,34 +16,12 @@ import removeProject from "./handlers/removeProject";
 import updateProject from "./handlers/updateProject";
 
 import { Types } from "mongoose";
-import { Env } from "@src/types/custom";
-
-type RedeployOptions = {
-  repoCloneUrl: string;
-  lastCommitMessage: string;
-  repoName: string;
-};
-
-type ProjectDeleteOptions = {
-  instanceId?: string;
-  subdomain?: string;
-  publicIpAddress?: string;
-  userId?: string;
-  repoId?: Types.ObjectId;
-};
-
-type BuildOptions = {
-  repoName: string;
-  repoCloneUrl: string;
-  repoUpdatedAt: string;
-  nodeVersion: string;
-  installCommand: string;
-  buildCommand: string;
-  envList: Env[];
-  buildType: string;
-  githubAccessToken: string;
-  userId: string;
-};
+import {
+  BuildOptions,
+  Env,
+  ProjectDeleteOptions,
+  RedeployOptions,
+} from "@src/types";
 
 class ProjectService extends Service {
   /* build options */
