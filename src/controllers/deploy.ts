@@ -11,19 +11,6 @@ import GithubClient from "@src/services/GithubClient";
 import { LeanDocument } from "mongoose";
 import { Repo } from "@src/types";
 
-interface PullRequestData {
-  prAction: boolean;
-  merged: string;
-  title: string;
-  updatedAt: string;
-  headRef: string;
-  headSha: string;
-  prUser: string;
-  repoOwner: string;
-  repoName: string;
-  cloneUrl: string;
-}
-
 export const deployProject = catchAsync(async (req, res, next) => {
   const buildOption = req.body;
   const { githubAccessToken } = req.query;
@@ -150,47 +137,26 @@ export const updateDeployment = catchAsync(async (req, res, next) => {
     );
   }
 
-  const {
-    merged,
-    title,
-    updated_at,
-    head: { ref, sha },
-    user: { login: prUser },
-  } = pull_request;
-  const {
-    owner: { login: repoOwner },
-    name,
-    clone_url,
-  } = repository;
-
-  const pullRequestData: PullRequestData = {
-    prAction: action,
-    merged,
-    title,
-    updatedAt: updated_at,
-    headRef: ref,
-    headSha: sha,
-    prUser,
-    repoOwner,
-    repoName: name,
-    cloneUrl: clone_url,
-  };
-
   const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
   const githubClient = new GithubClient(githubAccessToken as string);
-  const { commit } = await githubClient.getHeadCommitMessage(
-    pullRequestData.repoOwner,
-    pullRequestData.repoName,
-    pullRequestData.headRef,
-  );
-  const lastCommitMessage = commit.message;
-
   const project = new ProjectService();
-  await project.redeployProject({
-    repoCloneUrl: pullRequestData.cloneUrl,
-    lastCommitMessage,
-    repoName: pullRequestData.repoName,
-  });
+
+  const repoOwner = repository.owner.login;
+  const repoName = repository.name;
+  const headRef = pull_request.head.ref;
+
+  const { commit } = await githubClient.getHeadCommitMessage(
+    repoOwner,
+    repoName,
+    headRef,
+  );
+
+  const redeployOptions = {
+    repoCloneUrl: repository.clone_url,
+    lastCommitMessage: commit.message,
+    repoName,
+  };
+  await project.redeployProject(redeployOptions);
 
   return res.json({
     result: "ok",

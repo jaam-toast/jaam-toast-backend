@@ -12,19 +12,19 @@ export type GithubUser = {
   avatar_url?: string;
 };
 
-export type ListUserReposResponse = Endpoints["GET /user/repos"]["response"];
+export type GithubRepos = Endpoints["GET /user/repos"]["response"]["data"];
 
-export type ListUserOrgsResponse =
-  Endpoints["GET /users/{username}/orgs"]["response"];
+export type GithubOrgs =
+  Endpoints["GET /users/{username}/orgs"]["response"]["data"];
 
-export type ListOrgReposResponse =
-  Endpoints["GET /orgs/{org}/repos"]["response"];
+export type GithubOrgRepos =
+  Endpoints["GET /orgs/{org}/repos"]["response"]["data"];
 
-export type CreateWebhookResponse =
-  Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"];
+export type GithubWebhooks =
+  Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"]["data"];
 
-export type ListCommtisResponse =
+export type GithubCommits =
   Endpoints["GET /repos/{owner}/{repo}/commits"]["response"];
 
-export type PullRequestCommitResponse =
-  Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"];
+export type GithubPullRequestCommits =
+  Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"]["data"];

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
-import { Repo } from "../types";
+
+import { Repo } from "@src/types";
 
 const Joigoose = joigoose(mongoose);
 
