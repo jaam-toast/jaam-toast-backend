@@ -10,7 +10,7 @@ import createHttpsCertification from "./handlers/createHttpsCertification";
 import waitInstanceLogStremCreation from "./handlers/waitInstanceLogStremCreation";
 import getInstanceFilteredLogs from "./handlers/getInstanceFilteredLogs";
 import saveProject from "./handlers/saveProject";
-import clearDeployment from "./handlers/clearDeployment";
+import removeDeployment from "./handlers/removeDeployment";
 import updateInstance from "./handlers/updateInstace";
 import removeProject from "./handlers/removeProject";
 import updateProject from "./handlers/updateProject";
@@ -104,7 +104,7 @@ class ProjectService extends Service {
 
   async deleteDeployment(): Promise<ProjectService> {
     try {
-      await this.use(clearDeployment);
+      await this.use(removeDeployment);
     } catch (error) {
       throw error;
     }
@@ -120,7 +120,7 @@ class ProjectService extends Service {
     this.publicIpAddress = options.publicIpAddress;
 
     try {
-      await this.use(clearDeployment, removeProject);
+      await this.use(removeDeployment, removeProject);
     } catch (error) {
       throw error;
     }
