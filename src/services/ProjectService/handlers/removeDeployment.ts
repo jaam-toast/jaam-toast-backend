@@ -5,7 +5,7 @@ import InstanceClient from "@src/services/InstanceClient";
 
 import ProjectService from "@src/services/ProjectService";
 
-const clearDeployment = async (
+const removeDeployment = async (
   service: ProjectService,
   next: Function,
 ): Promise<void> => {
@@ -42,4 +42,4 @@ const clearDeployment = async (
   }
 };
 
-export default clearDeployment;
+export default removeDeployment;
