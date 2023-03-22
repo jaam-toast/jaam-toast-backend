@@ -1,15 +1,11 @@
 import User from "@src/models/User";
-import { Project, User as UserType, MongoDbId } from "@src/types";
-
-type Id = MongoDbId | string;
-
-type Property = {
-  username?: string;
-  userGithubUri?: string;
-  userImage?: string;
-  githubAccessToken?: string;
-  projects?: MongoDbId[];
-};
+import {
+  User as UserType,
+  Project,
+  IdParameter,
+  UserProperty,
+} from "@src/types/db";
+import { LeanDocument } from "mongoose";
 
 class UserModel {
   static async create(data: UserType) {
@@ -25,13 +21,13 @@ class UserModel {
     return newUser;
   }
 
-  static async findById(id: Id) {
+  static async findById(id: IdParameter) {
     const user = await User.findOne({ _id: id });
 
     return user;
   }
 
-  static async findByProperty(property: Property) {
+  static async findByProperty(property: UserProperty) {
     if (!property) {
       throw Error("Expected 1 arguments, but insufficient arguments.");
     }
@@ -41,19 +37,21 @@ class UserModel {
     return user;
   }
 
-  static async findByIdAndGetProjects(id: Id) {
-    const user = await User.findOne({ _id: id })
+  static async findByIdAndGetProjects(id: IdParameter) {
+    const user:
+      | {
+          projects: Project[];
+        }
+      | undefined = await User.findOne({ _id: id })
       .populate<{ projects: Project[] }>("projects")
       .lean();
 
-    const userProjects = user?.projects || [];
-
-    return userProjects;
+    return user?.projects || [];
   }
 
   static async findByIdAndUpdateProject(
-    userId: string,
-    projectId: UserType["_id"],
+    userId: IdParameter,
+    projectId: IdParameter,
   ) {
     const user = await User.updateOne(
       { _id: userId },
@@ -64,8 +62,8 @@ class UserModel {
   }
 
   static async findByIdAndDeleteProject(
-    userId: string | UserType["_id"],
-    projectId: string | UserType["_id"],
+    userId: IdParameter,
+    projectId: IdParameter,
   ) {
     const user = await User.updateOne(
       { _id: userId },

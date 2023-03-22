@@ -21,47 +21,6 @@ export enum LogType {
   Error,
 }
 
-export type MongoDbId = Types.ObjectId;
-
-export interface User {
-  _id?: MongoDbId;
-  username: string;
-  userGithubUri: string;
-  userImage?: string;
-  githubAccessToken?: string;
-  projects?: MongoDbId[];
-}
-
-export type Project = {
-  _id?: MongoDbId;
-  space?: string;
-  repoName: string;
-  repoCloneUrl: string;
-  repoUpdatedAt: string;
-  projectName: string;
-  nodeVersion: string;
-  installCommand: string;
-  buildCommand: string;
-  buildType: string;
-  envList: string;
-  deployments: MongoDbId[];
-  instanceId?: string;
-  deployedUrl?: string;
-  lastCommitMessage?: string;
-  lastCommitHash?: string;
-  webhookId?: string;
-  publicIpAddress?: string;
-};
-
-export type Deployment = {
-  _id?: MongoDbId;
-  buildingLog: (string | undefined)[] | undefined;
-  deployedStatus: string;
-  lastCommitMessage: string;
-  lastCommitHash: string;
-  repoUpdatedAt?: string;
-};
-
 export type BuildOptions = {
   userId: string;
   space: string;
@@ -79,7 +38,7 @@ export type BuildOptions = {
 
 // TEMP
 export type Repo = {
-  _id: MongoDbId;
+  _id: Types.ObjectId;
   repoName: string;
   repoOwner: string;
   repoCloneUrl: string;
@@ -111,7 +70,7 @@ export type ProjectDeleteOptions = {
   projectName?: string;
   publicIpAddress?: string;
   userId?: string;
-  repoId?: MongoDbId;
+  repoId?: Types.ObjectId;
 };
 
 // export interface ClientOptions {

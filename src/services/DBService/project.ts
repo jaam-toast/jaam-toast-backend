@@ -1,37 +1,11 @@
 import Project from "@src/models/Project";
 import Deployment from "@src/models/Deployment";
-import {
-  BuildOptions,
-  Project as ProjectType,
-  MongoDbId,
-} from "@src/types/index";
-
-type Id = MongoDbId | string;
-
-type Property = {
-  repoName?: string;
-  repoCloneUrl?: string;
-  repoUpdatedAt?: string;
-  projectName?: string;
-  nodeVersion?: string;
-  installCommand?: string;
-  buildCommand?: string;
-  buildType?: string;
-  envList?: string;
-  space?: string;
-  instanceId?: string;
-  deployedUrl?: string;
-  lastCommitMessage?: string;
-  lastCommitHash?: string;
-  webhookId?: string;
-  deployments?: ProjectType["_id"][];
-  publicIpAddress?: string;
-};
+import { BuildOptions } from "@src/types";
+import { IdParameter, ProjectProperty } from "@src/types/db";
 
 class ProjectModel {
   static async create(data: BuildOptions) {
     const {
-      userId,
       space,
       repoName,
       repoCloneUrl,
@@ -39,12 +13,11 @@ class ProjectModel {
       nodeVersion,
       installCommand,
       buildCommand,
-      envList,
       buildType,
+      envList,
     } = data;
 
     if (
-      !userId ||
       !space ||
       !repoName ||
       !repoCloneUrl ||
@@ -59,6 +32,7 @@ class ProjectModel {
     }
 
     const newProject = await Project.create({
+      space,
       repoName,
       repoCloneUrl,
       projectName,
@@ -72,7 +46,7 @@ class ProjectModel {
     return newProject;
   }
 
-  static async findByIdAndUpdate(id: Id, data: Property) {
+  static async findByIdAndUpdate(id: IdParameter, data: ProjectProperty) {
     const updatedProject = await Project.updateOne(
       { _id: id },
       { $set: { ...data } },
@@ -81,7 +55,10 @@ class ProjectModel {
     return updatedProject;
   }
 
-  static async findByIdAndUpdateDeployment(projectId: Id, deploymentId: Id) {
+  static async findByIdAndUpdateDeployment(
+    projectId: IdParameter,
+    deploymentId: IdParameter,
+  ) {
     if (!projectId || !deploymentId) {
       throw Error("Expected 2 arguments, but insufficient arguments.");
     }
@@ -94,7 +71,7 @@ class ProjectModel {
     return updatedProject;
   }
 
-  static async findByIdAndDelete(id: Id) {
+  static async findByIdAndDelete(id: IdParameter) {
     if (!id) {
       throw Error("Expected 1 arguments, but insufficient arguments.");
     }

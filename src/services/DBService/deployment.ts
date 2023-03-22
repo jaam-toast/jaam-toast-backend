@@ -1,5 +1,5 @@
 import Deployment from "@src/models/Deployment";
-import { Deployment as DeploymentType } from "@src/types";
+import { Deployment as DeploymentType, IdParameter } from "@src/types/db";
 
 class DeploymentModel {
   static async create() {
@@ -10,10 +10,7 @@ class DeploymentModel {
     return newDeployment;
   }
 
-  static async findByIdAndUpdate(
-    id: DeploymentType["_id"] | string,
-    data: DeploymentType,
-  ) {
+  static async findByIdAndUpdate(id: IdParameter, data: DeploymentType) {
     const {
       buildingLog,
       deployedStatus,
