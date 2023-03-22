@@ -2,14 +2,14 @@ import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import { User } from "@src/types";
+import { Project, User } from "@src/types";
 
-const joiUserSchema = joi.object({
+const joiNewUserSchema = joi.object({
   username: joi.string().required(),
   userGithubUri: joi.string().required(),
   userImage: joi.string(),
   githubAccessToken: joi.string(),
-  myRepos: joi.array().items(
+  projects: joi.array().items(
     joi.string().meta({
       _mongoose: { type: "ObjectId", ref: "Repo" },
     }),
@@ -17,9 +17,18 @@ const joiUserSchema = joi.object({
 });
 
 const Joigoose = joigoose(mongoose);
-const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema), {
+const newUserSchema = new mongoose.Schema(Joigoose.convert(joiNewUserSchema), {
   versionKey: false,
 });
-const User = mongoose.model<User>("User", userSchema);
 
-export default User;
+newUserSchema.pre<Project>("remove", function (next) {
+  NewUser.updateMany(
+    { projects: this._id },
+    { $pull: { projects: this._id } },
+    next,
+  );
+});
+
+const NewUser = mongoose.model<User>("NewUser", newUserSchema);
+
+export default NewUser;
