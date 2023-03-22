@@ -5,40 +5,6 @@ export interface Env {
   value: string;
 }
 
-export interface User {
-  _id: Types.ObjectId;
-  username: string;
-  userGithubUri: string;
-  userImage?: string;
-  githubAccessToken?: string;
-  myRepos?: Types.ObjectId[];
-}
-
-export interface Project {
-  _id: Types.ObjectId;
-  repoName: string;
-  repoOwner: string;
-  repoCloneUrl: string;
-  repoUpdatedAt: string;
-  nodeVersion: string;
-  recordId?: string;
-  webhookId?: string;
-  subdomain?: string;
-  userId?: string;
-  buildType: string;
-}
-
-export interface Deployment {
-  installCommand: string;
-  buildCommand: string;
-  envList?: Env[];
-  instanceId: string;
-  deployedUrl?: string;
-  buildingLog?: (string | undefined)[] | undefined;
-  lastCommitMessage?: string;
-  publicIpAddress?: string;
-}
-
 export type Next = Function;
 
 export type ServiceHandler<T> = (
@@ -55,8 +21,84 @@ export enum LogType {
   Error,
 }
 
+export type MongoDbId = Types.ObjectId;
+
+export interface User {
+  _id?: MongoDbId;
+  username: string;
+  userGithubUri: string;
+  userImage?: string;
+  githubAccessToken?: string;
+  projects?: MongoDbId[];
+}
+
+export type Project = {
+  _id?: MongoDbId;
+  space?: string;
+  repoName: string;
+  repoCloneUrl: string;
+  repoUpdatedAt: string;
+  projectName: string;
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  buildType: string;
+  envList: string;
+  deployments: MongoDbId[];
+  instanceId?: string;
+  deployedUrl?: string;
+  lastCommitMessage?: string;
+  lastCommitHash?: string;
+  webhookId?: string;
+  publicIpAddress?: string;
+};
+
+export type Deployment = {
+  _id?: MongoDbId;
+  buildingLog: (string | undefined)[] | undefined;
+  deployedStatus: string;
+  lastCommitMessage: string;
+  lastCommitHash: string;
+  repoUpdatedAt?: string;
+};
+
+export type BuildOptions = {
+  userId: string;
+  space: string;
+  repoName: string;
+  repoCloneUrl: string;
+  repoUpdatedAt?: string;
+  projectName?: string;
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  envList: Env[];
+  buildType: string;
+  githubAccessToken?: string;
+};
+
 // TEMP
-export type Repo = Project & Deployment;
+export type Repo = {
+  _id: MongoDbId;
+  repoName: string;
+  repoOwner: string;
+  repoCloneUrl: string;
+  repoUpdatedAt: string;
+  nodeVersion: string;
+  recordId?: string;
+  webhookId?: string;
+  subdomain?: string;
+  userId?: string;
+  buildType: string;
+  installCommand: string;
+  buildCommand: string;
+  envList?: Env[];
+  instanceId: string;
+  deployedUrl?: string;
+  buildingLog?: (string | undefined)[] | undefined;
+  lastCommitMessage?: string;
+  publicIpAddress?: string;
+};
 
 export type RedeployOptions = {
   repoCloneUrl: string;
@@ -66,23 +108,10 @@ export type RedeployOptions = {
 
 export type ProjectDeleteOptions = {
   instanceId?: string;
-  subdomain?: string;
+  projectName?: string;
   publicIpAddress?: string;
   userId?: string;
-  repoId?: Types.ObjectId;
-};
-
-export type BuildOptions = {
-  repoName: string;
-  repoCloneUrl: string;
-  repoUpdatedAt: string;
-  nodeVersion: string;
-  installCommand: string;
-  buildCommand: string;
-  envList: Env[];
-  buildType: string;
-  githubAccessToken: string;
-  userId: string;
+  repoId?: MongoDbId;
 };
 
 // export interface ClientOptions {
