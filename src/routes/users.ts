@@ -35,6 +35,17 @@ const usersRouter = (app: Router) => {
   );
 
   route.get(
+    "/:user_id/projects",
+    validateSchema(
+      Joi.object({
+        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+      }),
+      "params",
+    ),
+    UserController.getUserProjects,
+  );
+
+  route.get(
     "/:user_id/orgs/:org/repos",
     validateSchema(
       Joi.object({
