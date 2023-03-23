@@ -83,18 +83,7 @@ class ProjectModel {
       throw Error("Expected 2 arguments, but insufficient arguments.");
     }
 
-    const copyUpdateData = { ...updateData };
-
-    for (var prop in copyUpdateData) {
-      if (
-        copyUpdateData.hasOwnProperty(prop) &&
-        copyUpdateData[prop] === undefined
-      ) {
-        delete copyUpdateData[prop];
-      }
-    }
-
-    if (!Object.keys(copyUpdateData).length) {
+    if (!Object.keys(updateData).length) {
       throw Error("Update data type is not valid");
     }
 

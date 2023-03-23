@@ -4,7 +4,7 @@ import Joi from "joi";
 
 import {
   createProject,
-  getUserProjects,
+  getProject,
   updateProject,
   deleteProject,
 } from "@src/controllers/project";
@@ -19,35 +19,35 @@ const projectsRouter = (app: Router) => {
 
   route.post("/", createProject);
 
-  route.post(
-    "/:projectId",
+  route.get(
+    "/:project_name",
     validateSchema(
       Joi.object({
-        projectId: Joi.string().regex(/^[a-f\d]{24}$/i),
+        project_name: Joi.string().regex(/^[a-zA-Z0-9]+$/i),
       }),
-      "params[projectId]",
+      "params[project_name]",
+    ),
+    getProject,
+  );
+
+  route.put(
+    "/:project_name",
+    validateSchema(
+      Joi.object({
+        project_name: Joi.string().regex(/^[a-zA-Z0-9]+$/i),
+      }),
+      "params[project_name]",
     ),
     updateProject,
   );
 
-  route.get(
-    "/:projectId",
-    validateSchema(
-      Joi.object({
-        projectId: Joi.string().regex(/^[a-f\d]{24}$/i),
-      }),
-      "params[projectId]",
-    ),
-    getUserProjects,
-  );
-
   route.delete(
-    "/:projectId",
+    "/:project_name",
     validateSchema(
       Joi.object({
-        projectId: Joi.string().regex(/^[a-f\d]{24}$/i),
+        project_name: Joi.string().regex(/^[a-zA-Z0-9]+$/i),
       }),
-      "params[projectId]",
+      "params[project_name]",
     ),
     deleteProject,
   );
