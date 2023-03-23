@@ -8,6 +8,10 @@ import {
 
 class UserModel {
   static async create(data: UserType) {
+    if (!data) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
     const { username, userGithubUri, userImage, githubAccessToken } = data;
 
     const newUser = await User.create({
@@ -21,6 +25,10 @@ class UserModel {
   }
 
   static async findById(id: IdParameter) {
+    if (!id) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
     const user = await User.findOne({ _id: id });
 
     return user;
@@ -37,6 +45,10 @@ class UserModel {
   }
 
   static async findByIdAndGetProjects(id: IdParameter) {
+    if (!id) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
     const user:
       | {
           projects: Project[];
@@ -52,6 +64,10 @@ class UserModel {
     userId: IdParameter,
     projectId: IdParameter,
   ) {
+    if (!userId || projectId) {
+      throw Error("Expected 2 arguments, but insufficient arguments.");
+    }
+
     const user = await User.updateOne(
       { _id: userId },
       { $push: { projects: projectId } },
@@ -64,6 +80,10 @@ class UserModel {
     userId: IdParameter,
     projectId: IdParameter,
   ) {
+    if (!userId || projectId) {
+      throw Error("Expected 2 arguments, but insufficient arguments.");
+    }
+
     const user = await User.updateOne(
       { _id: userId },
       { $pull: { myRepos: projectId } },

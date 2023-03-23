@@ -5,6 +5,10 @@ import { IdParameter, ProjectProperty } from "@src/types/db";
 
 class ProjectModel {
   static async create(data: BuildOptions) {
+    if (!data) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
     const {
       space,
       repoName,
@@ -47,6 +51,10 @@ class ProjectModel {
   }
 
   static async findById(id: IdParameter) {
+    if (!id) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
     const project = await Project.findById(id);
 
     return project;

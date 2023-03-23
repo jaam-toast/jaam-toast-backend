@@ -11,6 +11,10 @@ class DeploymentModel {
   }
 
   static async findByIdAndUpdate(id: IdParameter, updateData: DeploymentType) {
+    if (!id || !updateData) {
+      throw Error("Expected 2 arguments, but insufficient arguments.");
+    }
+
     const updatedDeployment = await Deployment.findByIdAndUpdate(id, {
       ...updateData,
     });
