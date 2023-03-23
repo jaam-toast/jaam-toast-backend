@@ -10,16 +10,25 @@ import ProjectService from "@src/services/ProjectService";
 
 export const createProject = catchAsync(async (req, res, next) => {
   const buildOption = req.body;
+
   const { githubAccessToken } = req.query;
-  const { userId, space, repository } = buildOption;
+  const { userId, space, repoName } = buildOption;
+
+  if (!userId || !space || !repoName) {
+    return next(createError(401, "The required data is missing."));
+  }
 
   const newProject = await ProjectModel.create({
     ...buildOption,
     space,
-    repoName: repository,
+    repoName,
   });
 
   await UserModel.findByIdAndUpdateProject(userId, newProject._id);
+
+  if (!newProject) {
+    return next(createError(500, "Failed to create database."));
+  }
 
   res.json({
     result: "ok",
@@ -73,106 +82,111 @@ export const createProject = catchAsync(async (req, res, next) => {
   return;
 });
 
-export const getUserProjects = catchAsync(async (req, res, next) => {
-  const { user_id } = req.params;
+export const getProject = catchAsync(async (req, res, next) => {
+  const { project_name: projectName } = req.params;
 
-  if (!user_id) {
-    return next(createError(401, "Cannot find environment data 'user_id'"));
+  if (!projectName) {
+    return next(
+      createError(401, "Cannot find environment data 'project_name'"),
+    );
   }
 
-  const userProjects = await UserModel.findByIdAndGetProjects(user_id);
-
-  const filteredUserProjects = userProjects?.map(project => {
-    const {
-      _id,
-      space,
-      repoName,
-      repoCloneUrl,
-      repoUpdatedAt,
-      projectName,
-      nodeVersion,
-      installCommand,
-      buildCommand,
-      buildType,
-      envList,
-      instanceId,
-      deployedUrl,
-      lastCommitMessage,
-      lastCommitHash,
-      deployments,
-    } = project;
-
-    const filteredProjectData = {
-      repoName,
-      space,
-      repoCloneUrl,
-      repoUpdatedAt,
-      projectName,
-      nodeVersion,
-      installCommand,
-      buildCommand,
-      envList,
-      buildType,
-      deployedUrl,
-      instanceId,
-      projectId: _id,
-      lastCommitMessage,
-      lastCommitHash,
-      deployments,
-    };
-
-    return filteredProjectData;
-  });
+  const project = await ProjectModel.findOne({ projectName });
 
   return res.json({
     result: "ok",
-    data: filteredUserProjects,
+    data: project,
   });
 });
 
 export const updateProject = catchAsync(async (req, res, next) => {
-  const { action, pull_request, repository } = req.body;
+  const { preject_name: projectName } = req.params;
+  const { type } = req.query;
 
-  if (action !== "closed" || !pull_request.merged) {
-    return next(
-      createError(
-        401,
-        "Received abnormal PR data or PR that has not yet been merged.",
-      ),
-    );
+  switch (type) {
+    case "pull_request_update": {
+      const { action, pull_request, repository } = req.body;
+
+      if (action !== "closed" || !pull_request.merged) {
+        return next(
+          createError(
+            401,
+            "Received abnormal PR data or PR that has not yet been merged.",
+          ),
+        );
+      }
+
+      const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
+      const githubClient = new GithubClient(githubAccessToken as string);
+      const project = new ProjectService();
+
+      const repoOwner = repository.owner.login;
+      const repoName = repository.name;
+      const headRef = pull_request.head.ref;
+
+      const { commit } = await githubClient.getHeadCommitMessage(
+        repoOwner,
+        repoName,
+        headRef,
+      );
+
+      const redeployOptions = {
+        repoCloneUrl: repository.clone_url,
+        lastCommitMessage: commit.message,
+        repoName,
+      };
+      await project.redeployProject(redeployOptions);
+
+      // TODO db update logic
+      return res.json({
+        result: "ok",
+        data: project,
+      });
+    }
+    case "option_update": {
+      const { nodeVersion, installCommand, buildCommand, buildType, envList } =
+        req.body;
+
+      const updateData = {
+        ...(nodeVersion && { nodeVersion }),
+        ...(installCommand && { installCommand }),
+        ...(buildCommand && { buildCommand }),
+        ...(buildType && { buildType }),
+        ...(envList && { envList }),
+      };
+
+      if (
+        !nodeVersion &&
+        !installCommand &&
+        !buildCommand &&
+        !buildType &&
+        !envList
+      ) {
+        return next(
+          createError(401, "Insufficient data to process the request"),
+        );
+      }
+
+      const project = await ProjectModel.findOneAndUpdate(
+        { projectName },
+        updateData,
+      );
+
+      return res.json({
+        result: "ok",
+        data: project,
+      });
+    }
+    default: {
+      return next(createError(401, "No query type data"));
+    }
   }
-
-  const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
-  const githubClient = new GithubClient(githubAccessToken as string);
-  const project = new ProjectService();
-
-  const repoOwner = repository.owner.login;
-  const repoName = repository.name;
-  const headRef = pull_request.head.ref;
-
-  const { commit } = await githubClient.getHeadCommitMessage(
-    repoOwner,
-    repoName,
-    headRef,
-  );
-
-  const redeployOptions = {
-    repoCloneUrl: repository.clone_url,
-    lastCommitMessage: commit.message,
-    repoName,
-  };
-  await project.redeployProject(redeployOptions);
-
-  return res.json({
-    result: "ok",
-  });
 });
 
 export const deleteProject = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
-  const { projectId } = req.params;
-
-  if (!githubAccessToken || !projectId) {
+  const { project_name: projectName } = req.params;
+  if (!githubAccessToken || !projectName) {
     return next(
       createError(
         400,
@@ -181,10 +195,11 @@ export const deleteProject = catchAsync(async (req, res, next) => {
     );
   }
 
-  const deletedProject = await ProjectModel.findByIdAndDelete(projectId);
+  // TODO
+  const deletedProject = await ProjectModel.findOneAndDelete({ projectName });
 
   if (!deletedProject) {
-    return next(createError(500));
+    return next(createError(500, "Failed to delete database."));
   }
 
   const project = new ProjectService();
