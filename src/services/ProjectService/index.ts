@@ -54,7 +54,7 @@ class ProjectService extends Service {
     this.repoName = buildOptions.repoName;
     this.repoCloneUrl = buildOptions.repoCloneUrl;
     this.repoUpdatedAt = buildOptions.repoUpdatedAt;
-    this.subdomain = buildOptions.repoName;
+    this.subdomain = buildOptions.projectName;
     this.nodeVersion = buildOptions.nodeVersion;
     this.installCommand = buildOptions.installCommand;
     this.buildCommand = buildOptions.buildCommand;
@@ -116,11 +116,11 @@ class ProjectService extends Service {
     this.userId = options.userId;
     this.repoId = options.repoId;
     this.instanceId = options.instanceId;
-    this.subdomain = options.subdomain;
+    this.subdomain = options.projectName;
     this.publicIpAddress = options.publicIpAddress;
 
     try {
-      await this.use(removeDeployment, removeProject);
+      await this.use(removeDeployment);
     } catch (error) {
       throw error;
     }
