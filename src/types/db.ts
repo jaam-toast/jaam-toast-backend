@@ -42,6 +42,7 @@ export type Deployment = {
 export type IdParameter = Types.ObjectId | string;
 
 export type ProjectProperty = {
+  [key: string]: string | Types.ObjectId[] | undefined;
   space?: string;
   repoName?: string;
   repoCloneUrl?: string;

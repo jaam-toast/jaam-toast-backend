@@ -36,6 +36,14 @@ export type BuildOptions = {
   githubAccessToken?: string;
 };
 
+export type UpdateOptions = {
+  nodeVersion?: string;
+  installCommand?: string;
+  buildCommand?: string;
+  buildType?: string;
+  envList?: string;
+};
+
 // TEMP
 export type Repo = {
   _id: Types.ObjectId;
