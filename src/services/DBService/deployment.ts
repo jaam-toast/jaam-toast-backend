@@ -10,21 +10,9 @@ class DeploymentModel {
     return newDeployment;
   }
 
-  static async findByIdAndUpdate(id: IdParameter, data: DeploymentType) {
-    const {
-      buildingLog,
-      deployedStatus,
-      lastCommitMessage,
-      lastCommitHash,
-      repoUpdatedAt,
-    } = data;
-
+  static async findByIdAndUpdate(id: IdParameter, updateData: DeploymentType) {
     const updatedDeployment = await Deployment.findByIdAndUpdate(id, {
-      buildingLog,
-      deployedStatus,
-      lastCommitMessage,
-      lastCommitHash,
-      repoUpdatedAt,
+      ...updateData,
     });
 
     return updatedDeployment;
