@@ -5,7 +5,6 @@ import {
   IdParameter,
   UserProperty,
 } from "@src/types/db";
-import { LeanDocument } from "mongoose";
 
 class UserModel {
   static async create(data: UserType) {
@@ -27,12 +26,12 @@ class UserModel {
     return user;
   }
 
-  static async findByProperty(property: UserProperty) {
-    if (!property) {
+  static async findOne(targetData: UserProperty) {
+    if (!targetData) {
       throw Error("Expected 1 arguments, but insufficient arguments.");
     }
 
-    const user = await User.findOne({ property });
+    const user = await User.findOne({ targetData });
 
     return user;
   }

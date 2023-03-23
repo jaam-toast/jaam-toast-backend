@@ -46,26 +46,61 @@ class ProjectModel {
     return newProject;
   }
 
-  static async findByIdAndUpdate(id: IdParameter, data: ProjectProperty) {
+  static async findById(id: IdParameter) {
+    const project = await Project.findById(id);
+
+    return project;
+  }
+
+  static async findOne(targetData: ProjectProperty) {
+    if (!targetData) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
+    const project = await Project.findOne({ ...targetData });
+
+    return project;
+  }
+
+  static async findByIdAndUpdate(id: IdParameter, updateData: ProjectProperty) {
+    if (!id || !updateData) {
+      throw Error("Expected 2 arguments, but insufficient arguments.");
+    }
+
     const updatedProject = await Project.updateOne(
       { _id: id },
-      { $set: { ...data } },
+      { $set: { ...updateData } },
     );
 
     return updatedProject;
   }
 
-  static async findByIdAndUpdateDeployment(
-    projectId: IdParameter,
-    deploymentId: IdParameter,
+  static async findOneAndUpdate(
+    targetData: ProjectProperty,
+    updateData: ProjectProperty,
   ) {
-    if (!projectId || !deploymentId) {
+    if (!targetData || !updateData) {
       throw Error("Expected 2 arguments, but insufficient arguments.");
     }
 
+    const copyUpdateData = { ...updateData };
+
+    for (var prop in copyUpdateData) {
+      if (
+        copyUpdateData.hasOwnProperty(prop) &&
+        copyUpdateData[prop] === undefined
+      ) {
+        delete copyUpdateData[prop];
+      }
+    }
+
+    if (!Object.keys(copyUpdateData).length) {
+      throw Error("Update data type is not valid");
+    }
+
     const updatedProject = await Project.updateOne(
-      { _id: projectId },
-      { $push: { deployments: deploymentId } },
+      { ...targetData },
+      { $set: { ...updateData } },
     );
 
     return updatedProject;
@@ -77,6 +112,24 @@ class ProjectModel {
     }
 
     const deletedProject = await Project.findByIdAndDelete(id);
+
+    if (!deletedProject) return;
+
+    await Deployment.deleteMany({
+      _id: {
+        $in: deletedProject.deployments,
+      },
+    });
+
+    return deletedProject;
+  }
+
+  static async findOneAndDelete(targetData: ProjectProperty) {
+    if (!targetData) {
+      throw Error("Expected 1 arguments, but insufficient arguments.");
+    }
+
+    const deletedProject = await Project.findOneAndDelete({ ...targetData });
 
     if (!deletedProject) return;
 

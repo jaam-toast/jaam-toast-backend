@@ -12,7 +12,7 @@ export const login = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  let userData = await UserModel.findByProperty({ userGithubUri });
+  let userData = await UserModel.findOne({ userGithubUri });
 
   if (!userData) {
     userData = await UserModel.create({
