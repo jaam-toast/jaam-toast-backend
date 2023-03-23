@@ -10,7 +10,6 @@ import ProjectService from "@src/services/ProjectService";
 
 export const createProject = catchAsync(async (req, res, next) => {
   const buildOption = req.body;
-
   const { githubAccessToken } = req.query;
   const { userId, space, repoName } = buildOption;
 
@@ -24,15 +23,15 @@ export const createProject = catchAsync(async (req, res, next) => {
     repoName,
   });
 
-  await UserModel.findByIdAndUpdateProject(userId, newProject._id);
-
   if (!newProject) {
     return next(createError(500, "Failed to create database."));
   }
 
+  await UserModel.findByIdAndUpdateProject(userId, newProject._id);
+
   res.json({
-    result: "ok",
-    projectId: newProject._id,
+    message: "ok",
+    result: newProject._id,
   });
 
   const project = new ProjectService();
@@ -94,8 +93,8 @@ export const getProject = catchAsync(async (req, res, next) => {
   const project = await ProjectModel.findOne({ projectName });
 
   return res.json({
-    result: "ok",
-    data: project,
+    message: "ok",
+    result: project,
   });
 });
 
@@ -139,8 +138,8 @@ export const updateProject = catchAsync(async (req, res, next) => {
 
       // TODO db update logic
       return res.json({
-        result: "ok",
-        data: project,
+        message: "ok",
+        result: project,
       });
     }
     case "option_update": {
@@ -173,8 +172,8 @@ export const updateProject = catchAsync(async (req, res, next) => {
       );
 
       return res.json({
-        result: "ok",
-        data: project,
+        message: "ok",
+        result: project,
       });
     }
     default: {
@@ -186,6 +185,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
 export const deleteProject = catchAsync(async (req, res, next) => {
   const { githubAccessToken } = req.query;
   const { project_name: projectName } = req.params;
+
   if (!githubAccessToken || !projectName) {
     return next(
       createError(
@@ -212,6 +212,6 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   });
 
   return res.json({
-    result: "ok",
+    message: "ok",
   });
 });

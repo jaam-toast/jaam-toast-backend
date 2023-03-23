@@ -20,8 +20,8 @@ export const getOrganizations = catchAsync(async (req, res, next) => {
   }));
 
   return res.json({
-    result: "ok",
-    data: orgsData,
+    message: "ok",
+    result: orgsData,
   });
 });
 
@@ -59,8 +59,8 @@ export const getUserRepos = catchAsync(async (req, res, next) => {
   );
 
   return res.json({
-    result: "ok",
-    data: sortedUserReposList,
+    message: "ok",
+    result: sortedUserReposList,
   });
 });
 
@@ -74,8 +74,8 @@ export const getUserProjects = catchAsync(async (req, res, next) => {
   const userProjects = await UserModel.findByIdAndGetProjects(user_id);
 
   return res.json({
-    result: "ok",
-    data: userProjects,
+    message: "ok",
+    result: userProjects,
   });
 });
 
@@ -101,7 +101,7 @@ export const getOrganizationRepos = catchAsync(async (req, res, next) => {
   }));
 
   return res.json({
-    result: "ok",
-    data: organizationReposList,
+    message: "ok",
+    result: organizationReposList,
   });
 });
