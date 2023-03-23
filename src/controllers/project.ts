@@ -2,9 +2,7 @@ import createError from "http-errors";
 
 import Config from "@src/config";
 import catchAsync from "@src/controllers/utils/asyncHandler";
-import UserModel from "@src/services/DBService/user";
-import ProjectModel from "@src/services/DBService/project";
-import DeploymentModel from "@src/services/DBService/deployment";
+import DB from "@src/services/DBService";
 import GithubClient from "@src/services/GithubClient";
 import ProjectService from "@src/services/ProjectService";
 
@@ -17,7 +15,7 @@ export const createProject = catchAsync(async (req, res, next) => {
     return next(createError(401, "The required data is missing."));
   }
 
-  const newProject = await ProjectModel.create({
+  const newProject = await DB.Project.create({
     ...buildOption,
     space,
     repoName,
@@ -27,7 +25,7 @@ export const createProject = catchAsync(async (req, res, next) => {
     return next(createError(500, "Failed to create database."));
   }
 
-  await UserModel.findByIdAndUpdateProject(userId, newProject._id);
+  await DB.User.findByIdAndUpdateProject(userId, newProject._id);
 
   res.json({
     message: "ok",
@@ -61,7 +59,7 @@ export const createProject = catchAsync(async (req, res, next) => {
     webhookId,
   } = project;
 
-  await ProjectModel.findByIdAndUpdate(newProject._id, {
+  await DB.Project.findByIdAndUpdate(newProject._id, {
     instanceId,
     deployedUrl,
     lastCommitMessage,
@@ -70,7 +68,7 @@ export const createProject = catchAsync(async (req, res, next) => {
     webhookId,
   });
 
-  await DeploymentModel.findByIdAndUpdate(newProject._id, {
+  await DB.Deployment.findByIdAndUpdate(newProject._id, {
     buildingLog,
     repoUpdatedAt,
     deployedStatus: "test...",
@@ -90,7 +88,7 @@ export const getProject = catchAsync(async (req, res, next) => {
     );
   }
 
-  const project = await ProjectModel.findOne({ projectName });
+  const project = await DB.Project.findOne({ projectName });
 
   return res.json({
     message: "ok",
@@ -166,7 +164,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
         );
       }
 
-      const project = await ProjectModel.findOneAndUpdate(
+      const project = await DB.Project.findOneAndUpdate(
         { projectName },
         updateData,
       );
@@ -196,7 +194,7 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   }
 
   // TODO
-  const deletedProject = await ProjectModel.findOneAndDelete({ projectName });
+  const deletedProject = await DB.Project.findOneAndDelete({ projectName });
 
   if (!deletedProject) {
     return next(createError(500, "Failed to delete database."));

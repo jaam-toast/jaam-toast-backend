@@ -1,7 +1,7 @@
 import createError from "http-errors";
 
 import catchAsync from "@src/controllers/utils/asyncHandler";
-import UserModel from "@src/services/DBService/user";
+import DB from "@src/services/DBService";
 import GithubClient from "@src/services/GithubClient";
 
 export const getOrganizations = catchAsync(async (req, res, next) => {
@@ -71,7 +71,7 @@ export const getUserProjects = catchAsync(async (req, res, next) => {
     return next(createError(401, "Cannot find environment data 'user_id'"));
   }
 
-  const userProjects = await UserModel.findByIdAndGetProjects(user_id);
+  const userProjects = await DB.User.findByIdAndGetProjects(user_id);
 
   return res.json({
     message: "ok",

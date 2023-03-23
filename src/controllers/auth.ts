@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 import Config from "@src/config";
 import catchAsync from "@src/controllers/utils/asyncHandler";
-import UserModel from "@src/services/DBService/user";
+import DB from "@src/services/DBService";
 
 export const login = catchAsync(async (req, res, next) => {
   const { username, userGithubUri, userImage, githubAccessToken } = req.user;
@@ -12,10 +12,10 @@ export const login = catchAsync(async (req, res, next) => {
     return next(createError(401));
   }
 
-  let userData = await UserModel.findOne({ userGithubUri });
+  let userData = await DB.User.findOne({ userGithubUri });
 
   if (!userData) {
-    userData = await UserModel.create({
+    userData = await DB.User.create({
       username,
       userGithubUri,
       userImage,
