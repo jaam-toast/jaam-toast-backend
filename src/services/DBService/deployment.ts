@@ -1,26 +1,34 @@
 import Deployment from "@src/models/Deployment";
 import { Deployment as DeploymentType, IdParameter } from "@src/types/db";
 
-class DeploymentModel {
+class DeploymentService {
   static async create() {
-    const newDeployment = await Deployment.create({
-      deployStatus: "pending",
-    });
+    try {
+      const newDeployment = await Deployment.create({
+        deployStatus: "pending",
+      });
 
-    return newDeployment;
+      return newDeployment;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  static async findByIdAndUpdate(id: IdParameter, updateData: DeploymentType) {
-    if (!id || !updateData) {
-      throw Error("Expected 2 arguments, but insufficient arguments.");
+  static async findByIdAndUpdate(id: IdParameter, data: DeploymentType) {
+    try {
+      if (!id || !data) {
+        throw Error("Expected 2 arguments, but insufficient arguments.");
+      }
+
+      const updatedDeployment = await Deployment.findByIdAndUpdate(id, {
+        ...data,
+      });
+
+      return updatedDeployment;
+    } catch (error) {
+      throw error;
     }
-
-    const updatedDeployment = await Deployment.findByIdAndUpdate(id, {
-      ...updateData,
-    });
-
-    return updatedDeployment;
   }
 }
 
-export default DeploymentModel;
+export default DeploymentService;

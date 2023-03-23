@@ -1,143 +1,173 @@
 import Project from "@src/models/Project";
 import Deployment from "@src/models/Deployment";
 import { BuildOptions } from "@src/types";
-import { IdParameter, ProjectProperty } from "@src/types/db";
+import { IdParameter, ProjectOptions } from "@src/types/db";
 
-class ProjectModel {
-  static async create(data: BuildOptions) {
-    if (!data) {
-      throw Error("Expected 1 arguments, but insufficient arguments.");
+class ProjectService {
+  static async create(options: BuildOptions) {
+    try {
+      if (!options) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const {
+        space,
+        repoName,
+        repoCloneUrl,
+        projectName,
+        nodeVersion,
+        installCommand,
+        buildCommand,
+        buildType,
+        envList,
+      } = options;
+
+      if (
+        !space ||
+        !repoName ||
+        !repoCloneUrl ||
+        !projectName ||
+        !nodeVersion ||
+        !installCommand ||
+        !buildCommand ||
+        !buildType ||
+        !envList
+      ) {
+        throw Error("Cannot find environment options before saving project.");
+      }
+
+      const newProject = await Project.create({
+        space,
+        repoName,
+        repoCloneUrl,
+        projectName,
+        nodeVersion,
+        installCommand,
+        buildCommand,
+        buildType,
+        envList,
+      });
+
+      return newProject;
+    } catch (error) {
+      throw error;
     }
-
-    const {
-      space,
-      repoName,
-      repoCloneUrl,
-      projectName,
-      nodeVersion,
-      installCommand,
-      buildCommand,
-      buildType,
-      envList,
-    } = data;
-
-    if (
-      !space ||
-      !repoName ||
-      !repoCloneUrl ||
-      !projectName ||
-      !nodeVersion ||
-      !installCommand ||
-      !buildCommand ||
-      !buildType ||
-      !envList
-    ) {
-      throw Error("Cannot find environment data before saving project.");
-    }
-
-    const newProject = await Project.create({
-      space,
-      repoName,
-      repoCloneUrl,
-      projectName,
-      nodeVersion,
-      installCommand,
-      buildCommand,
-      buildType,
-      envList,
-    });
-
-    return newProject;
   }
 
   static async findById(id: IdParameter) {
-    if (!id) {
-      throw Error("Expected 1 arguments, but insufficient arguments.");
+    try {
+      if (!id) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const project = await Project.findById(id);
+
+      return project;
+    } catch (error) {
+      throw error;
     }
-
-    const project = await Project.findById(id);
-
-    return project;
   }
 
-  static async findOne(targetData: ProjectProperty) {
-    if (!targetData) {
-      throw Error("Expected 1 arguments, but insufficient arguments.");
+  static async findOne(options: ProjectOptions) {
+    try {
+      if (!options) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const project = await Project.findOne({ ...options });
+
+      return project;
+    } catch (error) {
+      throw error;
     }
-
-    const project = await Project.findOne({ ...targetData });
-
-    return project;
   }
 
-  static async findByIdAndUpdate(id: IdParameter, updateData: ProjectProperty) {
-    if (!id || !updateData) {
-      throw Error("Expected 2 arguments, but insufficient arguments.");
+  static async findByIdAndUpdate(id: IdParameter, options: ProjectOptions) {
+    try {
+      if (!id || !options) {
+        throw Error("Expected 2 arguments, but insufficient arguments.");
+      }
+
+      const updatedProject = await Project.updateOne(
+        { _id: id },
+        { $set: { ...options } },
+      );
+
+      return updatedProject;
+    } catch (error) {
+      throw error;
     }
-
-    const updatedProject = await Project.updateOne(
-      { _id: id },
-      { $set: { ...updateData } },
-    );
-
-    return updatedProject;
   }
 
   static async findOneAndUpdate(
-    targetData: ProjectProperty,
-    updateData: ProjectProperty,
+    targetOptions: ProjectOptions,
+    updateOptions: ProjectOptions,
   ) {
-    if (!targetData || !updateData) {
-      throw Error("Expected 2 arguments, but insufficient arguments.");
+    try {
+      if (!targetOptions || !updateOptions) {
+        throw Error("Expected 2 arguments, but insufficient arguments.");
+      }
+
+      if (!Object.keys(updateOptions).length) {
+        throw Error("Update data type is not valid");
+      }
+
+      const updatedProject = await Project.updateOne(
+        { ...targetOptions },
+        { $set: { ...updateOptions } },
+      );
+
+      return updatedProject;
+    } catch (error) {
+      throw error;
     }
-
-    if (!Object.keys(updateData).length) {
-      throw Error("Update data type is not valid");
-    }
-
-    const updatedProject = await Project.updateOne(
-      { ...targetData },
-      { $set: { ...updateData } },
-    );
-
-    return updatedProject;
   }
 
   static async findByIdAndDelete(id: IdParameter) {
-    if (!id) {
-      throw Error("Expected 1 arguments, but insufficient arguments.");
+    try {
+      if (!id) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const deletedProject = await Project.findByIdAndDelete(id);
+
+      if (!deletedProject) return;
+
+      await Deployment.deleteMany({
+        _id: {
+          $in: deletedProject.deployments,
+        },
+      });
+
+      return deletedProject;
+    } catch (error) {
+      throw error;
     }
-
-    const deletedProject = await Project.findByIdAndDelete(id);
-
-    if (!deletedProject) return;
-
-    await Deployment.deleteMany({
-      _id: {
-        $in: deletedProject.deployments,
-      },
-    });
-
-    return deletedProject;
   }
 
-  static async findOneAndDelete(targetData: ProjectProperty) {
-    if (!targetData) {
-      throw Error("Expected 1 arguments, but insufficient arguments.");
+  static async findOneAndDelete(targetOptions: ProjectOptions) {
+    try {
+      if (!targetOptions) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const deletedProject = await Project.findOneAndDelete({
+        ...targetOptions,
+      });
+
+      if (!deletedProject) return;
+
+      await Deployment.deleteMany({
+        _id: {
+          $in: deletedProject.deployments,
+        },
+      });
+
+      return deletedProject;
+    } catch (error) {
+      throw error;
     }
-
-    const deletedProject = await Project.findOneAndDelete({ ...targetData });
-
-    if (!deletedProject) return;
-
-    await Deployment.deleteMany({
-      _id: {
-        $in: deletedProject.deployments,
-      },
-    });
-
-    return deletedProject;
   }
 }
 
-export default ProjectModel;
+export default ProjectService;
