@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import { Project, User } from "@src/types";
+import { Project, User } from "@src/types/db";
 
-const joiNewUserSchema = joi.object({
+const joiUserSchema = joi.object({
   username: joi.string().required(),
   userGithubUri: joi.string().required(),
   userImage: joi.string(),
@@ -17,18 +17,18 @@ const joiNewUserSchema = joi.object({
 });
 
 const Joigoose = joigoose(mongoose);
-const newUserSchema = new mongoose.Schema(Joigoose.convert(joiNewUserSchema), {
+const userSchema = new mongoose.Schema(Joigoose.convert(joiUserSchema), {
   versionKey: false,
 });
 
-newUserSchema.pre<Project>("remove", function (next) {
-  NewUser.updateMany(
+userSchema.pre<Project>("remove", function (next) {
+  User.updateMany(
     { projects: this._id },
     { $pull: { projects: this._id } },
     next,
   );
 });
 
-const NewUser = mongoose.model<User>("NewUser", newUserSchema);
+const User = mongoose.model<User>("User", userSchema);
 
-export default NewUser;
+export default User;
