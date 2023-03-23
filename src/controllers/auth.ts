@@ -34,8 +34,8 @@ export const login = catchAsync(async (req, res, next) => {
   });
 
   return res.json({
-    result: "ok",
-    data: {
+    message: "ok",
+    result: {
       _id: userData?._id,
       username: userData?.username,
       userGithubUri: userData?.userGithubUri,
