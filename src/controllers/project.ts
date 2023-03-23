@@ -141,8 +141,19 @@ export const updateProject = catchAsync(async (req, res, next) => {
       });
     }
     case "option_update": {
-      const { nodeVersion, installCommand, buildCommand, buildType, envList } =
-        req.body;
+      const {
+        nodeVersion,
+        installCommand,
+        buildCommand,
+        buildType,
+        envList,
+        instanceId,
+        deployedUrl,
+        lastCommitMessage,
+        lastCommitHash,
+        webhookId,
+        publicIpAddress,
+      } = req.body;
 
       const updateData = {
         ...(nodeVersion && { nodeVersion }),
@@ -150,15 +161,15 @@ export const updateProject = catchAsync(async (req, res, next) => {
         ...(buildCommand && { buildCommand }),
         ...(buildType && { buildType }),
         ...(envList && { envList }),
+        ...(instanceId && { instanceId }),
+        ...(deployedUrl && { deployedUrl }),
+        ...(lastCommitMessage && { lastCommitMessage }),
+        ...(lastCommitHash && { lastCommitHash }),
+        ...(webhookId && { webhookId }),
+        ...(publicIpAddress && { publicIpAddress }),
       };
 
-      if (
-        !nodeVersion &&
-        !installCommand &&
-        !buildCommand &&
-        !buildType &&
-        !envList
-      ) {
+      if (!Object.keys(updateData).length) {
         return next(
           createError(401, "Insufficient data to process the request"),
         );
@@ -178,6 +189,35 @@ export const updateProject = catchAsync(async (req, res, next) => {
       return next(createError(401, "No query type data"));
     }
   }
+});
+
+export const updateDeployment = catchAsync(async (req, res, next) => {
+  const { deployment_id } = req.params;
+  const {
+    buildingLog,
+    deployedStatus,
+    lastCommitMessage,
+    lastCommitHash,
+    repoUpdatedAt,
+  } = req.body;
+
+  const updateData = {
+    ...(buildingLog && { buildingLog }),
+    ...(deployedStatus && { deployedStatus }),
+    ...(lastCommitMessage && { lastCommitMessage }),
+    ...(lastCommitHash && { lastCommitHash }),
+    ...(repoUpdatedAt && { repoUpdatedAt }),
+  };
+
+  const updateDeployment = await DB.Deployment.findByIdAndUpdate(
+    deployment_id,
+    updateData,
+  );
+
+  return res.json({
+    message: "ok",
+    result: updateDeployment,
+  });
 });
 
 export const deleteProject = catchAsync(async (req, res, next) => {
