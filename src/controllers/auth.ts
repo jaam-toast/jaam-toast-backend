@@ -33,15 +33,20 @@ export const login = catchAsync(async (req, res, next) => {
     expiresIn: "1d",
   });
 
-  return res.json({
-    message: "ok",
-    result: {
-      _id: userData?._id,
-      username: userData?.username,
-      userGithubUri: userData?.userGithubUri,
-      userImage: userData?.userImage,
-    },
+  const { referer } = req.headers;
+  const loginData = JSON.stringify({
+    id: userData?._id,
+    name: userData?.username,
+    githubUri: userData?.userGithubUri,
+    image: userData?.userImage,
     githubAccessToken,
     accessToken,
   });
+
+  return res
+    .cookie("loginData", loginData, {
+      maxAge: 60 * 60 * 24,
+      httpOnly: true,
+    })
+    .redirect(referer ?? Config.CLIENT_URL);
 });

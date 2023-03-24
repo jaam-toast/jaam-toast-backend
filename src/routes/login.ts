@@ -9,7 +9,7 @@ const route = Router();
 const loginRouter = (app: Router) => {
   app.use("/login", route);
 
-  route.post("/", verifyGithubCode, AuthController.login);
+  route.get("/", verifyGithubCode, AuthController.login);
 };
 
 export default loginRouter;
