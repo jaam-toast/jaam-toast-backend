@@ -5,7 +5,7 @@ import OauthClient from "../services/OauthClient";
 import GithubClient from "../services/GithubClient";
 
 const verifyGithubCode = catchAsync(async (req, res, next) => {
-  const { code } = req.params;
+  const { code } = req.query;
 
   if (!code) {
     return next(createError(401, "Authentication failed. Cannot find 'code'."));
