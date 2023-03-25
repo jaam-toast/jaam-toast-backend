@@ -2,8 +2,8 @@ import User from "@src/models/User";
 import {
   User as UserType,
   Project,
-  IdParameter,
   UserOptions,
+  IdParameter,
 } from "@src/types/db";
 
 class UserService {
@@ -76,7 +76,7 @@ class UserService {
     projectId: IdParameter,
   ) {
     try {
-      if (!userId || projectId) {
+      if (!userId || !projectId) {
         throw Error("Expected 2 arguments, but insufficient arguments.");
       }
 
