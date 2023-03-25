@@ -1,9 +1,4 @@
-import { startSession } from "mongoose";
-
-import UserModel from "@src/models/User";
-import RepoModel from "@src/models/Repo";
-import log from "@src/services/Logger";
-
+import DB from "@src/services/DBService";
 import ProjectService from "@src/services/ProjectService";
 
 const saveProject = async (
@@ -11,78 +6,68 @@ const saveProject = async (
   next: Function,
 ): Promise<void> => {
   const {
+    userId,
+    space,
     repoName,
     repoCloneUrl,
-    repoOwner,
-    deployedUrl,
-    instanceId,
-    userId,
-    repoUpdatedAt,
+    projectUpdatedAt,
+    projectName,
     nodeVersion,
-    buildingLog,
-    lastCommitMessage,
-    webhookId,
     installCommand,
     buildCommand,
     buildType,
     envList,
+    lastCommitMessage,
+    lastCommitHash,
+    webhookId,
   } = service;
 
   if (
-    !repoOwner ||
-    !deployedUrl ||
-    !instanceId ||
-    !webhookId ||
+    !userId ||
+    !space ||
+    !repoName ||
+    !repoCloneUrl ||
+    !projectUpdatedAt ||
+    !projectName ||
+    !nodeVersion ||
+    !installCommand ||
+    !buildCommand ||
+    !buildType ||
+    !envList ||
     !lastCommitMessage ||
-    !buildingLog
+    !lastCommitHash ||
+    !webhookId
   ) {
     service.throw("Cannot find environment data before saving project.");
   }
 
   try {
-    const session = await startSession();
-
-    await session.withTransaction(async () => {
-      const newRepoArr = await RepoModel.create(
-        [
-          {
-            repoName,
-            repoOwner,
-            repoCloneUrl,
-            repoUpdatedAt,
-            nodeVersion,
-            installCommand,
-            buildCommand,
-            buildType,
-            envList,
-            instanceId,
-            buildingLog,
-            deployedUrl,
-            lastCommitMessage,
-            webhookId,
-          },
-        ],
-        { session },
-      );
-
-      const newRepo = newRepoArr[0].toObject();
-      const repoId = newRepo._id;
-
-      await UserModel.updateOne(
-        { _id: userId },
-        { $push: { myRepos: newRepo._id } },
-        { session, new: true },
-      );
-
-      service.repoId = repoId;
+    const newProject = await DB.Project.create({
+      space,
+      repoName,
+      repoCloneUrl,
+      projectUpdatedAt,
+      projectName,
+      nodeVersion,
+      installCommand,
+      buildCommand,
+      buildType,
+      envList,
+      lastCommitMessage,
+      lastCommitHash,
+      webhookId,
     });
 
-    session.endSession();
+    if (!newProject) {
+      service.throw("Failed to create database.");
+    }
+
+    await DB.User.findByIdAndUpdateProject(userId, newProject._id);
+
+    service.projectId = newProject._id;
   } catch (error) {
     service.throw("An unexpected error occurred during saving project.", error);
   }
-
-  log.build("A new deployment's data is saved successfully!");
 
   next();
 };
