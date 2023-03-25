@@ -39,11 +39,6 @@ const verifyGithubSignature: RequestHandler = (req, res, next) => {
     `The result of calculatedSignature and githubSignature from Github webhook match properly`,
   );
 
-  res.locals = {
-    event,
-    payload,
-  };
-
   next();
 };
 
