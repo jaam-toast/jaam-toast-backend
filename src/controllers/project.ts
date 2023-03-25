@@ -1,79 +1,35 @@
 import createError from "http-errors";
 
-import Config from "@src/config";
 import catchAsync from "@src/controllers/utils/asyncHandler";
 import DB from "@src/services/DBService";
-import GithubClient from "@src/services/GithubClient";
 import ProjectService from "@src/services/ProjectService";
 
+import { BuildOptions } from "@src/types";
+
 export const createProject = catchAsync(async (req, res, next) => {
-  const buildOption = req.body;
-  const { githubAccessToken } = req.query;
-  const { userId, space, repoName } = buildOption;
+  const buildOption: BuildOptions = req.body;
+  const githubAccessToken = req.query.githubAccessToken as string;
 
-  if (!userId || !space || !repoName) {
-    return next(createError(401, "The required data is missing."));
+  if (!buildOption || !githubAccessToken) {
+    return next(createError(401, "Cannot find environment data."));
   }
-
-  const newProject = await DB.Project.create({
-    ...buildOption,
-    space,
-    repoName,
-  });
-
-  if (!newProject) {
-    return next(createError(500, "Failed to create database."));
-  }
-
-  await DB.User.findByIdAndUpdateProject(userId, newProject._id);
-
-  res.json({
-    message: "ok",
-    result: newProject._id,
-  });
 
   const project = new ProjectService();
 
-  await project.deployProject({
+  await project.createProject({
     ...buildOption,
-    userId,
     githubAccessToken,
   });
 
-  const {
-    // subdomain,
-    // repoName,
-    // repoOwner,
-    // repoCloneUrl,
-    // nodeVersion,
-    // installCommand,
-    // buildCommand,
-    // envList,
-    // buildType,
-    // repoId,
-    repoUpdatedAt,
-    deployedUrl,
-    buildingLog,
-    instanceId,
-    lastCommitMessage,
-    webhookId,
-  } = project;
+  const { projectId } = project;
 
-  await DB.Project.findByIdAndUpdate(newProject._id, {
-    instanceId,
-    deployedUrl,
-    lastCommitMessage,
-    // add lastCommitHash,
-    // add publicIpAddress,
-    webhookId,
-  });
+  if (!projectId) {
+    return next(createError(500, "Failed to create database."));
+  }
 
-  await DB.Deployment.findByIdAndUpdate(newProject._id, {
-    buildingLog,
-    repoUpdatedAt,
-    deployedStatus: "test...",
-    lastCommitMessage: "test...",
-    lastCommitHash: "test...",
+  res.status(201).json({
+    message: "ok",
+    result: projectId,
   });
 
   return;
