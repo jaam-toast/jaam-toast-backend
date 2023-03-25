@@ -1,12 +1,25 @@
 import Deployment from "@src/models/Deployment";
-import { Deployment as DeploymentType, IdParameter } from "@src/types/db";
+import {
+  Deployment as DeploymentType,
+  DeploymentOptions,
+  IdParameter,
+} from "@src/types/db";
 
 class DeploymentService {
-  static async create() {
+  static async create(options?: DeploymentOptions) {
     try {
-      const newDeployment = await Deployment.create({
-        deployStatus: "pending",
-      });
+      let newDeployment;
+
+      if (options && Object.keys(options).length) {
+        newDeployment = await Deployment.create({
+          deployStatus: "pending",
+          ...options,
+        });
+      } else {
+        newDeployment = await Deployment.create({
+          deployStatus: "pending",
+        });
+      }
 
       return newDeployment;
     } catch (error) {

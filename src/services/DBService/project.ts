@@ -1,12 +1,15 @@
 import Project from "@src/models/Project";
 import Deployment from "@src/models/Deployment";
-import { BuildOptions } from "@src/types";
-import { IdParameter, ProjectOptions } from "@src/types/db";
+import {
+  Project as ProjectType,
+  ProjectOptions,
+  IdParameter,
+} from "@src/types/db";
 
 class ProjectService {
-  static async create(options: BuildOptions) {
+  static async create(data: ProjectType) {
     try {
-      if (!options) {
+      if (!data) {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
@@ -20,7 +23,10 @@ class ProjectService {
         buildCommand,
         buildType,
         envList,
-      } = options;
+        webhookId,
+        lastCommitMessage,
+        lastCommitHash,
+      } = data;
 
       if (
         !space ||
@@ -31,9 +37,12 @@ class ProjectService {
         !installCommand ||
         !buildCommand ||
         !buildType ||
-        !envList
+        !envList ||
+        !webhookId ||
+        !lastCommitMessage ||
+        !lastCommitHash
       ) {
-        throw Error("Cannot find environment options before saving project.");
+        throw Error("Cannot find environment data before saving project.");
       }
 
       const newProject = await Project.create({
@@ -46,6 +55,9 @@ class ProjectService {
         buildCommand,
         buildType,
         envList,
+        webhookId,
+        lastCommitMessage,
+        lastCommitHash,
       });
 
       return newProject;
@@ -112,10 +124,22 @@ class ProjectService {
         throw Error("Update data type is not valid");
       }
 
-      const updatedProject = await Project.updateOne(
-        { ...targetOptions },
-        { $set: { ...updateOptions } },
-      );
+      let updatedProject;
+
+      if (updateOptions.deployments) {
+        const [deploymentId] = updateOptions.deployments;
+
+        updatedProject = await Project.findOneAndUpdate(
+          { ...targetOptions },
+          { $set: { ...updateOptions } },
+          { $push: { deployments: deploymentId } },
+        );
+      } else {
+        updatedProject = await Project.findOneAndUpdate(
+          { ...targetOptions },
+          { $set: { ...updateOptions } },
+        );
+      }
 
       return updatedProject;
     } catch (error) {
