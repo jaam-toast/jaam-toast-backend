@@ -1,10 +1,10 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
+import { RequestHandler } from "express";
 
 import Config from "@src/config";
 
-import { RequestHandler } from "express";
-import { UserType } from "@src/types/custom";
+import { User } from "@src/types/db";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
@@ -50,7 +50,7 @@ const verifyToken: RequestHandler = (req, res, next) => {
     );
   }
 
-  req.user = verifiedUserData as UserType;
+  req.user = verifiedUserData as User;
 
   next();
 };
