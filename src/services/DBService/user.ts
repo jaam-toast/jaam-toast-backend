@@ -1,5 +1,6 @@
 import User from "@src/models/User";
-import {
+
+import type {
   User as UserType,
   Project,
   UserOptions,

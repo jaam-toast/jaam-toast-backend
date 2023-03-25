@@ -1,7 +1,7 @@
 import morgan from "morgan";
 import log from "@src/services/Logger";
 
-import { StreamOptions } from "morgan";
+import type { StreamOptions } from "morgan";
 
 const stream: StreamOptions = {
   write: message => log.request(message),

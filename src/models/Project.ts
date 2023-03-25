@@ -3,7 +3,7 @@ import joi from "joi";
 import joigoose from "joigoose";
 import Deployment from "./Deployment";
 
-import { Project } from "@src/types/db";
+import type { Project } from "@src/types/db";
 
 const Joigoose = joigoose(mongoose);
 

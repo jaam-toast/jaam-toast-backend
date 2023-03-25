@@ -1,5 +1,6 @@
 import Deployment from "@src/models/Deployment";
-import {
+
+import type {
   Deployment as DeploymentType,
   DeploymentOptions,
   IdParameter,

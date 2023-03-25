@@ -1,9 +1,10 @@
-import { RequestHandler } from "express";
 import createError from "http-errors";
 import { createHmac } from "crypto";
 
 import Config from "../config";
 import log from "@src/services/Logger";
+
+import type { RequestHandler } from "express";
 
 const verifyGithubSignature: RequestHandler = (req, res, next) => {
   const githubSignature = req.header("X-Hub-Signature-256");

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import { Project, User } from "@src/types/db";
+import type { Project, User } from "@src/types/db";
 
 const joiUserSchema = joi.object({
   username: joi.string().required(),

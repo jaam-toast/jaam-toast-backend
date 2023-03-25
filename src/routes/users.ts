@@ -2,10 +2,9 @@ import { Router } from "express";
 
 import Joi from "joi";
 
-import verifyToken from "../middlewares/verifyToken";
-import validateSchema from "../middlewares/validateSchema";
-
-import * as UserController from "../controllers/user";
+import * as UserController from "@src/controllers/user";
+import verifyToken from "@src/middlewares/verifyToken";
+import validateSchema from "@src/middlewares/validateSchema";
 
 const route = Router();
 

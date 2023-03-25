@@ -1,6 +1,6 @@
 import log from "@src/services/Logger";
 
-import { ErrorRequestHandler } from "express";
+import type { ErrorRequestHandler } from "express";
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.locals.message = err.message;
