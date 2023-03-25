@@ -1,80 +1,60 @@
+import { Types } from "mongoose";
 import Service from "@src/services/Service";
 import log from "@src/services/Logger";
 import setGithubInfo from "./handlers/setGithubInfo";
-import createInstance from "./handlers/createInstance";
 import createWebhook from "./handlers/createWebhook";
-import waitPublicIpAdreessCreation from "./handlers/waitPublicIpAdressCreation";
-import createDomain from "./handlers/createDomain";
-import waitDnsRecordCreation from "./handlers/waitDnsRecordCreation";
-import createHttpsCertification from "./handlers/createHttpsCertification";
-import waitInstanceLogStremCreation from "./handlers/waitInstanceLogStremCreation";
-import getInstanceFilteredLogs from "./handlers/getInstanceFilteredLogs";
+import checkWebhook from "./handlers/checkWebhook";
 import saveProject from "./handlers/saveProject";
-import removeDeployment from "./handlers/removeDeployment";
-import updateInstance from "./handlers/updateInstace";
-import removeProject from "./handlers/removeProject";
-import updateProject from "./handlers/updateProject";
 
-import { Types } from "mongoose";
-import {
-  BuildOptions,
-  Env,
-  ProjectDeleteOptions,
-  RedeployOptions,
-} from "@src/types";
+import { BuildOptions, Env } from "@src/types";
+import { ProjectOptions } from "@src/types/db";
+import updateProject from "./handlers/updateProject";
+import deleteProject from "./handlers/deleteProject";
 
 class ProjectService extends Service {
-  /* build options */
-  githubAccessToken?: string;
+  userId?: string;
+  space?: string;
   repoName?: string;
   repoCloneUrl?: string;
-  repoUpdatedAt?: string;
-  subdomain?: string;
-  userId?: string;
+  projectUpdatedAt?: string;
+  projectName?: string;
   nodeVersion?: string;
   installCommand?: string;
   buildCommand?: string;
   envList?: Env[];
   buildType?: string;
+  githubAccessToken?: string;
 
-  /* build data */
+  webhookId?: number;
+  lastCommitMessage?: string;
+  lastCommitHash?: string;
+  deployments?: Types.ObjectId[];
   instanceId?: string;
   deployedUrl?: string;
-  lastCommitMessage?: string;
-  webhookId?: string;
-  recordId?: string;
   publicIpAddress?: string;
-  buildingLog?: (string | undefined)[];
-  repoId?: Types.ObjectId;
-  repoOwner?: string;
+  projectId?: Types.ObjectId | string;
+  deploymentId?: Types.ObjectId;
 
   /* methods */
-  async deployProject(buildOptions: BuildOptions): Promise<ProjectService> {
+  async createProject(buildOptions: BuildOptions): Promise<ProjectService> {
     this.githubAccessToken = buildOptions.githubAccessToken;
+    this.userId = buildOptions.userId;
+    this.space = buildOptions.space;
     this.repoName = buildOptions.repoName;
     this.repoCloneUrl = buildOptions.repoCloneUrl;
-    this.repoUpdatedAt = buildOptions.repoUpdatedAt;
-    this.subdomain = buildOptions.projectName;
+    this.projectUpdatedAt = buildOptions.projectUpdatedAt;
+    this.projectName = buildOptions.projectName;
     this.nodeVersion = buildOptions.nodeVersion;
     this.installCommand = buildOptions.installCommand;
     this.buildCommand = buildOptions.buildCommand;
     this.envList = buildOptions.envList;
     this.buildType = buildOptions.buildType;
-    this.userId = buildOptions.userId;
 
     try {
-      await this.use(
-        setGithubInfo,
-        createInstance,
-        createWebhook,
-        waitPublicIpAdreessCreation,
-        createDomain,
-        waitDnsRecordCreation,
-        createHttpsCertification,
-        waitInstanceLogStremCreation,
-        getInstanceFilteredLogs,
-        saveProject,
-      );
+      await setGithubInfo(this, () => {});
+      await checkWebhook(this, () => {});
+      await createWebhook(this, () => {});
+      await saveProject(this, () => {});
 
       return this;
     } catch (error) {
@@ -88,44 +68,39 @@ class ProjectService extends Service {
     throw new Error(message);
   }
 
-  async redeployProject(options: RedeployOptions): Promise<ProjectService> {
-    this.lastCommitMessage = options.lastCommitMessage;
-    this.repoCloneUrl = options.repoCloneUrl;
-    this.repoName = options.repoName;
+  async updateProject(updateOptions: ProjectOptions): Promise<ProjectService> {
+    this.projectUpdatedAt = updateOptions.projectUpdatedAt;
+    this.projectName = updateOptions.projectName;
+    this.nodeVersion = updateOptions.nodeVersion;
+    this.installCommand = updateOptions.installCommand;
+    this.buildCommand = updateOptions.buildCommand;
+    this.envList = updateOptions.envList;
+    this.buildType = updateOptions.buildType;
+    this.webhookId = updateOptions.webhookId;
+    this.projectUpdatedAt = updateOptions.projectUpdatedAt;
+    this.lastCommitMessage = updateOptions.lastCommitMessage;
+    this.lastCommitHash = updateOptions.lastCommitHash;
 
     try {
-      await this.use(updateProject, updateInstance);
+      await updateProject(this, () => {});
+
+      return this;
     } catch (error) {
       throw error;
     }
-
-    return this;
   }
 
-  async deleteDeployment(): Promise<ProjectService> {
+  async deleteProject(
+    projectName: ProjectOptions["projectName"],
+  ): Promise<ProjectService> {
+    this.projectName = projectName;
     try {
-      await this.use(removeDeployment);
+      await deleteProject(this, () => {});
+
+      return this;
     } catch (error) {
       throw error;
     }
-
-    return this;
-  }
-
-  async deleteProject(options: ProjectDeleteOptions): Promise<ProjectService> {
-    this.userId = options.userId;
-    this.repoId = options.repoId;
-    this.instanceId = options.instanceId;
-    this.subdomain = options.projectName;
-    this.publicIpAddress = options.publicIpAddress;
-
-    try {
-      await this.use(removeDeployment);
-    } catch (error) {
-      throw error;
-    }
-
-    return this;
   }
 }
 
