@@ -10,6 +10,7 @@ import {
 } from "@src/controllers/project";
 import verifyToken from "@src/middlewares/verifyToken";
 import validateSchema from "@src/middlewares/validateSchema";
+import verifyGithubSignature from "@src/middlewares/verifyGithubSignature";
 
 const route = Router();
 
@@ -17,6 +18,8 @@ const projectsRouter = (app: Router) => {
   app.use("/projects", verifyToken, route);
 
   route.post("/", createProject);
+
+  route.post("/hooks", verifyGithubSignature, updateProject);
 
   route.get(
     "/:project_name",
