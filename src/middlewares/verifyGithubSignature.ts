@@ -1,18 +1,17 @@
+import { RequestHandler } from "express";
 import createError from "http-errors";
 import { createHmac } from "crypto";
 
 import Config from "../config";
 import log from "@src/services/Logger";
 
-import { RequestHandler } from "express";
-
 const verifyGithubSignature: RequestHandler = (req, res, next) => {
   const githubSignature = req.header("X-Hub-Signature-256");
-  const eventName = req.header("X-GitHub-Event");
+  const event = req.header("X-GitHub-Event");
   const payload = req.body;
 
   log.build(
-    `A POST request is received from Github webhook, and the event name is - ${eventName}`,
+    `A POST request is received from Github webhook, and the event name is - ${event}`,
   );
 
   const hash = "sha256";
@@ -38,6 +37,11 @@ const verifyGithubSignature: RequestHandler = (req, res, next) => {
   log.build(
     `The result of calculatedSignature and githubSignature from Github webhook match properly`,
   );
+
+  res.locals = {
+    event,
+    payload,
+  };
 
   next();
 };
