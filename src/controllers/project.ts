@@ -46,6 +46,10 @@ export const getProject = catchAsync(async (req, res, next) => {
 
   const project = await DB.Project.findOne({ projectName });
 
+  if (!project) {
+    return next(createError(400, "Project data does not exist."));
+  }
+
   return res.json({
     message: "ok",
     result: project,
@@ -54,126 +58,73 @@ export const getProject = catchAsync(async (req, res, next) => {
 
 export const updateProject = catchAsync(async (req, res, next) => {
   const { preject_name: projectName } = req.params;
-  const { type } = req.query;
+  const { event, payload } = res.locals;
 
-  switch (type) {
-    case "pull_request_update": {
-      const { action, pull_request, repository } = req.body;
-
-      if (action !== "closed" || !pull_request.merged) {
-        return next(
-          createError(
-            401,
-            "Received abnormal PR data or PR that has not yet been merged.",
-          ),
-        );
-      }
-
-      const githubAccessToken = Config.USER_CREDENTIAL_TOKEN;
-      const githubClient = new GithubClient(githubAccessToken as string);
-      const project = new ProjectService();
-
-      const repoOwner = repository.owner.login;
-      const repoName = repository.name;
-      const headRef = pull_request.head.ref;
-
-      const { commit } = await githubClient.getHeadCommitMessage(
-        repoOwner,
-        repoName,
-        headRef,
-      );
-
-      const redeployOptions = {
-        repoCloneUrl: repository.clone_url,
-        lastCommitMessage: commit.message,
-        repoName,
-      };
-      await project.redeployProject(redeployOptions);
-
-      // TODO db update logic
+  switch (event) {
+    case "ping": {
       return res.json({
-        message: "ok",
-        result: project,
+        message: "The webhook has been successfully installed.",
       });
     }
-    case "option_update": {
-      const {
-        nodeVersion,
-        installCommand,
-        buildCommand,
-        buildType,
-        envList,
-        instanceId,
-        deployedUrl,
-        lastCommitMessage,
-        lastCommitHash,
-        webhookId,
-        publicIpAddress,
-      } = req.body;
-
-      const updateData = {
-        ...(nodeVersion && { nodeVersion }),
-        ...(installCommand && { installCommand }),
-        ...(buildCommand && { buildCommand }),
-        ...(buildType && { buildType }),
-        ...(envList && { envList }),
-        ...(instanceId && { instanceId }),
-        ...(deployedUrl && { deployedUrl }),
-        ...(lastCommitMessage && { lastCommitMessage }),
-        ...(lastCommitHash && { lastCommitHash }),
-        ...(webhookId && { webhookId }),
-        ...(publicIpAddress && { publicIpAddress }),
-      };
-
-      if (!Object.keys(updateData).length) {
-        return next(
-          createError(401, "Insufficient data to process the request"),
-        );
+    case "push": {
+      if (
+        payload.ref.slice(11) !== "main" &&
+        payload.ref.slice(11) !== "master"
+      ) {
+        return res.status(304).json({
+          message: "ok",
+        });
       }
 
-      const project = await DB.Project.findOneAndUpdate(
-        { projectName },
-        updateData,
-      );
+      const { head_commit: headCommit, repository } = req.body;
+
+      const webhookId = repository.id;
+      const projectUpdatedAt = headCommit.timestamp;
+      const lastCommitMessage = headCommit.message;
+      const lastCommitHash = headCommit.id;
+
+      const project = new ProjectService();
+
+      await project.updateProject({
+        webhookId,
+        projectUpdatedAt,
+        lastCommitMessage,
+        lastCommitHash,
+      });
+
+      const { projectId, deploymentId } = project;
+
+      if (!projectId || !deploymentId) {
+        return next(createError(500, "Failed to update database."));
+      }
 
       return res.json({
         message: "ok",
-        result: project,
+        result: projectId,
       });
     }
     default: {
-      return next(createError(401, "No query type data"));
+      const updateOptions = req.body;
+
+      const project = new ProjectService();
+
+      await project.updateProject({
+        projectName,
+        ...updateOptions,
+      });
+
+      const { projectId, deploymentId } = project;
+
+      if (!projectId || !deploymentId) {
+        return next(createError(500, "Failed to update database."));
+      }
+
+      return res.json({
+        message: "ok",
+        result: projectId,
+      });
     }
   }
-});
-
-export const updateDeployment = catchAsync(async (req, res, next) => {
-  const { deployment_id } = req.params;
-  const {
-    buildingLog,
-    deployedStatus,
-    lastCommitMessage,
-    lastCommitHash,
-    repoUpdatedAt,
-  } = req.body;
-
-  const updateData = {
-    ...(buildingLog && { buildingLog }),
-    ...(deployedStatus && { deployedStatus }),
-    ...(lastCommitMessage && { lastCommitMessage }),
-    ...(lastCommitHash && { lastCommitHash }),
-    ...(repoUpdatedAt && { repoUpdatedAt }),
-  };
-
-  const updateDeployment = await DB.Deployment.findByIdAndUpdate(
-    deployment_id,
-    updateData,
-  );
-
-  return res.json({
-    message: "ok",
-    result: updateDeployment,
-  });
 });
 
 export const deleteProject = catchAsync(async (req, res, next) => {
@@ -189,23 +140,17 @@ export const deleteProject = catchAsync(async (req, res, next) => {
     );
   }
 
-  // TODO
-  const deletedProject = await DB.Project.findOneAndDelete({ projectName });
+  const project = new ProjectService();
 
-  if (!deletedProject) {
+  await project.deleteProject(projectName);
+
+  const { projectId: deletedProjectId } = project;
+
+  if (!deletedProjectId) {
     return next(createError(500, "Failed to delete database."));
   }
 
-  const project = new ProjectService();
-
-  await project.deleteProject({
-    repoId: deletedProject?._id,
-    instanceId: deletedProject?.instanceId,
-    projectName: deletedProject?.projectName,
-    publicIpAddress: deletedProject?.publicIpAddress,
-  });
-
-  return res.json({
+  return res.status(204).json({
     message: "ok",
   });
 });
