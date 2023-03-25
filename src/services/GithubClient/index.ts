@@ -2,7 +2,8 @@ import axios from "axios";
 
 import Config from "@src/config";
 import log from "@src/services/Logger";
-import {
+
+import type {
   GithubUser,
   GithubOrgs,
   GithubRepos,
@@ -130,8 +131,8 @@ class GithubClient {
         },
         {
           params: {
-            owner: `${repoOwner}`,
-            repo: `${repoName}`,
+            owner: repoOwner,
+            repo: repoName,
           },
         },
       );

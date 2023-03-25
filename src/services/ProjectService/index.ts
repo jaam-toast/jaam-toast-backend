@@ -5,11 +5,11 @@ import setGithubInfo from "./handlers/setGithubInfo";
 import createWebhook from "./handlers/createWebhook";
 import checkWebhook from "./handlers/checkWebhook";
 import saveProject from "./handlers/saveProject";
-
-import { BuildOptions, Env } from "@src/types";
-import { ProjectOptions } from "@src/types/db";
 import updateProject from "./handlers/updateProject";
 import deleteProject from "./handlers/deleteProject";
+
+import type { BuildOptions, Env } from "@src/types";
+import type { ProjectOptions } from "@src/types/db";
 
 class ProjectService extends Service {
   userId?: string;

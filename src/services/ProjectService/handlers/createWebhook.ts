@@ -17,7 +17,6 @@ const createWebhook = async (
 
   try {
     const githubClient = new GithubClient(githubAccessToken as string);
-
     const newWebhookData = await githubClient.createRepoWebhook(
       space,
       repoName,

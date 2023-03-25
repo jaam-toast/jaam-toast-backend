@@ -15,11 +15,9 @@ import verifyGithubSignature from "@src/middlewares/verifyGithubSignature";
 const route = Router();
 
 const projectsRouter = (app: Router) => {
-  app.use("/projects", verifyToken, route);
+  app.use("/projects", route);
 
-  route.post("/", createProject);
-
-  route.post("/hooks", verifyGithubSignature, updateProject);
+  route.post("/", verifyToken, createProject);
 
   route.get(
     "/:project_name",
@@ -29,6 +27,7 @@ const projectsRouter = (app: Router) => {
       }),
       "params[project_name]",
     ),
+    verifyToken,
     getProject,
   );
 
@@ -40,6 +39,7 @@ const projectsRouter = (app: Router) => {
       }),
       "params[project_name]",
     ),
+    verifyToken,
     updateProject,
   );
 
@@ -51,6 +51,7 @@ const projectsRouter = (app: Router) => {
       }),
       "params[project_name]",
     ),
+    verifyToken,
     deleteProject,
   );
 };
