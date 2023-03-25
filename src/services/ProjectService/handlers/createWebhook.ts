@@ -1,24 +1,28 @@
 import GithubClient from "@src/services/GithubClient";
-
 import ProjectService from "@src/services/ProjectService";
 
 const createWebhook = async (
   service: ProjectService,
   next: Function,
 ): Promise<void> => {
-  const { githubAccessToken, repoOwner, repoName } = service;
+  const { githubAccessToken, space, repoName, webhookId } = service;
 
-  if (!repoOwner || !repoName) {
-    service.throw("Cannot find 'repoOwner' before creating EC2 instance.");
+  if (webhookId) {
+    return next();
+  }
+
+  if (!githubAccessToken || !space || !repoName) {
+    service.throw("Cannot find environment data");
   }
 
   try {
     const githubClient = new GithubClient(githubAccessToken as string);
+
     const newWebhookData = await githubClient.createRepoWebhook(
-      repoOwner,
+      space,
       repoName,
     );
-    const webhookId = newWebhookData.id.toString();
+    const webhookId = newWebhookData.id;
 
     service.webhookId = webhookId;
   } catch (error) {
