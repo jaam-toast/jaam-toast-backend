@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
 import createError from "http-errors";
 
 import log from "@src/services/Logger";
+
+import type { Request, Response, NextFunction } from "express";
 
 const validateSchema = (schema: ObjectSchema, property: string) => {
   return (req: Request, res: Response, next: NextFunction) => {

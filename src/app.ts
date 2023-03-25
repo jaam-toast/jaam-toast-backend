@@ -5,7 +5,7 @@ import expressLoader from "@src/loaders/express";
 import serverLoader from "@src/loaders/server";
 import socketLoader from "@src/loaders/socket";
 
-import { Express } from "express";
+import type { Express } from "express";
 
 const app = express();
 

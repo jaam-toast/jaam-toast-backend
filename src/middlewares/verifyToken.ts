@@ -1,10 +1,10 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
-import { RequestHandler } from "express";
 
 import Config from "@src/config";
 
-import { User } from "@src/types/db";
+import type { User } from "@src/types/db";
+import type { RequestHandler } from "express";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;

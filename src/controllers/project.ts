@@ -4,7 +4,7 @@ import catchAsync from "@src/controllers/utils/asyncHandler";
 import DB from "@src/services/DBService";
 import ProjectService from "@src/services/ProjectService";
 
-import { BuildOptions } from "@src/types";
+import type { BuildOptions } from "@src/types";
 
 export const createProject = catchAsync(async (req, res, next) => {
   const buildOption: BuildOptions = req.body;

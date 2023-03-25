@@ -6,7 +6,7 @@ import requestLogger from "@src/middlewares/morganMiddleware";
 import errorHandler from "@src/middlewares/errorHandler";
 import routes from "@src/routes";
 
-import { Express } from "express";
+import type { Express } from "express";
 
 const expressLoader = async (app: Express): Promise<void> => {
   app.get("/status", (req, res) => {

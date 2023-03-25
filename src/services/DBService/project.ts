@@ -1,6 +1,7 @@
 import Project from "@src/models/Project";
 import Deployment from "@src/models/Deployment";
-import {
+
+import type {
   Project as ProjectType,
   ProjectOptions,
   IdParameter,

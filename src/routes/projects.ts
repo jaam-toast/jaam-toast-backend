@@ -8,7 +8,6 @@ import {
   updateProject,
   deleteProject,
 } from "@src/controllers/project";
-
 import verifyToken from "@src/middlewares/verifyToken";
 import validateSchema from "@src/middlewares/validateSchema";
 

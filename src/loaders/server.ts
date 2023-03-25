@@ -2,9 +2,9 @@ import http from "http";
 
 import log from "@src/services/Logger";
 
-import { Express } from "express";
-import { Server } from "http";
-import { AddressInfo } from "net";
+import type { Express } from "express";
+import type { Server } from "http";
+import type { AddressInfo } from "net";
 
 const serverLoader = async (app: Express): Promise<Server> => {
   const port = parseInt(process.env.PORT || "8000", 10);

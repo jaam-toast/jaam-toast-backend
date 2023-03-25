@@ -1,4 +1,4 @@
-import { ServiceHandler } from "@src/types";
+import type { ServiceHandler } from "@src/types";
 
 abstract class Service {
   public layers: ServiceHandler<this>[] = [];
