@@ -14,7 +14,7 @@ const setGithubInfo = async (
   try {
     const githubClient = new GithubClient(githubAccessToken as string);
 
-    const commitList = (await githubClient.getCommits(space, repoName)) as any;
+    const commitList = await githubClient.getCommits(space, repoName);
 
     const lastCommitMessage = commitList[0].commit.message;
     const lastCommitHash = commitList[0].sha;

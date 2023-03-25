@@ -20,11 +20,14 @@ export type GithubOrgs =
 export type GithubOrgRepos =
   Endpoints["GET /orgs/{org}/repos"]["response"]["data"];
 
+export type GithubGetWebhooks =
+  Endpoints["GET /repos/{owner}/{repo}/hooks"]["response"]["data"];
+
 export type GithubWebhooks =
   Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"]["data"];
 
 export type GithubCommits =
-  Endpoints["GET /repos/{owner}/{repo}/commits"]["response"];
+  Endpoints["GET /repos/{owner}/{repo}/commits"]["response"]["data"];
 
 export type GithubPullRequestCommits =
   Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"]["data"];
