@@ -31,5 +31,5 @@ export type BuildOptions = {
   buildCommand: string;
   envList: Env[];
   buildType: string;
-  githubAccessToken?: string | QueryString.ParsedQs;
+  githubAccessToken?: string;
 };

@@ -22,10 +22,10 @@ export type Project = {
   buildCommand: string;
   buildType: string;
   envList: Env[];
-  deployments?: Types.ObjectId[];
+  webhookId: number;
   lastCommitMessage: string;
   lastCommitHash: string;
-  webhookId: number;
+  deployments?: Types.ObjectId[];
   instanceId?: string;
   deployedUrl?: string;
   publicIpAddress?: string;
