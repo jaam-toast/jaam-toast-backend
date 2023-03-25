@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { Env } from ".";
 
 export interface User {
   _id?: Types.ObjectId;
@@ -11,22 +12,22 @@ export interface User {
 
 export type Project = {
   _id?: Types.ObjectId;
-  space?: string;
+  space: string;
   repoName: string;
   repoCloneUrl: string;
-  repoUpdatedAt: string;
+  projectUpdatedAt: string;
   projectName: string;
   nodeVersion: string;
   installCommand: string;
   buildCommand: string;
   buildType: string;
-  envList: string;
-  deployments: Types.ObjectId[];
+  envList: Env[];
+  deployments?: Types.ObjectId[];
+  lastCommitMessage: string;
+  lastCommitHash: string;
+  webhookId: number;
   instanceId?: string;
   deployedUrl?: string;
-  lastCommitMessage?: string;
-  lastCommitHash?: string;
-  webhookId?: string;
   publicIpAddress?: string;
 };
 
@@ -41,30 +42,38 @@ export type Deployment = {
 
 export type IdParameter = Types.ObjectId | string;
 
-export type ProjectProperty = {
-  space?: string;
-  repoName?: string;
-  repoCloneUrl?: string;
-  repoUpdatedAt?: string;
-  projectName?: string;
-  nodeVersion?: string;
-  installCommand?: string;
-  buildCommand?: string;
-  buildType?: string;
-  envList?: string;
-  instanceId?: string;
-  deployedUrl?: string;
-  lastCommitMessage?: string;
-  lastCommitHash?: string;
-  webhookId?: string;
-  deployments?: Types.ObjectId[];
-  publicIpAddress?: string;
-};
-
-export type UserProperty = {
+export type UserOptions = {
   username?: string;
   userGithubUri?: string;
   userImage?: string;
   githubAccessToken?: string;
   projects?: Types.ObjectId[];
+};
+
+export type ProjectOptions = {
+  space?: string;
+  repoName?: string;
+  repoCloneUrl?: string;
+  projectUpdatedAt?: string;
+  projectName?: string;
+  nodeVersion?: string;
+  installCommand?: string;
+  buildCommand?: string;
+  buildType?: string;
+  envList?: Env[];
+  deployments?: Types.ObjectId[];
+  lastCommitMessage?: string;
+  lastCommitHash?: string;
+  webhookId?: number;
+  instanceId?: string;
+  deployedUrl?: string;
+  publicIpAddress?: string;
+};
+
+export type DeploymentOptions = {
+  buildingLog?: (string | undefined)[] | undefined;
+  deployedStatus?: string;
+  lastCommitMessage?: string;
+  lastCommitHash?: string;
+  repoUpdatedAt?: string;
 };
