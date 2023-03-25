@@ -58,43 +58,47 @@ export const getProject = catchAsync(async (req, res, next) => {
 
 export const updateProject = catchAsync(async (req, res, next) => {
   const { project_name: projectName } = req.params;
-  const { event, payload } = res.locals;
+  const { updateType } = req.query;
 
-  switch (event) {
-    case "ping": {
-      return res.json({
-        message: "The webhook has been successfully installed.",
-      });
-    }
-    case "push": {
-      if (
-        payload.ref.slice(11) !== "main" &&
-        payload.ref.slice(11) !== "master"
-      ) {
+  switch (updateType) {
+    case "webhook": {
+      const eventType = req.header("X-GitHub-Event");
+
+      if (!eventType) {
+        return next(createError(400, "Cannot find environment data"));
+      }
+
+      if (eventType === "ping") {
+        return res.json({
+          message: "The webhook has been successfully installed.",
+        });
+      }
+
+      const updatedBranch = req.body.ref.slice(11);
+      const { head_commit: headCommit, repository } = req.body;
+
+      if (!headCommit) {
+        return next(createError(400, "Cannot find environment data"));
+      }
+
+      if (updatedBranch !== "main" && updatedBranch !== "master") {
         return res.status(304).json({
           message: "ok",
         });
       }
 
-      const { head_commit: headCommit, repository } = req.body;
-
-      const webhookId = repository.id;
-      const projectUpdatedAt = headCommit.timestamp;
-      const lastCommitMessage = headCommit.message;
-      const lastCommitHash = headCommit.id;
-
       const project = new ProjectService();
 
       await project.updateProject({
-        webhookId,
-        projectUpdatedAt,
-        lastCommitMessage,
-        lastCommitHash,
+        webhookId: repository.id,
+        projectUpdatedAt: headCommit.timestamp,
+        lastCommitMessage: headCommit.message,
+        lastCommitHash: headCommit.id,
       });
 
-      const { projectId, deploymentId } = project;
+      const { projectId } = project;
 
-      if (!projectId || !deploymentId) {
+      if (!projectId) {
         return next(createError(500, "Failed to update database."));
       }
 
@@ -103,7 +107,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
         result: projectId,
       });
     }
-    default: {
+    case "buildOption": {
       const updateOptions = req.body;
 
       const project = new ProjectService();
@@ -123,6 +127,9 @@ export const updateProject = catchAsync(async (req, res, next) => {
         message: "ok",
         result: projectId,
       });
+    }
+    default: {
+      return next(createError(400, "Cannot find update type"));
     }
   }
 });
