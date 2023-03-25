@@ -15,7 +15,9 @@ const checkWebhook = async (
   try {
     const project = await DB.Project.findOne({ repoName });
 
-    if (!project) return next();
+    if (!project) {
+      return next();
+    }
 
     const githubClient = new GithubClient(githubAccessToken as string);
     const repoWebhook = await githubClient.getRepoWebhook(space, repoName);

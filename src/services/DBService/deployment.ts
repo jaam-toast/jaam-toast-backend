@@ -9,18 +9,10 @@ import type {
 class DeploymentService {
   static async create(options?: DeploymentOptions) {
     try {
-      let newDeployment;
-
-      if (options && Object.keys(options).length) {
-        newDeployment = await Deployment.create({
-          deployStatus: "pending",
-          ...options,
-        });
-      } else {
-        newDeployment = await Deployment.create({
-          deployStatus: "pending",
-        });
-      }
+      const newDeployment = await Deployment.create({
+        deployStatus: "pending",
+        ...options,
+      });
 
       return newDeployment;
     } catch (error) {

@@ -125,22 +125,16 @@ class ProjectService {
         throw Error("Update data type is not valid");
       }
 
-      let updatedProject;
-
-      if (updateOptions.deployments) {
-        const [deploymentId] = updateOptions.deployments;
-
-        updatedProject = await Project.findOneAndUpdate(
-          { ...targetOptions },
-          { $set: { ...updateOptions } },
-          { $push: { deployments: deploymentId } },
-        );
-      } else {
-        updatedProject = await Project.findOneAndUpdate(
-          { ...targetOptions },
-          { $set: { ...updateOptions } },
-        );
-      }
+      const updatedProject = updateOptions.deployments
+        ? await Project.findOneAndUpdate(
+            { ...targetOptions },
+            { $set: { ...updateOptions } },
+            { $push: { deployments: updateOptions.deployments[0] } },
+          )
+        : await Project.findOneAndUpdate(
+            { ...targetOptions },
+            { $set: { ...updateOptions } },
+          );
 
       return updatedProject;
     } catch (error) {

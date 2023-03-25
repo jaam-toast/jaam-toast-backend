@@ -15,7 +15,6 @@ export const createProject = catchAsync(async (req, res, next) => {
   }
 
   const project = new ProjectService();
-
   await project.createProject({
     ...buildOption,
     githubAccessToken,
@@ -88,7 +87,6 @@ export const updateProject = catchAsync(async (req, res, next) => {
       }
 
       const project = new ProjectService();
-
       await project.updateProject({
         webhookId: repository.id,
         projectUpdatedAt: headCommit.timestamp,
@@ -111,7 +109,6 @@ export const updateProject = catchAsync(async (req, res, next) => {
       const updateOptions = req.body;
 
       const project = new ProjectService();
-
       await project.updateProject({
         projectName,
         ...updateOptions,
@@ -148,7 +145,6 @@ export const deleteProject = catchAsync(async (req, res, next) => {
   }
 
   const project = new ProjectService();
-
   await project.deleteProject(projectName);
 
   const { projectId: deletedProjectId } = project;
