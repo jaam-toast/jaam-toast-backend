@@ -91,6 +91,27 @@ class GithubClient {
     }
   }
 
+  async getRepoWebhook(repoOwner: string, repoName: string) {
+    try {
+      const { data } = await this.client.get<GithubWebhooks>(
+        `/repos/${repoOwner}/${repoName}/hooks`,
+        {
+          params: {
+            owner: `${repoOwner}`,
+            repo: `${repoName}`,
+          },
+        },
+      );
+
+      return data;
+    } catch (error) {
+      log.serverError(
+        "An error occurred while get a GitHub repository webhook.",
+      );
+      throw error;
+    }
+  }
+
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
       const { data } = await this.client.post<GithubWebhooks>(
@@ -98,7 +119,7 @@ class GithubClient {
         {
           name: "web",
           active: true,
-          events: ["pull_request"],
+          events: ["push"],
           config: {
             url: `${Config.WEBHOOK_PAYLOAD_URL}`,
             content_type: "json",
