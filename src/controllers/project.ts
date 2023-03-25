@@ -57,7 +57,7 @@ export const getProject = catchAsync(async (req, res, next) => {
 });
 
 export const updateProject = catchAsync(async (req, res, next) => {
-  const { preject_name: projectName } = req.params;
+  const { project_name: projectName } = req.params;
   const { event, payload } = res.locals;
 
   switch (event) {
@@ -113,9 +113,9 @@ export const updateProject = catchAsync(async (req, res, next) => {
         ...updateOptions,
       });
 
-      const { projectId, deploymentId } = project;
+      const { projectId } = project;
 
-      if (!projectId || !deploymentId) {
+      if (!projectId) {
         return next(createError(500, "Failed to update database."));
       }
 
