@@ -3,7 +3,7 @@ import joi from "joi";
 import joigoose from "joigoose";
 import Deployment from "./Deployment";
 
-import { Project } from "@src/types";
+import { Project } from "@src/types/db";
 
 const Joigoose = joigoose(mongoose);
 
@@ -11,7 +11,7 @@ const joiProjectSchema = joi.object({
   space: joi.string(),
   repoName: joi.string(),
   repoCloneUrl: joi.string(),
-  repoUpdatedAt: joi.string(),
+  projectUpdatedAt: joi.string(),
   projectName: joi.string(),
   nodeVersion: joi.string(),
   installCommand: joi.string().allow("").default("npm install"),
@@ -43,6 +43,8 @@ const projectSchema = new mongoose.Schema(Joigoose.convert(joiProjectSchema), {
 projectSchema.pre<Project>("save", async function (next) {
   const deployment = await Deployment.create({
     deployStatus: "pending",
+    lastCommitMessage: this.lastCommitMessage,
+    lastCommitHash: this.lastCommitHash,
   });
 
   if (!deployment) {
