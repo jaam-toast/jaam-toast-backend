@@ -7,6 +7,7 @@ import {
   GithubOrgs,
   GithubRepos,
   GithubOrgRepos,
+  GithubGetWebhooks,
   GithubWebhooks,
   GithubCommits,
   GithubPullRequestCommits,
@@ -93,7 +94,7 @@ class GithubClient {
 
   async getRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<GithubWebhooks>(
+      const { data } = await this.client.get<GithubGetWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           params: {
