@@ -26,9 +26,7 @@ class DeploymentService {
         throw Error("Expected 2 arguments, but insufficient arguments.");
       }
 
-      const updatedDeployment = await Deployment.findByIdAndUpdate(id, {
-        ...data,
-      });
+      const updatedDeployment = await Deployment.findByIdAndUpdate(id, data);
 
       return updatedDeployment;
     } catch (error) {

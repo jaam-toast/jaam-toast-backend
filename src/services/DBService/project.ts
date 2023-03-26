@@ -87,7 +87,7 @@ class ProjectService {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
-      const project = await Project.findOne({ ...options });
+      const project = await Project.findOne(options);
 
       return project;
     } catch (error) {
@@ -103,7 +103,7 @@ class ProjectService {
 
       const updatedProject = await Project.updateOne(
         { _id: id },
-        { $set: { ...options } },
+        { $set: options },
       );
 
       return updatedProject;
@@ -170,9 +170,7 @@ class ProjectService {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
-      const deletedProject = await Project.findOneAndDelete({
-        ...targetOptions,
-      });
+      const deletedProject = await Project.findOneAndDelete(targetOptions);
 
       if (!deletedProject) return;
 
