@@ -11,7 +11,7 @@ const joiUserSchema = joi.object({
   githubAccessToken: joi.string(),
   projects: joi.array().items(
     joi.string().meta({
-      _mongoose: { type: "ObjectId", ref: "Repo" },
+      _mongoose: { type: "ObjectId", ref: "Project" },
     }),
   ),
 });
