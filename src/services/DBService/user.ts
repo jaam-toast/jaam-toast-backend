@@ -44,7 +44,7 @@ class UserService {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
-      const user = await User.findOne({ options });
+      const user = await User.findOne(options);
 
       return user;
     } catch (error) {
