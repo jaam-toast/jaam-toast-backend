@@ -45,7 +45,7 @@ export const login = catchAsync(async (req, res, next) => {
 
   return res
     .cookie("loginData", loginData, {
-      maxAge: 60 * 60 * 24,
+      maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
     })
     .redirect(referer ?? Config.CLIENT_URL);

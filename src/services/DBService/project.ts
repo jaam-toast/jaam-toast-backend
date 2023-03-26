@@ -19,6 +19,7 @@ class ProjectService {
         repoName,
         repoCloneUrl,
         projectName,
+        projectUpdatedAt,
         nodeVersion,
         installCommand,
         buildCommand,
@@ -34,6 +35,7 @@ class ProjectService {
         !repoName ||
         !repoCloneUrl ||
         !projectName ||
+        !projectUpdatedAt ||
         !nodeVersion ||
         !installCommand ||
         !buildCommand ||
