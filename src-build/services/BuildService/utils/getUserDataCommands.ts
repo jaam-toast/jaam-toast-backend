@@ -2,11 +2,11 @@ import Config from "../../../config";
 import getNginxScript from "./getNginxScript";
 import log from "../../Logger";
 
-import { BuildOptions } from "../../../types";
+import { ClientOptions, BuildDefault } from "../../../types";
 
 const getUserDataCommands = (
-  clientOptions: BuildOptions,
-  deploymentOptions: BuildOptions = {
+  clientOptions: ClientOptions,
+  deploymentOptions: BuildDefault = {
     nodeVersion: "16.x",
     installCommand: "",
     buildCommand: "",

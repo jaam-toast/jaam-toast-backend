@@ -19,18 +19,23 @@ export enum LogType {
   Error,
 }
 
-export type BuildOptions = {
+export type BuildDefault = {
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  buildType: string;
+  envList?: Env[];
+};
+
+export type BuildOptions = ClientOptions & BuildDefault;
+
+export type ClientOptions = {
   projectId?: string;
   deploymentId?: string;
   subdomain?: string;
   space?: string;
-  repoCloneUrl?: string;
+  repoCloneUrl: string;
   repoName?: string;
-  nodeVersion?: string;
-  installCommand?: string;
-  buildCommand?: string;
-  buildType?: string;
-  envList?: Env[];
 };
 
 export type DeleteBuildOptions = {
