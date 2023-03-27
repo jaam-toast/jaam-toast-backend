@@ -1,14 +1,14 @@
 import http from "http";
 
-import Config from "@src/config";
-import log from "@src/services/Logger";
+import log from "../services/Logger";
 
 import type { Express } from "express";
 import type { Server } from "http";
 import type { AddressInfo } from "net";
+import Config from "../config";
 
 const serverLoader = async (app: Express): Promise<Server> => {
-  const port = parseInt(Config.MAIN_SERVER_PORT || "8000", 10);
+  const port = parseInt(Config.BUILD_SERVER_PORT || "4000", 10);
 
   app.set("port", port);
 
