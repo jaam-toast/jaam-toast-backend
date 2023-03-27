@@ -1,10 +1,6 @@
 import Deployment from "@src/models/Deployment";
 
-import type {
-  Deployment as DeploymentType,
-  DeploymentOptions,
-  IdParameter,
-} from "@src/types/db";
+import type { DeploymentOptions, IdParameter } from "@src/types/db";
 
 class DeploymentService {
   static async create(options?: DeploymentOptions) {
@@ -20,13 +16,36 @@ class DeploymentService {
     }
   }
 
-  static async findByIdAndUpdate(id: IdParameter, data: DeploymentType) {
+  static async findById(id: IdParameter) {
     try {
-      if (!id || !data) {
+      if (!id) {
+        throw Error("Expected 1 arguments, but insufficient arguments.");
+      }
+
+      const deployment = await Deployment.findById(id);
+
+      return deployment;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async findByIdAndUpdate(id: IdParameter, options: DeploymentOptions) {
+    try {
+      if (!id || !options) {
         throw Error("Expected 2 arguments, but insufficient arguments.");
       }
 
-      const updatedDeployment = await Deployment.findByIdAndUpdate(id, data);
+      const { buildingLog } = options;
+      delete options.buildingLog;
+
+      const updatedDeployment = buildingLog
+        ? await Deployment.findByIdAndUpdate(
+            id,
+            { $set: options, $push: { buildingLog: buildingLog[0] } },
+            { new: true },
+          )
+        : await Deployment.findByIdAndUpdate(id, { $set: options });
 
       return updatedDeployment;
     } catch (error) {
