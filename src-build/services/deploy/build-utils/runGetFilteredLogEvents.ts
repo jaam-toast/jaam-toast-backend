@@ -1,5 +1,5 @@
-import getLogStreamStatus from "@src/services/deploy/build-utils/getLogStreamStatus";
-import getFilteredLogEvents from "@src/services/deploy/aws/cwl_filterlogeventscommand";
+import getLogStreamStatus from "@src-deploy/services/deploy/build-utils/getLogStreamStatus";
+import getFilteredLogEvents from "@src-deploy/services/deploy/aws/cwl_filterlogeventscommand";
 import log from "@src/services/Logger";
 
 import { RRType } from "@aws-sdk/client-route-53";
