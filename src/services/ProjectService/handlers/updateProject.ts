@@ -44,17 +44,18 @@ const updateProject = async (
   }
 
   try {
-    const deployment = await DB.Deployment.create();
-    updateData.deployments = [deployment._id];
+    const project = await DB.Project.findOne({ projectName });
 
-    const project = await DB.Project.findOneAndUpdate(
-      { projectName },
-      updateData,
-    );
-
-    if (!deployment || !project) {
-      service.throw("Failed to update database.");
+    if (!project || !project.deployments) {
+      service.throw("Cannot find environment data");
     }
+
+    if (project?.deployments.length > 1) {
+      const deployment = await DB.Deployment.create();
+      service.deployments = [deployment._id];
+    }
+
+    await DB.Project.findOneAndUpdate({ projectName }, updateData);
 
     service.projectId = project._id;
   } catch (error) {
