@@ -24,6 +24,7 @@ const joiProjectSchema = joi.object({
     }),
   ),
   instanceId: joi.string().allow(""),
+  recordId: joi.string().allow(""),
   deployedUrl: joi.string().allow(""),
   deployments: joi.array().items(
     joi.string().meta({
@@ -34,6 +35,7 @@ const joiProjectSchema = joi.object({
   lastCommitHash: joi.string(),
   webhookId: joi.string(),
   publicIpAddress: joi.string(),
+  status: joi.string().allow("default"),
 });
 
 const projectSchema = new mongoose.Schema(Joigoose.convert(joiProjectSchema), {
@@ -45,6 +47,8 @@ projectSchema.pre<Project>("save", async function (next) {
     deployStatus: "pending",
     lastCommitMessage: this.lastCommitMessage,
     lastCommitHash: this.lastCommitHash,
+    projectUpdatedAt: this.projectUpdatedAt,
+    buildingLog: [],
   });
 
   if (!deployment) {
@@ -55,6 +59,16 @@ projectSchema.pre<Project>("save", async function (next) {
   this?.deployments?.push(deployment._id);
 
   return next();
+});
+
+projectSchema.pre("findOneAndDelete", async function (next) {
+  const projectName = this.getFilter();
+
+  await this.model.findOneAndUpdate(projectName, {
+    $set: { status: "deleting" },
+  });
+
+  next();
 });
 
 const Project = mongoose.model<Project>("Project", projectSchema);
