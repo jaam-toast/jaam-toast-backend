@@ -1,0 +1,23 @@
+import { CreateProjectDefaultOptions } from "./db";
+
+type BuildClientParams = {
+  projectId: string;
+  deploymentId: string;
+};
+
+export type CreateBuildOptions = BuildClientParams &
+  CreateProjectDefaultOptions;
+
+export type UpdateBuildOptions = BuildClientParams &
+  CreateBuildOptions & {
+    instanceId?: string;
+    recordId?: string;
+    deployedUrl?: string;
+    publicIpAddress?: string;
+  };
+
+export type DeleteBuildOptions = {
+  projectName: string;
+  instanceId: string;
+  publicIpAddress: string;
+};
