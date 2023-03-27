@@ -8,6 +8,8 @@ const Config = {
   DATABASE_URL: process.env.MONGODB_URI!,
   JWT_SECRET: process.env.JWT_SECRET_KEY!,
   SERVER_URL: process.env.ORIGIN_SERVER_URL!,
+  MAIN_SERVER_URL: process.env.MAIN_SERVER_URL!,
+  BUILD_SERVER_URL: process.env.BUILD_SERVER_URL!,
   CLIENT_URL: process.env.CLIENT_URL!,
   CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
   CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
