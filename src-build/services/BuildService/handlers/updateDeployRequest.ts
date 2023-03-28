@@ -1,19 +1,21 @@
 import BuildService from "..";
 import DBClient from "../../DBClient";
+import { signJwt } from "../../../controllers/utils/jwt";
 
 const updateDeployRequest = async (service: BuildService, next: Function) => {
-  const { deploymentId, buildingLog } = service;
+  const { projectId, deploymentId, buildingLog } = service;
 
-  if (!deploymentId || !buildingLog) {
+  if (!projectId || !deploymentId || !buildingLog) {
     service.throw("Cannot find deploymentId before update deployment");
   }
 
   try {
-    const dbClient = new DBClient();
+    const token = signJwt(projectId);
+    const dbClient = new DBClient(token);
     const updatedDeployement = await dbClient.updateDeployment({
       deploymentId,
       deployStatus: "success",
-      buildingLog: [...buildingLog],
+      buildingLog: buildingLog,
     });
 
     if (!updatedDeployement) {

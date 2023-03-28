@@ -1,12 +1,20 @@
 import log from "../../Logger";
 import BuildService from "..";
 import DBClient from "../../DBClient";
+import { signJwt } from "../../../controllers/utils/jwt";
 
 const updateProjectRequest = async (service: BuildService, next: Function) => {
-  const { subdomain, deployedUrl, deploymentId, instanceId, publicIpAddress } =
-    service;
+  const {
+    projectId,
+    subdomain,
+    deployedUrl,
+    deploymentId,
+    instanceId,
+    publicIpAddress,
+  } = service;
 
   if (
+    !projectId ||
     !subdomain ||
     !deploymentId ||
     !instanceId ||
@@ -17,7 +25,8 @@ const updateProjectRequest = async (service: BuildService, next: Function) => {
   }
 
   try {
-    const dbClient = new DBClient();
+    const token = signJwt(projectId);
+    const dbClient = new DBClient(token);
     const updatedProject = await dbClient.updateProject({
       projectName: subdomain,
       instanceId,

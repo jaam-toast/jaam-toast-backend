@@ -15,7 +15,7 @@ export const createBuild = catchAsync(async (req, res, next) => {
     message: "ok",
   });
 
-  const project = new BuildService();
+  const project = new BuildService(projectId);
   await project.startBuild({
     projectId,
     deploymentId,
@@ -34,8 +34,8 @@ export const updateBuild = catchAsync(async (req, res, next) => {
     message: "ok",
   });
 
-  const project = new BuildService();
   // * deploy 삭제
+  const project = new BuildService(project_id);
   await project.removeBuild({
     subdomain: deployOptions.projectName,
     instanceId: deployOptions.instanceId,
@@ -51,17 +51,18 @@ export const updateBuild = catchAsync(async (req, res, next) => {
 });
 
 export const deleteBuild = catchAsync(async (req, res, next) => {
-  const { project_name, instance_id, public_ip_Address } = req.params;
+  const { project_id } = req.params;
+  const { subdomain, instanceId, ip } = req.query;
 
-  if (!project_name || !instance_id || !public_ip_Address) {
+  if (!project_id || !instanceId || !subdomain) {
     return next(createError(401, "Cannot find environment data."));
   }
 
-  const project = new BuildService();
+  const project = new BuildService(project_id);
   await project.removeBuild({
-    subdomain: project_name,
-    instanceId: instance_id,
-    publicIpAddress: public_ip_Address,
+    subdomain: subdomain.toString(),
+    instanceId: instanceId.toString(),
+    publicIpAddress: ip?.toString(),
   });
 
   return res.status(201).json({
