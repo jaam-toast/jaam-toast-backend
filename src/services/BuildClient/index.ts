@@ -10,10 +10,13 @@ import {
 class BuildClient {
   client;
 
-  constructor() {
+  constructor(accessToken: string) {
     this.client = axios.create({
       baseURL: Config.BUILD_SERVER_URL,
       timeout: 2500,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
   }
 
@@ -48,11 +51,11 @@ class BuildClient {
   }
 
   async deleteBuild(options: DeleteBuildOptions) {
-    const { projectName, instanceId, publicIpAddress } = options;
+    const { projectId, projectName, instanceId, publicIpAddress } = options;
 
     try {
       const data = await this.client.delete(
-        `/build/${projectName}/${instanceId}/${publicIpAddress}`,
+        `/build/${projectId}?subdomain=${projectName}&instanceId=${instanceId}&ip=${publicIpAddress}`,
       );
 
       return data;

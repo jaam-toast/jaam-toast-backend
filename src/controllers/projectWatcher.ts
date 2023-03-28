@@ -6,6 +6,7 @@ import {
 import BuildClient from "@src/services/BuildClient";
 
 import { Project } from "@src/types/db";
+import { signJwt } from "@src/controllers/utils/jwt";
 
 export const projectWatchFields = [
   "_id",
@@ -20,6 +21,7 @@ export const projectWatchFields = [
   "buildType",
   "envList",
   "lastCommitMessage",
+  "status",
 ];
 
 export const insertWatch = async (
@@ -58,7 +60,8 @@ export const insertWatch = async (
   const deploymentId = deployments[0];
 
   try {
-    const buildClient = new BuildClient();
+    const token = signJwt(projectId.toString());
+    const buildClient = new BuildClient(token);
     await buildClient.createBuild({
       projectId: projectId.toString(),
       deploymentId: deploymentId.toString(),
@@ -114,8 +117,7 @@ export const updateWatch = async (
     !buildCommand ||
     !buildType ||
     !envList ||
-    !instanceId ||
-    !publicIpAddress
+    !instanceId
   ) {
     throw Error("The data is incorrect.");
   }
@@ -123,7 +125,8 @@ export const updateWatch = async (
   const deploymentId = deployments[0];
 
   try {
-    const buildClient = new BuildClient();
+    const token = signJwt(projectId.toString());
+    const buildClient = new BuildClient(token);
     await buildClient.updateBuild({
       projectId: projectId.toString(),
       deploymentId: deploymentId.toString(),
@@ -153,12 +156,19 @@ export const deleteWatch = async (
     throw Error("The data is incorrect.");
   }
 
-  const { projectName, instanceId, publicIpAddress } = stream.fullDocument;
+  const {
+    _id: projectId,
+    projectName,
+    instanceId,
+    publicIpAddress,
+  } = stream.fullDocument;
 
   try {
-    if (instanceId && publicIpAddress && projectName) {
-      const buildClient = new BuildClient();
+    if (projectId && instanceId && projectName) {
+      const token = signJwt(projectId.toString());
+      const buildClient = new BuildClient(token);
       await buildClient.deleteBuild({
+        projectId: projectId.toString(),
         projectName,
         instanceId,
         publicIpAddress,

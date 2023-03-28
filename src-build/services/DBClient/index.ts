@@ -9,10 +9,13 @@ import {
 class DBClient {
   client;
 
-  constructor() {
+  constructor(accessToken: string) {
     this.client = axios.create({
       baseURL: Config.MAIN_SERVER_URL,
       timeout: 2500,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
   }
 

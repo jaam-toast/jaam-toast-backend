@@ -10,7 +10,6 @@ import {
 } from "@src/controllers/project";
 import verifyToken from "@src/middlewares/verifyToken";
 import validateSchema from "@src/middlewares/validateSchema";
-import verifyGithubSignature from "@src/middlewares/verifyGithubSignature";
 
 const route = Router();
 

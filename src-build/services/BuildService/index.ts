@@ -10,10 +10,11 @@ import waitDnsRecordCreation from "./handlers/waitDnsRecordCreation";
 import createHttpsCertification from "./handlers/createHttpsCertification";
 import waitInstanceLogStremCreation from "./handlers/waitInstanceLogStremCreation";
 import getInstanceFilteredLogs from "./handlers/getInstanceFilteredLogs";
+import updateDeployRequest from "./handlers/updateDeployRequest";
 import removeBuild from "./handlers/removeBuild";
 
 import { BuildOptions, DeleteBuildOptions, Env, LogMessage } from "../../types";
-import updateDeployRequest from "./handlers/updateDeployRequest";
+import { signJwt } from "../../controllers/utils/jwt";
 
 class BuildService extends Service {
   /* deploy options */
@@ -37,10 +38,10 @@ class BuildService extends Service {
   buildingLog?: (string | undefined)[];
   dbClient: DBClient;
 
-  constructor() {
+  constructor(projectId) {
     super();
 
-    this.dbClient = new DBClient();
+    this.dbClient = new DBClient(signJwt(projectId));
   }
 
   /* methods */
