@@ -18,18 +18,3 @@ export enum LogType {
   Deployment,
   Error,
 }
-
-export type BuildOptions = {
-  userId?: string;
-  space: string;
-  repoName: string;
-  repoCloneUrl: string;
-  projectUpdatedAt: string;
-  projectName: string;
-  nodeVersion: string;
-  installCommand: string;
-  buildCommand: string;
-  envList: Env[];
-  buildType: string;
-  githubAccessToken?: string;
-};
