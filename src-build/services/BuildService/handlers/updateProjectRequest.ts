@@ -6,14 +6,6 @@ const updateProjectRequest = async (service: BuildService, next: Function) => {
   const { subdomain, deployedUrl, deploymentId, instanceId, publicIpAddress } =
     service;
 
-  console.log("updateProjectRequest", {
-    subdomain,
-    deployedUrl,
-    deploymentId,
-    instanceId,
-    publicIpAddress,
-  });
-
   if (
     !subdomain ||
     !deploymentId ||
