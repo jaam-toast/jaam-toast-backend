@@ -12,22 +12,22 @@ export type GithubUser = {
   avatar_url?: string;
 };
 
-export type GithubRepos = Endpoints["GET /user/repos"]["response"]["data"];
+export type GetGithubRepos = Endpoints["GET /user/repos"]["response"]["data"];
 
-export type GithubOrgs =
+export type GetGithubOrgs =
   Endpoints["GET /users/{username}/orgs"]["response"]["data"];
 
-export type GithubOrgRepos =
+export type GetGithubOrgRepos =
   Endpoints["GET /orgs/{org}/repos"]["response"]["data"];
 
-export type GithubGetWebhooks =
+export type GetGithubWebhooks =
   Endpoints["GET /repos/{owner}/{repo}/hooks"]["response"]["data"];
 
-export type GithubWebhooks =
+export type PostGithubWebhooks =
   Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"]["data"];
 
-export type GithubCommits =
+export type GetGithubCommits =
   Endpoints["GET /repos/{owner}/{repo}/commits"]["response"]["data"];
 
-export type GithubPullRequestCommits =
+export type GetGithubPullRequestCommits =
   Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"]["data"];
