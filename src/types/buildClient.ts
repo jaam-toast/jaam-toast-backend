@@ -17,7 +17,8 @@ export type UpdateBuildOptions = BuildClientParams &
   };
 
 export type DeleteBuildOptions = {
+  projectId?: string;
   projectName: string;
   instanceId: string;
-  publicIpAddress: string;
+  publicIpAddress?: string;
 };
