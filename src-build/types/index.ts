@@ -41,5 +41,5 @@ export type ClientOptions = {
 export type DeleteBuildOptions = {
   subdomain: string;
   instanceId: string;
-  publicIpAddress: string;
+  publicIpAddress?: string;
 };
