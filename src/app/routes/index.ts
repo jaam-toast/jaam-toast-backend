@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import loginRouter from "@src/routes/login";
-import usersRouter from "@src/routes/users";
-import projectsRouter from "@src/routes/projects";
+import loginRouter from "@src/app/routes/login";
+import usersRouter from "@src/app/routes/users";
+import projectsRouter from "@src/app/routes/projects";
 import deploymentsRouter from "./deployments";
 import reposRouter from "./repos";
 

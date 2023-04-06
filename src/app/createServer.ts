@@ -7,7 +7,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import type { AddressInfo } from "net";
 
-const serverLoader = async (app: Express): Promise<Server> => {
+export const createServer = async (app: Express): Promise<Server> => {
   const port = parseInt(Config.MAIN_SERVER_PORT || "8000", 10);
 
   app.set("port", port);
@@ -47,5 +47,3 @@ const serverLoader = async (app: Express): Promise<Server> => {
 
   return server;
 };
-
-export default serverLoader;
