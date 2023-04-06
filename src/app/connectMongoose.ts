@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import Config from "@src/config";
 import log from "@src/services/Logger";
 
-const mongooseLoader = async (): Promise<void> => {
+export const connectMongoose = async (): Promise<void> => {
   try {
     mongoose.set("strictQuery", false);
 
@@ -16,5 +16,3 @@ const mongooseLoader = async (): Promise<void> => {
     throw error;
   }
 };
-
-export default mongooseLoader;
