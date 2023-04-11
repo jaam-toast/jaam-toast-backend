@@ -1,8 +1,7 @@
 import { Server } from "http";
 import { Server as socketServer, Socket } from "socket.io";
 
-import Config from "../config";
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 
 import type { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";

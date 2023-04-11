@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
+
 import Service from "@src/__temp/services/Service";
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 import setGithubInfo from "./handlers/setGithubInfo";
 import createWebhook from "./handlers/createWebhook";
 import checkWebhook from "./handlers/checkWebhook";

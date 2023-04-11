@@ -1,14 +1,15 @@
-import { createBuild } from "./createBuild";
+import { createBuildProject } from "./createBuildProject";
 import { makeBuildResource } from "./makeBuildResource";
 
 import type { OptionalProject } from "@src/domains/types/entity";
+import type { Framework } from "@src/domains/types";
 
 // type 정리중..
 type Options = {
   repoName: string;
   repoCloneUrl: string;
   projectName: string;
-  framework: string;
+  framework: Framework;
   installCommand: string;
   buildCommand: string;
   envList: string;
@@ -51,7 +52,7 @@ export class BuildService {
         throw Error("Cannot find build Resource");
       }
 
-      const buildUrl = await createBuild({
+      const buildUrl = await createBuildProject({
         buildResourceLocation,
         projectName,
       });

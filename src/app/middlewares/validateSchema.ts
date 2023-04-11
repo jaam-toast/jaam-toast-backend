@@ -1,7 +1,7 @@
 import { ObjectSchema } from "joi";
 import createError from "http-errors";
 
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 
 import type { Request, Response, NextFunction } from "express";
 

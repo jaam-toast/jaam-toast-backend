@@ -1,7 +1,7 @@
 import http from "http";
 
 import Config from "@src/config";
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 
 import type { Express } from "express";
 import type { Server } from "http";

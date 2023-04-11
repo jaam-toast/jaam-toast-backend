@@ -19,7 +19,7 @@ import { LogMessage, LogType } from "@src/types";
  *   ㄴ> server log (ex: connect server, morgan log, etc..)
  */
 
-class Logger extends Observer {
+export class Logger extends Observer {
   /* logging handlers */
   private static console(logType: LogType, ...messages: LogMessage[]) {
     const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
@@ -153,5 +153,3 @@ class Logger extends Observer {
     Logger.console(LogType.Request, ...messages);
   }
 }
-
-export default Logger;

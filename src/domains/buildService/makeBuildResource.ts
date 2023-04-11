@@ -1,21 +1,23 @@
 import { spawn } from "child_process";
 
 import { FrameWorkPresets } from "@src/domains/@constants/frameWorkPresets";
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
+
+import type { Framework } from "@src/domains/types";
 
 type Options = {
   repoCloneUrl: string;
   repoName: string;
-  framework: string;
+  framework: Framework;
   installCommand: string;
   buildCommand: string;
 };
 
 const runGitClone = async ({ repoCloneUrl }: Pick<Options, "repoCloneUrl">) => {
   const command = [
-    `rm -rf buildResource`,
-    `mkdir buildResource`,
-    `cd buildResource`,
+    "rm -rf buildResource",
+    "mkdir buildResource",
+    "cd buildResource",
     `git clone ${repoCloneUrl}`,
   ].join(" && ");
 
@@ -27,12 +29,8 @@ const runGitClone = async ({ repoCloneUrl }: Pick<Options, "repoCloneUrl">) => {
 
   childProcess.stdout.setEncoding("utf8");
   childProcess.stderr.setEncoding("utf8");
-  childProcess.stdout?.on("data", data => {
-    log.debug(data);
-  });
-  childProcess.stderr?.on("data", error => {
-    log.buildError(error);
-  });
+  childProcess.stdout?.on("data", log.debug);
+  childProcess.stderr?.on("data", log.buildError);
 
   await new Promise<number>((resolve, reject) => {
     childProcess.on("exit", (code: number) => {
@@ -62,12 +60,8 @@ const runDependenciesInstall = async ({
 
   childProcess.stdout.setEncoding("utf8");
   childProcess.stderr.setEncoding("utf8");
-  childProcess.stdout?.on("data", data => {
-    log.debug(data);
-  });
-  childProcess.stderr?.on("data", error => {
-    log.buildError(error);
-  });
+  childProcess.stdout?.on("data", log.debug);
+  childProcess.stderr?.on("data", log.buildError);
 
   await new Promise<number>((resolve, reject) => {
     childProcess.on("exit", (code: number) => {
@@ -97,12 +91,8 @@ const runBuild = async ({
 
   childProcess.stdout.setEncoding("utf8");
   childProcess.stderr.setEncoding("utf8");
-  childProcess.stdout?.on("data", data => {
-    log.build(data);
-  });
-  childProcess.stderr?.on("data", error => {
-    log.buildError(error);
-  });
+  childProcess.stdout?.on("data", log.build);
+  childProcess.stderr?.on("data", log.buildError);
 
   await new Promise<number>((resolve, reject) => {
     childProcess.on("exit", (code: number) => {

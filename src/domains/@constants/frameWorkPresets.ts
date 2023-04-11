@@ -1,6 +1,9 @@
-export const FrameWorkPresets: {
-  [key: string]: { buildCommand: string; buildDirectory: string };
-} = {
+import type { Framework } from "@src/domains/types";
+
+export const FrameWorkPresets: Record<
+  Framework,
+  { buildCommand: string; buildDirectory: string }
+> = {
   CreateReactApp: {
     buildCommand: "npm run build",
     buildDirectory: "build",
