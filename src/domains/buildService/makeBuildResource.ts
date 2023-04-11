@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-import { FrameWorkPresets } from "@src/domains/_constants/frameWorkPresets";
+import { FrameWorkPresets } from "@src/domains/@constants/frameWorkPresets";
 import log from "@src/common/Logger";
 
 type Options = {
