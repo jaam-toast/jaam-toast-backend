@@ -2,9 +2,9 @@ import { Router } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
+import { UserRepository } from "@src/domains/repositories/userRepository";
 import verifyGithubCode from "@src/app/middlewares/verifyGithubCode";
-import DB from "@src/services/DBService";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "@src/app/utils/asyncHandler";
 import Config from "@src/config";
 
 const route = Router();
@@ -23,10 +23,10 @@ const loginRouter = (app: Router) => {
         return next(createError(401));
       }
 
-      let userData = await DB.User.findOne({ userGithubUri });
+      let userData = await UserRepository.findOne({ userGithubUri });
 
       if (!userData) {
-        userData = await DB.User.create({
+        userData = await UserRepository.create({
           username,
           userGithubUri,
           userImage,

@@ -1,5 +1,7 @@
-import { updateProjectByWebhook } from "@src/controllers/project";
+import createError from "http-errors";
+
 import verifyGithubSignature from "@src/app/middlewares/verifyGithubSignature";
+import { asyncHandler as catchAsync } from "@src/app/utils/asyncHandler";
 
 import { Router } from "express";
 
@@ -34,23 +36,23 @@ const reposRouter = (app: Router) => {
         });
       }
 
-      const project = new ProjectService();
-      await project.updateProject({
-        projectName,
-        webhookId: repository.id,
-        projectUpdatedAt: headCommit.timestamp,
-        lastCommitMessage: headCommit.message,
-        lastCommitHash: headCommit.id,
-      });
-      const { projectId } = project;
+      // const project = new ProjectService();
+      // await project.updateProject({
+      //   projectName,
+      //   webhookId: repository.id,
+      //   projectUpdatedAt: headCommit.timestamp,
+      //   lastCommitMessage: headCommit.message,
+      //   lastCommitHash: headCommit.id,
+      // });
+      // const { projectId } = project;
 
-      if (!projectId) {
-        return next(createError(500, "Failed to update database."));
-      }
+      // if (!projectId) {
+      //   return next(createError(500, "Failed to update database."));
+      // }
 
       return res.json({
         message: "ok",
-        result: projectId,
+        // result: projectId,
       });
     }),
   );

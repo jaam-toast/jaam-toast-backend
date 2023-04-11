@@ -1,8 +1,8 @@
 import createError from "http-errors";
 
-import catchAsync from "../utils/asyncHandler";
-import OauthClient from "../../services/OauthClient";
-import GithubClient from "../../services/GithubClient";
+import OauthClient from "../../__temp/services/OauthClient";
+import { asyncHandler as catchAsync } from "@src/app/utils/asyncHandler";
+import { GithubService } from "@src/infrastructure/githubService";
 
 const verifyGithubCode = catchAsync(async (req, res, next) => {
   const { code } = req.query;
@@ -23,8 +23,8 @@ const verifyGithubCode = catchAsync(async (req, res, next) => {
     );
   }
 
-  const githubClient = new GithubClient(githubAccessToken);
-  const githubData = await githubClient.getUserData();
+  const github = new GithubService(githubAccessToken);
+  const githubData = await github.getUserData();
 
   if (!githubData) {
     return next(
