@@ -7,9 +7,7 @@
   },
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/app.ts",
-    "dev": "concurrently \"yarn server-main\" \"yarn server-build\"",
-    "server-main": "ts-node-dev --transpile-only --respawn -r tsconfig-paths/register --watch ./src --trace-warnings --trace-uncaught -- ./src/app.ts",
-    "server-build": "ts-node-dev --transpile-only --respawn -r tsconfig-paths/register --watch ./src --trace-warnings --trace-uncaught -- ./src-build/app.ts",
+    "dev": "ts-node-dev --transpile-only --respawn -r tsconfig-paths/register --watch ./src --trace-warnings --trace-uncaught -- ./src/index.ts",
     "watch-ts": "npx tsc --watch",
     "lint": "eslint --ext .ts src/",
     "test": "node --experimental-vm-modules --trace-warnings node_modules/jest/bin/jest.js --verbose --detectOpenHandles"
@@ -29,7 +27,8 @@
     "mongoose": "^6.6.5",
     "morgan": "^1.10.0",
     "nanoid": "^4.0.2",
-    "socket.io": "^4.5.3"
+    "socket.io": "^4.5.3",
+    "wrangler": "^2.14.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",
