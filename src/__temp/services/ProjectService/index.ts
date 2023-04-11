@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import Service from "@src/services/Service";
-import log from "@src/services/Logger";
+import Service from "@src/__temp/services/Service";
+import log from "@src/common/Logger";
 import setGithubInfo from "./handlers/setGithubInfo";
 import createWebhook from "./handlers/createWebhook";
 import checkWebhook from "./handlers/checkWebhook";
@@ -72,9 +72,7 @@ class ProjectService extends Service {
     throw new Error(message);
   }
 
-  async updateProject(
-    updateOptions: ProjectOptions,
-  ): Promise<ProjectService> {
+  async updateProject(updateOptions: ProjectOptions): Promise<ProjectService> {
     this.space = updateOptions.space;
     this.projectName = updateOptions.projectName;
     this.projectUpdatedAt = updateOptions.projectUpdatedAt;

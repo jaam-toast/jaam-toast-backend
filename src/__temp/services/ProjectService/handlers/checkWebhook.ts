@@ -1,6 +1,6 @@
-import GithubClient from "@src/services/GithubClient";
-import DB from "@src/services/DBService";
-import ProjectService from "@src/services/ProjectService";
+import GithubClient from "@src/__temp/services/GithubClient";
+import DB from "@src/__temp/services/DBService";
+import ProjectService from "@src/__temp/services/ProjectService";
 
 const checkWebhook = async (
   service: ProjectService,

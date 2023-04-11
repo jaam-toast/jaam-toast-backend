@@ -1,6 +1,6 @@
-import type { DomainEvent } from "../domains/types/DomainEvent";
-import type { BaseHandler } from "./types/BaseHandler";
-import type { BaseEvent } from "./types/BaseEvent";
+import type { DomainEvent } from "./domain/types/DomainEvent";
+import type { BaseHandler } from "../../package/jaamux/types/BaseHandler";
+import type { BaseEvent } from "../../package/jaamux/types/BaseEvent";
 
 const mapEventToHandler: Partial<Record<DomainEvent["name"], BaseHandler[]>> =
   {};

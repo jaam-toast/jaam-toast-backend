@@ -1,5 +1,5 @@
-import type { DomainAggregate } from "@src/domains/types/DomainAggregate";
-import type { DomainEvent } from "../../domains/types/DomainEvent";
+import type { DomainAggregate } from "@src/core/domain/types/DomainAggregate";
+import type { DomainEvent } from "../domain/types/DomainEvent";
 
 export type BaseHandler<
   AggregateName extends DomainAggregate["name"] = DomainAggregate["name"],

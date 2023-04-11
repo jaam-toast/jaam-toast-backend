@@ -1,5 +1,5 @@
-import Project from "@src/models/Project";
-import { BaseEvent } from "@src/core/types/BaseEvent";
+import Project from "@src/domains/repositories/models/Project";
+import { BaseEvent } from "@src/__temp/types/BaseEvent";
 
 export async function ProjectProjection(options: BaseEvent<string, {}>) {
   switch (options.name) {

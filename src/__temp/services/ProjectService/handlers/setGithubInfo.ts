@@ -1,5 +1,5 @@
-import GithubClient from "@src/services/GithubClient";
-import ProjectService from "@src/services/ProjectService";
+import GithubClient from "@src/__temp/services/GithubClient";
+import ProjectService from "@src/__temp/services/ProjectService";
 
 const setGithubInfo = async (
   service: ProjectService,

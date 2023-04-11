@@ -1,5 +1,5 @@
-import Project from "@src/models/Project";
-import Deployment from "@src/models/Deployment";
+import Project from "@src/domains/repositories/models/Project";
+import Deployment from "@src/repositories/models/Deployment";
 
 import type {
   Project as ProjectType,
