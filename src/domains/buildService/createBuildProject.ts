@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";
 import Config from "@src/infrastructure/@config";
 import { CloudFlare } from "@src/infrastructure/cloudFlare";
@@ -26,12 +26,8 @@ const createDeployment = async ({
 
   childProcess.stdout.setEncoding("utf8");
   childProcess.stderr.setEncoding("utf8");
-  childProcess.stdout?.on("data", data => {
-    log.debug(data);
-  });
-  childProcess.stderr?.on("data", error => {
-    log.buildError(error);
-  });
+  childProcess.stdout?.on("data", log.debug);
+  childProcess.stderr?.on("data", log.buildError);
 
   await new Promise<number>((resolve, reject) => {
     childProcess.on("exit", (code: number) => {
@@ -47,7 +43,7 @@ const createDeployment = async ({
   log.debug("Cloning complete.");
 };
 
-export async function createBuild({
+export async function createBuildProject({
   buildResourceLocation,
   projectName,
 }: Options) {
