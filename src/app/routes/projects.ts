@@ -2,11 +2,13 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 
-import ProjectService from "@src/services/ProjectService";
-import DB from "@src/services/DBService";
+import { BuildService } from "@src/domains/buildService";
+import { CmsService } from "@src/domains/cmsService";
+import { ProjectRepository } from "@src/domains/repositories/projectRepository";
+import { UserRepository } from "@src/domains/repositories/userRepository";
 import verifyToken from "@src/app/middlewares/verifyToken";
 import validateSchema from "@src/app/middlewares/validateSchema";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "@src/app/utils/asyncHandler";
 
 const route = Router();
 
@@ -17,32 +19,71 @@ const projectsRouter = (app: Router) => {
     "/",
     verifyToken,
     asyncHandler(async (req, res, next) => {
-      const buildOption = req.body;
-      const githubAccessToken = req.query.githubAccessToken as string;
+      const projectOptions = req.body;
 
-      if (!buildOption || !githubAccessToken) {
-        return next(createError(401, "Cannot find environment data."));
+      const {
+        userId,
+        space,
+        repoName,
+        repoCloneUrl,
+        projectName,
+        projectUpdatedAt,
+        framework,
+        installCommand,
+        buildCommand,
+        envList,
+      } = projectOptions;
+
+      if (
+        !userId ||
+        !space ||
+        !repoName ||
+        !repoCloneUrl ||
+        !projectName ||
+        !projectUpdatedAt ||
+        !framework ||
+        !installCommand ||
+        !buildCommand ||
+        !envList
+      ) {
+        return next(
+          createError(401, "Cannot find environment data 'project_name'"),
+        );
       }
 
-      const project = new ProjectService();
-      await project.createProject({
-        ...buildOption,
-        githubAccessToken,
-      });
+      const project = await ProjectRepository.create(projectOptions);
+      const user = await UserRepository.findByIdAndUpdateProject(
+        userId,
+        project._id,
+      );
 
-      const { projectId } = project;
-
-      if (!projectId) {
+      if (!project || !user) {
         return next(createError(500, "Failed to create database."));
       }
 
-      return res.status(201).json({
+      res.json({
         message: "ok",
-        result: projectId,
+        result: project._id,
+      });
+
+      const buildUrl = await BuildService.createBuild({
+        repoName,
+        repoCloneUrl,
+        projectName,
+        framework,
+        installCommand,
+        buildCommand,
+        envList,
+      });
+      const cmsUrl = await CmsService.createApi();
+      await ProjectRepository.findByIdAndUpdate(project._id, {
+        buildUrl,
+        cmsUrl,
       });
     }),
   );
 
+  // 진행중..
   route.get(
     "/:project_name",
     validateSchema(
@@ -53,15 +94,15 @@ const projectsRouter = (app: Router) => {
     ),
     verifyToken,
     asyncHandler(async (req, res, next) => {
-      const { project_name: projectName } = req.params;
+      const { projectId } = req.params;
 
-      if (!projectName) {
+      if (!projectId) {
         return next(
           createError(401, "Cannot find environment data 'project_name'"),
         );
       }
 
-      const project = await DB.Project.findOne({ projectName });
+      const project = await ProjectRepository.findById(projectId);
 
       if (!project) {
         return next(createError(400, "Project data does not exist."));
@@ -84,24 +125,19 @@ const projectsRouter = (app: Router) => {
     ),
     verifyToken,
     asyncHandler(async (req, res, next) => {
-      const { project_name: projectName } = req.params;
-      const updateOptions = req.body;
-
-      const project = new ProjectService();
-      await project.updateProject({
-        projectName,
-        ...updateOptions,
-      });
-
-      const { projectId } = project;
+      const { projectId } = req.params;
+      const updateData = req.body;
 
       if (!projectId) {
         return next(createError(500, "Failed to update database."));
       }
 
+      const buildService = new BuildService();
+      const projectData = await buildService.updateBuild(updateData);
+
       return res.json({
         message: "ok",
-        result: projectId,
+        result: projectData,
       });
     }),
   );
@@ -116,10 +152,9 @@ const projectsRouter = (app: Router) => {
     ),
     verifyToken,
     asyncHandler(async (req, res, next) => {
-      const { githubAccessToken } = req.query;
-      const { project_name: projectName } = req.params;
+      const { projectId } = req.params;
 
-      if (!githubAccessToken || !projectName) {
+      if (!projectId) {
         return next(
           createError(
             400,
@@ -128,14 +163,10 @@ const projectsRouter = (app: Router) => {
         );
       }
 
-      const project = new ProjectService();
-      await project.deleteProject(projectName);
-
-      const { projectId: deletedProjectId } = project;
-
-      if (!deletedProjectId) {
-        return next(createError(500, "Failed to delete database."));
-      }
+      const buildService = new BuildService();
+      const cmsService = new CmsService();
+      await buildService.deleteBuild(projectId);
+      await cmsService.deleteApi();
 
       return res.status(204).json({
         message: "ok",
