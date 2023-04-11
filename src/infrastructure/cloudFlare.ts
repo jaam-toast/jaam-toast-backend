@@ -6,7 +6,7 @@ type Options = {
   authEmail: string;
 };
 
-export class CloudFlareService {
+export class CloudFlare {
   api;
 
   constructor({ accountId, apiKey, authEmail }: Options) {

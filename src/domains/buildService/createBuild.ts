@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import log from "@src/common/Logger";
 import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";
 import Config from "@src/infrastructure/@config";
-import { CloudFlareService } from "@src/infrastructure/cloudFlareService";
+import { CloudFlare } from "@src/infrastructure/cloudFlare";
 
 type Options = {
   buildResourceLocation: string;
@@ -51,7 +51,7 @@ export async function createBuild({
   buildResourceLocation,
   projectName,
 }: Options) {
-  const cloudflareApi = new CloudFlareService({
+  const cloudflareApi = new CloudFlare({
     accountId: Config.CLOUDFLARE_ACCOUNT_ID,
     apiKey: Config.CLOUDFLARE_API_KEY,
     authEmail: Config.CLOUDFLARE_EMAIL,

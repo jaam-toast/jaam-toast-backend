@@ -14,7 +14,7 @@ import type {
   GetGithubPullRequestCommits,
 } from "@src/types/github";
 
-export class GithubService {
+export class Github {
   client;
 
   constructor(accessToken: string) {

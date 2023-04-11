@@ -2,7 +2,7 @@ import createError from "http-errors";
 
 import OauthClient from "../../__temp/services/OauthClient";
 import { asyncHandler as catchAsync } from "@src/app/utils/asyncHandler";
-import { GithubService } from "@src/infrastructure/githubService";
+import { Github } from "@src/infrastructure/github";
 
 const verifyGithubCode = catchAsync(async (req, res, next) => {
   const { code } = req.query;
@@ -23,7 +23,7 @@ const verifyGithubCode = catchAsync(async (req, res, next) => {
     );
   }
 
-  const github = new GithubService(githubAccessToken);
+  const github = new Github(githubAccessToken);
   const githubData = await github.getUserData();
 
   if (!githubData) {
