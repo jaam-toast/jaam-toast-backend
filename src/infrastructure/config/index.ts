@@ -1,0 +1,21 @@
+import dotenv from "dotenv";
+
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+
+dotenv.config();
+
+const Config = {
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN!,
+  CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID!,
+  CLOUDFLARE_API_KEY: process.env.CLOUDFLARE_API_KEY!,
+  CLOUDFLARE_EMAIL: process.env.CLOUDFLARE_EMAIL!,
+
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
+  GITHUB_USER_CREDENTIAL_ID: process.env.GITHUB_USER_CREDENTIAL_ID!,
+  GITHUB_USER_CREDENTIAL_TOKEN: process.env.GITHUB_USER_CREDENTIAL_TOKEN!,
+  GITHUB_WEBHOOK_SECRET_KEY: process.env.GITHUB_WEBHOOK_SECRET_KEY!,
+  GITHUB_WEBHOOK_PAYLOAD_URL: process.env.GITHUB_WEBHOOK_PAYLOAD_URL!,
+};
+
+export default Config;

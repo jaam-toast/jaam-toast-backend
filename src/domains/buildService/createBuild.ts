@@ -1,8 +1,8 @@
 import { spawn } from "child_process";
 
-import Config from "@src/domains/config";
 import log from "@src/common/Logger";
 import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";
+import Config from "@src/infrastructure/config";
 import { CloudFlareService } from "@src/infrastructure/cloudFlareService";
 
 type Options = {
