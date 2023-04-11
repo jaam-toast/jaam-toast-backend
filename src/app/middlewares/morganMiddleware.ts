@@ -1,5 +1,5 @@
 import morgan from "morgan";
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 
 import type { StreamOptions } from "morgan";
 

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-import log from "@src/common/Logger";
+import { Logger as log } from "@src/common/Logger";
 
-export const connectDB = async (databaseUrl: string) => {
+export async function connectDB(databaseUrl: string) {
   try {
     mongoose.set("strictQuery", false);
 
@@ -14,4 +14,4 @@ export const connectDB = async (databaseUrl: string) => {
 
     throw error;
   }
-};
+}
