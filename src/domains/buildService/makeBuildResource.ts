@@ -20,7 +20,7 @@ const runGitClone = async ({ repoCloneUrl }: Pick<Options, "repoCloneUrl">) => {
   ].join(" && ");
 
   const childProcess = spawn(command, {
-    cwd: "./",
+    cwd: process.cwd(),
     shell: true,
     stdio: "pipe",
   });
