@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import Config from "@src/config";
-import log from "@src/services/Logger";
+import log from "@src/common/Logger";
 
 import type {
   GithubUser,

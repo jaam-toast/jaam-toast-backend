@@ -1,4 +1,4 @@
-import { BaseAggregate } from "../../core/types/BaseAggregate";
+import { BaseAggregate } from "../../../../package/jaamux/types/BaseAggregate";
 
 export type ProjectAggregate = BaseAggregate<
   "ProjectAggregate",

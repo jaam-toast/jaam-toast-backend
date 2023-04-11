@@ -1,4 +1,4 @@
-import Deployment from "@src/models/Deployment";
+import Deployment from "@src/repositories/models/Deployment";
 
 import type { DeploymentOptions, IdParameter } from "@src/types/db";
 

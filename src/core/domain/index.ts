@@ -1,4 +1,5 @@
-import { createService } from "../core/createService";
+import { createService } from "@src/core";
+
 import { buildSlice } from "./slices/buildSlice";
 
 export const service = createService({

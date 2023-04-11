@@ -1,7 +1,7 @@
-import Event from "@src/models/Event";
+import Event from "@src/repositories/models/Event";
 
 import { LeanDocument } from "mongoose";
-import { BaseEvent } from "./types/BaseEvent";
+import { BaseEvent } from "../../package/jaamux/types/BaseEvent";
 
 type Callback = (options: BaseEvent<string, {}>) => void;
 type RollBackOption = Omit<BaseEvent<string, {}>, "name"> & { version: number };

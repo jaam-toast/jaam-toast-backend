@@ -1,4 +1,4 @@
-import type { BaseEvent } from "@src/core/types/BaseEvent";
+import type { BaseEvent } from "@src/__temp/types/BaseEvent";
 
 // TODO: remove this type.
 type TempEvent = BaseEvent<"TempEvent", { tempData: string }>;

@@ -1,6 +1,6 @@
 import { registerEvent, publishEvent } from "./eventBus";
 
-import type { DomainEvent } from "../domains/types/DomainEvent";
+import type { DomainEvent } from "./domain/types/DomainEvent";
 import type { Slice } from "./types/Slice";
 
 export function createService({ slices }: { slices: Slice[] }) {

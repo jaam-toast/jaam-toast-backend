@@ -1,12 +1,8 @@
-import { createSlice } from "../../core/createSlice";
+import { createSlice } from "@src/core";
 
 export const buildSlice = createSlice<"ProjectAggregate">({
   handlers: {
     StartProjectBuild: (event, aggregate, publish) => {
-      console.log("start handler");
-      console.log(event);
-      console.log(aggregate);
-
       publish({
         name: "EndProjectBuild",
         data: {
