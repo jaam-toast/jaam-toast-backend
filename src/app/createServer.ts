@@ -8,7 +8,7 @@ import type { Server } from "http";
 import type { AddressInfo } from "net";
 
 export const createServer = async (app: Express): Promise<Server> => {
-  const port = parseInt(Config.MAIN_SERVER_PORT || "8000", 10);
+  const port = parseInt(Config.SERVER_PORT || "8000", 10);
 
   app.set("port", port);
 
