@@ -2,11 +2,11 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 
-import GithubClient from "@src/services/GithubClient";
-import DB from "@src/services/DBService";
+import GithubClient from "@src/__temp/services/GithubClient";
+import { UserRepository } from "@src/domains/repositories/userRepository";
 import verifyToken from "@src/app/middlewares/verifyToken";
 import validateSchema from "@src/app/middlewares/validateSchema";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "@src/app/utils/asyncHandler";
 
 const route = Router();
 
@@ -106,7 +106,7 @@ const usersRouter = (app: Router) => {
         return next(createError(401, "Cannot find environment data 'user_id'"));
       }
 
-      const userProjects = await DB.User.findByIdAndGetProjects(user_id);
+      const userProjects = await UserRepository.findByIdAndGetProjects(user_id);
 
       return res.json({
         message: "ok",

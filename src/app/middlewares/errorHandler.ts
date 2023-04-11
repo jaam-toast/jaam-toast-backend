@@ -1,4 +1,4 @@
-import log from "@src/services/Logger";
+import log from "@src/common/Logger";
 
 import type { ErrorRequestHandler } from "express";
 

@@ -1,8 +1,8 @@
 import createError from "http-errors";
 import { createHmac } from "crypto";
 
-import Config from "../../config";
-import log from "@src/services/Logger";
+import Config from "@src/config";
+import log from "@src/common/Logger";
 
 import type { RequestHandler } from "express";
 
