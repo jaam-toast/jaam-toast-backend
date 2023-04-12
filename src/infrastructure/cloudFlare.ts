@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import Config from "@src/infrastructure/@config";
+import Config from "./@config";
 
 export class CloudFlare {
   api;

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-import Config from "@src/config";
-import { Logger as log } from "@src/common/Logger";
+import Config from "./@config";
+import { Logger as log } from "../common/Logger";
 
 import type {
   GithubUser,
@@ -12,7 +12,7 @@ import type {
   PostGithubWebhooks,
   GetGithubCommits,
   GetGithubPullRequestCommits,
-} from "@src/infrastructure/@types/github";
+} from "./@types/github";
 
 export class Github {
   client;
@@ -73,16 +73,13 @@ export class Github {
 
   async getOrgRepos(org: string) {
     try {
-      const { data } = await this.client.get(
-        `/orgs/${org}/repos`,
-        {
-          params: {
-            visibility: "public",
-            affiliation: "organization_member",
-            sort: "updated",
-          },
+      const { data } = await this.client.get(`/orgs/${org}/repos`, {
+        params: {
+          visibility: "public",
+          affiliation: "organization_member",
+          sort: "updated",
         },
-      );
+      });
 
       return data;
     } catch (error) {
@@ -123,10 +120,10 @@ export class Github {
           active: true,
           events: ["push"],
           config: {
-            url: `${Config.WEBHOOK_PAYLOAD_URL}`,
+            url: `${Config.GITHUB_WEBHOOK_PAYLOAD_URL}`,
             content_type: "json",
             insecure_ssl: "0",
-            secret: `${Config.WEBHOOK_SECRET_KEY}`,
+            secret: `${Config.GITHUB_WEBHOOK_SECRET_KEY}`,
           },
         },
         {

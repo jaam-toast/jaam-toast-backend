@@ -6,7 +6,7 @@
     "node": ">=16.15.0 <=18.12.0"
   },
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "start": "pm2 start ts-node -- --project ./tsconfig.json ./src/index.ts --watch",
     "dev": "ts-node-dev --transpile-only --respawn -r tsconfig-paths/register --watch ./src --trace-warnings --trace-uncaught -- ./src/index.ts",
     "watch-ts": "npx tsc --watch",
     "lint": "eslint --ext .ts src/",

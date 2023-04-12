@@ -1,7 +1,7 @@
 import createError from "http-errors";
 
-import verifyGithubSignature from "@src/app/middlewares/verifyGithubSignature";
-import { asyncHandler as catchAsync } from "@src/app/utils/asyncHandler";
+import verifyGithubSignature from "../middlewares/verifyGithubSignature";
+import { asyncHandler as catchAsync } from "../utils/asyncHandler";
 
 import { Router } from "express";
 

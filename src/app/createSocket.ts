@@ -1,9 +1,9 @@
 import { Server } from "http";
 import { Socket } from "socket.io";
 
-import { Logger as log } from "@src/common/Logger";
-import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";
-import { SocketSingleton } from "@src/infrastructure/socket";
+import { Logger as log } from "../common/Logger";
+import { BUILD_COMPLETE_MESSAGE } from "../common/constants";
+import { SocketSingleton } from "../infrastructure/socket";
 
 type Options = {
   server: Server;

@@ -1,8 +1,8 @@
 import { createBuildProject } from "./createBuildProject";
 import { createBuildResource } from "./createBuildResource";
 
-import type { OptionalProject } from "@src/domains/@types/entity";
-import type { Framework } from "@src/domains/@types";
+import type { OptionalProject } from "../../domains/@types/entity";
+import type { Framework } from "../../domains/@types";
 
 // type 정리중..
 type Options = {

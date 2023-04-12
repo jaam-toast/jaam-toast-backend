@@ -1,4 +1,4 @@
-import { Logger as log } from "@src/common/Logger";
+import { Logger as log } from "../../common/Logger";
 
 import type { ErrorRequestHandler } from "express";
 

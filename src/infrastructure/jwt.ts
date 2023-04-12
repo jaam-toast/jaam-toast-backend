@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import Config from "@src/infrastructure/@config";
+import Config from "./@config";
 
 type Options = {
   payload: string | object | Buffer;

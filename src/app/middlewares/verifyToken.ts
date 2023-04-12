@@ -1,8 +1,8 @@
 import type { RequestHandler } from "express";
 import createError from "http-errors";
 
-import type { User } from "@src/types/db";
-import { Jwt } from "@src/infrastructure/jwt";
+import type { User } from "../../types/db";
+import { Jwt } from "../../infrastructure/jwt";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;

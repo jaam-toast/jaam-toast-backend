@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import requestLogger from "@src/app/middlewares/morganMiddleware";
-import errorHandler from "@src/app/middlewares/errorHandler";
-import routes from "@src/app/routes";
+import requestLogger from "./middlewares/morganMiddleware";
+import errorHandler from "./middlewares/errorHandler";
+import routes from "./routes";
 
 import type { Express } from "express";
 

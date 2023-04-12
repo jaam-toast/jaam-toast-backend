@@ -3,11 +3,11 @@ import createError from "http-errors";
 import Joi from "joi";
 
 // import GithubClient from "@src/__temp/services/GithubClient";
-import { Github as GithubClient } from "@src/infrastructure/github";
-import { UserRepository } from "@src/domains/repositories/userRepository";
-import verifyToken from "@src/app/middlewares/verifyToken";
-import validateSchema from "@src/app/middlewares/validateSchema";
-import { asyncHandler } from "@src/app/utils/asyncHandler";
+import { Github as GithubClient } from "../../infrastructure/github";
+import { UserRepository } from "../../domains/repositories/userRepository";
+import verifyToken from "../middlewares/verifyToken";
+import validateSchema from "../middlewares/validateSchema";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const route = Router();
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import Config from "@src/config";
+import Config from "../../../config";
 
 import type { GithubToken } from "@src/infrastructure/@types/github";
 

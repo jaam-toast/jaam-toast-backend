@@ -2,13 +2,13 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 
-import { BuildService } from "@src/domains/buildService";
-import { CmsService } from "@src/domains/cmsService";
-import { ProjectRepository } from "@src/domains/repositories/projectRepository";
-import { UserRepository } from "@src/domains/repositories/userRepository";
-import verifyToken from "@src/app/middlewares/verifyToken";
-import validateSchema from "@src/app/middlewares/validateSchema";
-import { asyncHandler } from "@src/app/utils/asyncHandler";
+import { BuildService } from "../../domains/buildService";
+import { CmsService } from "../../domains/cmsService";
+import { ProjectRepository } from "../../domains/repositories/projectRepository";
+import { UserRepository } from "../../domains/repositories/userRepository";
+import verifyToken from "../middlewares/verifyToken";
+import validateSchema from "../middlewares/validateSchema";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const route = Router();
 
