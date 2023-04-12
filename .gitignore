@@ -9,3 +9,7 @@ logs/*
 .DS_Store
 
 .yarn/
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
