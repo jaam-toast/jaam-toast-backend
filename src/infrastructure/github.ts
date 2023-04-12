@@ -30,7 +30,7 @@ export class Github {
 
   async getUserData() {
     try {
-      const { data } = await this.client.get<GithubUser>("/user");
+      const { data } = await this.client.get("/user");
 
       return data;
     } catch (error) {
@@ -41,7 +41,7 @@ export class Github {
 
   async getRepos(repoType: string) {
     try {
-      const { data } = await this.client.get<GetGithubRepos>("/user/repos", {
+      const { data } = await this.client.get("/user/repos", {
         params: {
           visibility: `${repoType}`,
           affiliation: "owner",
@@ -60,7 +60,7 @@ export class Github {
 
   async getOrgs() {
     try {
-      const { data } = await this.client.get<GetGithubOrgs>("/user/orgs");
+      const { data } = await this.client.get("/user/orgs");
 
       return data;
     } catch (error) {
@@ -73,7 +73,7 @@ export class Github {
 
   async getOrgRepos(org: string) {
     try {
-      const { data } = await this.client.get<GetGithubOrgRepos>(
+      const { data } = await this.client.get(
         `/orgs/${org}/repos`,
         {
           params: {
@@ -95,7 +95,7 @@ export class Github {
 
   async getRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<GetGithubWebhooks>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           params: {
@@ -116,7 +116,7 @@ export class Github {
 
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.post<PostGithubWebhooks>(
+      const { data } = await this.client.post(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           name: "web",
@@ -148,7 +148,7 @@ export class Github {
 
   async getCommits(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<GetGithubCommits>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/commits`,
       );
 
@@ -165,7 +165,7 @@ export class Github {
     commitRef: string,
   ) {
     try {
-      const { data } = await this.client.get<GetGithubPullRequestCommits>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
       );
 

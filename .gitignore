@@ -6,6 +6,8 @@ dist
 
 logs/*
 
+src/__temp/
+
 .DS_Store
 
 .yarn/

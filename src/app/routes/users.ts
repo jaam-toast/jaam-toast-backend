@@ -2,7 +2,8 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 
-import GithubClient from "@src/__temp/services/GithubClient";
+// import GithubClient from "@src/__temp/services/GithubClient";
+import { Github as GithubClient } from "@src/infrastructure/github";
 import { UserRepository } from "@src/domains/repositories/userRepository";
 import verifyToken from "@src/app/middlewares/verifyToken";
 import validateSchema from "@src/app/middlewares/validateSchema";
