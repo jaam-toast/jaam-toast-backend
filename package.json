@@ -13,6 +13,7 @@
     "test": "node --experimental-vm-modules --trace-warnings node_modules/jest/bin/jest.js --verbose --detectOpenHandles"
   },
   "dependencies": {
+    "@aws-sdk/client-route-53": "^3.310.0",
     "axios": "^1.1.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
