@@ -1,11 +1,11 @@
 import { Router } from "express";
 import createError from "http-errors";
-import jwt from "jsonwebtoken";
 
 import { UserRepository } from "@src/domains/repositories/userRepository";
 import verifyGithubCode from "@src/app/middlewares/verifyGithubCode";
 import { asyncHandler } from "@src/app/utils/asyncHandler";
 import Config from "@src/config";
+import { Jwt } from "@src/infrastructure/jwt";
 
 const route = Router();
 
@@ -40,8 +40,11 @@ const loginRouter = (app: Router) => {
         userImage: userData?.userImage,
       };
 
-      const accessToken = jwt.sign(userPayload, Config.JWT_SECRET, {
-        expiresIn: "1d",
+      const accessToken = Jwt.sign({
+        payload: userPayload,
+        options: {
+          expiresIn: "1d",
+        },
       });
 
       const { referer } = req.headers;

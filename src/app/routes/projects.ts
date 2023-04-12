@@ -47,7 +47,7 @@ const projectsRouter = (app: Router) => {
         !envList
       ) {
         return next(
-          createError(401, "Cannot find environment data 'project_name'"),
+          createError(401, "Cannot find environment data"),
         );
       }
 
@@ -158,7 +158,7 @@ const projectsRouter = (app: Router) => {
         return next(
           createError(
             400,
-            "Cannot find environment data 'githubAccessToken', and 'projectName'",
+            "Cannot find environment data 'project id'",
           ),
         );
       }

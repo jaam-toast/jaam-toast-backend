@@ -12,7 +12,7 @@ import type {
   PostGithubWebhooks,
   GetGithubCommits,
   GetGithubPullRequestCommits,
-} from "@src/types/github";
+} from "@src/infrastructure/@types/github";
 
 class GithubClient {
   client;

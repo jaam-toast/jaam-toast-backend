@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import { FrameWorkPresets } from "@src/domains/@constants/frameWorkPresets";
 import { Logger as log } from "@src/common/Logger";
 
-import type { Framework } from "@src/domains/types";
+import type { Framework } from "@src/domains/@types";
 
 type Options = {
   repoCloneUrl: string;
@@ -108,7 +108,7 @@ const runBuild = async ({
   log.build("Build complete.");
 };
 
-export async function makeBuildResource({
+export async function createBuildResource({
   repoCloneUrl,
   repoName,
   framework,

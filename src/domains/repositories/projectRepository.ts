@@ -1,5 +1,5 @@
 import Project from "@src/domains/repositories/models/Project";
-import { BaseProject, OptionalProject } from "@src/domains/types/entity";
+import { BaseProject, OptionalProject } from "@src/domains/@types/entity";
 
 import type { Project as ProjectType, IdParameter } from "@src/types/db";
 

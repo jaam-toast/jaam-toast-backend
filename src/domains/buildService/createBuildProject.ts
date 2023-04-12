@@ -47,15 +47,10 @@ export async function createBuildProject({
   buildResourceLocation,
   projectName,
 }: Options) {
-  const cloudflareApi = new CloudFlare({
-    accountId: Config.CLOUDFLARE_ACCOUNT_ID,
-    apiKey: Config.CLOUDFLARE_API_KEY,
-    authEmail: Config.CLOUDFLARE_EMAIL,
-  });
-
   log.build("Creating a project data...");
 
-  const data = await cloudflareApi.createProject({ projectName });
+  const cloudflare = new CloudFlare();
+  const data = await cloudflare.createProject({ projectName });
 
   if (!data) {
     throw Error("Project creation failed.");

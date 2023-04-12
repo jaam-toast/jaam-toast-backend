@@ -1,8 +1,8 @@
 import { createBuildProject } from "./createBuildProject";
-import { makeBuildResource } from "./makeBuildResource";
+import { createBuildResource } from "./createBuildResource";
 
-import type { OptionalProject } from "@src/domains/types/entity";
-import type { Framework } from "@src/domains/types";
+import type { OptionalProject } from "@src/domains/@types/entity";
+import type { Framework } from "@src/domains/@types";
 
 // type 정리중..
 type Options = {
@@ -40,7 +40,7 @@ export class BuildService {
         throw Error("Cannot find environment data before create project.");
       }
 
-      const buildResourceLocation = await makeBuildResource({
+      const buildResourceLocation = await createBuildResource({
         repoName,
         repoCloneUrl,
         framework,

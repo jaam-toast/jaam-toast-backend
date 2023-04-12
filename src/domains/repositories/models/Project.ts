@@ -16,6 +16,7 @@ const joiProjectSchema = joi.object({
   framework: joi.string(),
   installCommand: joi.string().allow("").default("npm install"),
   buildCommand: joi.string().allow("").default("npm run build"),
+  nodeVersion: joi.string().allow("").default("12.18"),
   envList: joi.array().items(
     joi.object({
       key: joi.string(),

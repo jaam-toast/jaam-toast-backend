@@ -1,10 +1,8 @@
+import type { RequestHandler } from "express";
 import createError from "http-errors";
-import jwt from "jsonwebtoken";
-
-import Config from "@src/config";
 
 import type { User } from "@src/types/db";
-import type { RequestHandler } from "express";
+import { Jwt } from "@src/infrastructure/jwt";
 
 const verifyToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
@@ -31,7 +29,7 @@ const verifyToken: RequestHandler = (req, res, next) => {
 
   const getVerifiedUserData = (userAccessToken: string) => {
     try {
-      const decodedUserData = jwt.verify(userAccessToken, Config.JWT_SECRET);
+      const decodedUserData = Jwt.verify({ token: userAccessToken });
 
       return decodedUserData;
     } catch (error) {
