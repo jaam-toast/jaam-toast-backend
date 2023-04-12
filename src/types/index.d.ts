@@ -1,4 +1,4 @@
-import { User } from "@src/types/db";
+import { User } from "./db";
 
 declare global {
   namespace Express {
