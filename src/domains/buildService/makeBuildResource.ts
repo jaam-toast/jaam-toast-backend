@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 
-import { FrameWorkPresets } from "@src/domains/@constants/frameWorkPresets";
-import { Logger as log } from "@src/common/Logger";
+import { FrameWorkPresets } from "../@constants/frameWorkPresets";
+import { Logger as log } from "../../common/Logger";
 
-import type { Framework } from "@src/domains/types";
+import type { Framework } from "../types";
 
 type Options = {
   repoCloneUrl: string;

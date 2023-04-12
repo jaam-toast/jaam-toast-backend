@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import Config from "@src/config";
+import Config from "../../config";
 
 export const signJwt = (id: string) => {
   const token = jwt.sign({ id }, Config.JWT_SECRET, {

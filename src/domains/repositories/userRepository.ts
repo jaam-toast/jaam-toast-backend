@@ -1,11 +1,11 @@
-import User from "@src/domains/repositories/models/User";
+import User from "../repositories/models/User";
 
 import type {
   User as UserType,
   Project,
   UserOptions,
   IdParameter,
-} from "@src/types/db";
+} from "../../types/db";
 
 export class UserRepository {
   static async create(data: UserType) {

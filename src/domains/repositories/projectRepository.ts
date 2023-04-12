@@ -1,7 +1,7 @@
-import Project from "@src/domains/repositories/models/Project";
-import { BaseProject, OptionalProject } from "@src/domains/types/entity";
+import Project from "../repositories/models/Project";
+import { BaseProject, OptionalProject } from "../types/entity";
 
-import type { Project as ProjectType, IdParameter } from "@src/types/db";
+import type { Project as ProjectType, IdParameter } from "../../types/db";
 
 export type Env = {
   key: string;

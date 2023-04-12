@@ -1,8 +1,8 @@
 import axios from "axios";
 
-import Config from "@src/config";
+import Config from "../../../config";
 
-import type { GithubToken } from "@src/types/github";
+import type { GithubToken } from "../../../types/github";
 
 class OauthClient {
   client = axios.create({
