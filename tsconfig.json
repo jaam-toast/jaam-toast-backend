@@ -15,7 +15,7 @@
     "paths": {
       "@src/*": ["src/*"]
     },
-    // "noImplicitAny": false
+    "noImplicitAny": false
   },
   "include": ["src/**/**/*", "index.d.ts"],
   "exclude": ["node_modules", "**/*.(spec|test).ts"]
