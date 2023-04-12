@@ -48,7 +48,7 @@ const verifyToken: RequestHandler = (req, res, next) => {
     );
   }
 
-  req.user = verifiedUserData as User;
+  req.app.locals = verifiedUserData as User;
 
   next();
 };

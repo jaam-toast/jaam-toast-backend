@@ -17,7 +17,7 @@ const loginRouter = (app: Router) => {
     verifyGithubCode,
     asyncHandler(async (req, res, next) => {
       const { username, userGithubUri, userImage, githubAccessToken } =
-        req.user;
+        req.app.locals;
 
       if (!username || !userGithubUri) {
         return next(createError(401));

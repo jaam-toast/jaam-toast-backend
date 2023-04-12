@@ -39,7 +39,7 @@ const verifyGithubCode = catchAsync(async (req, res, next) => {
     githubAccessToken,
   };
 
-  req.user = verifiedUserData;
+  req.app.locals = verifiedUserData
 
   next();
 });
