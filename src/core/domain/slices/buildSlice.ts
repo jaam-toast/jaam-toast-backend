@@ -1,4 +1,4 @@
-import { createSlice } from "@src/core";
+import { createSlice } from "../../../core";
 
 export const buildSlice = createSlice<"ProjectAggregate">({
   handlers: {

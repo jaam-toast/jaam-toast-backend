@@ -1,11 +1,11 @@
 import fs from "fs/promises";
 import chalk from "chalk";
 
-import Config from "@src/config";
+import Config from "../../config";
 import Observer from "../Observer";
 import getFormattedKoreaTime from "./utils/getFormattedKoreaTime";
 
-import { LogMessage, LogType } from "@src/types";
+import { LogMessage, LogType } from "../../types";
 
 /*
  * how to use

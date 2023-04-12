@@ -1,4 +1,4 @@
-import type { Framework } from "@src/domains/types";
+import type { Framework } from "../types";
 
 export const FrameWorkPresets: Record<
   Framework,

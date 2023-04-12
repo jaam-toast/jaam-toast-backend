@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 
-import { Logger as log } from "@src/common/Logger";
-import { BUILD_COMPLETE_MESSAGE } from "@src/common/constants";
-import Config from "@src/infrastructure/@config";
-import { CloudFlare } from "@src/infrastructure/cloudFlare";
+import { Logger as log } from "../../common/Logger";
+import { BUILD_COMPLETE_MESSAGE } from "../../common/constants";
+import Config from "../../infrastructure/@config";
+import { CloudFlare } from "../../infrastructure/cloudFlare";
 
 type Options = {
   buildResourceLocation: string;

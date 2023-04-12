@@ -2,10 +2,10 @@ import { Router } from "express";
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import { UserRepository } from "@src/domains/repositories/userRepository";
-import verifyGithubCode from "@src/app/middlewares/verifyGithubCode";
-import { asyncHandler } from "@src/app/utils/asyncHandler";
-import Config from "@src/config";
+import { UserRepository } from "../../domains/repositories/userRepository";
+import verifyGithubCode from "../middlewares/verifyGithubCode";
+import { asyncHandler } from "../utils/asyncHandler";
+import Config from "../../config";
 
 const route = Router();
 
@@ -17,7 +17,7 @@ const loginRouter = (app: Router) => {
     verifyGithubCode,
     asyncHandler(async (req, res, next) => {
       const { username, userGithubUri, userImage, githubAccessToken } =
-        req.user;
+        req.app.locals;
 
       if (!username || !userGithubUri) {
         return next(createError(401));

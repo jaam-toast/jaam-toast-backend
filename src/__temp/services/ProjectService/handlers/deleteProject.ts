@@ -1,25 +1,25 @@
-import DB from "@src/__temp/services/DBService";
-import ProjectService from "@src/__temp/services/ProjectService";
+// import DB from "../../../services/DBService";
+// import ProjectService from "../../../services/ProjectService";
 
-const deleteProject = async (
-  service: ProjectService,
-  next: Function,
-): Promise<void> => {
-  const { projectName } = service;
+// const deleteProject = async (
+//   service: ProjectService,
+//   next: Function,
+// ): Promise<void> => {
+//   const { projectName } = service;
 
-  try {
-    const deletedProject = await DB.Project.findOneAndDelete({ projectName });
+//   try {
+//     const deletedProject = await DB.Project.findOneAndDelete({ projectName });
 
-    if (!deletedProject) {
-      service.throw("Failed to delete database.");
-    }
+//     if (!deletedProject) {
+//       service.throw("Failed to delete database.");
+//     }
 
-    service.projectId = deletedProject._id;
-  } catch (error) {
-    service.throw("An unexpected error occurred during delete project.", error);
-  }
+//     service.projectId = deletedProject._id;
+//   } catch (error) {
+//     service.throw("An unexpected error occurred during delete project.", error);
+//   }
 
-  next();
-};
+//   next();
+// };
 
-export default deleteProject;
+// export default deleteProject;

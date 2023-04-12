@@ -2,11 +2,11 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 
-import GithubClient from "@src/__temp/services/GithubClient";
-import { UserRepository } from "@src/domains/repositories/userRepository";
-import verifyToken from "@src/app/middlewares/verifyToken";
-import validateSchema from "@src/app/middlewares/validateSchema";
-import { asyncHandler } from "@src/app/utils/asyncHandler";
+import { Github } from "../../infrastructure/github";
+import { UserRepository } from "../../domains/repositories/userRepository";
+import verifyToken from "../middlewares/verifyToken";
+import validateSchema from "../middlewares/validateSchema";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const route = Router();
 
@@ -28,7 +28,7 @@ const usersRouter = (app: Router) => {
         return next(createError(400));
       }
 
-      const githubClient = new GithubClient(githubAccessToken as string);
+      const githubClient = new Github(githubAccessToken as string);
       const organizations = await githubClient.getOrgs();
       const orgsData = organizations.map(org => ({
         spaceName: org.login,
@@ -58,7 +58,7 @@ const usersRouter = (app: Router) => {
         return next(createError(400));
       }
 
-      const githubClient = new GithubClient(githubAccessToken as string);
+      const githubClient = new Github(githubAccessToken as string);
       const publicRepos = await githubClient.getRepos("public");
       const privateRepos = await githubClient.getRepos("private");
 
@@ -131,7 +131,7 @@ const usersRouter = (app: Router) => {
         return next(createError(400));
       }
 
-      const githubClient = new GithubClient(githubAccessToken as string);
+      const githubClient = new Github(githubAccessToken as string);
       const organizationRepos = await githubClient.getOrgRepos(org);
 
       if (!organizationRepos) {

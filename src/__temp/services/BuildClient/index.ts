@@ -1,18 +1,18 @@
 import axios from "axios";
 
-import Config from "@src/config";
+import Config from "../../../config";
 import {
   CreateBuildOptions,
   UpdateBuildOptions,
   DeleteBuildOptions,
-} from "@src/types/buildClient";
+} from "../../../types/buildClient";
 
 class BuildClient {
   client;
 
   constructor(accessToken: string) {
     this.client = axios.create({
-      baseURL: Config.BUILD_SERVER_URL,
+      // baseURL: Config.BUILD_SERVER_URL,
       timeout: 2500,
       headers: {
         Authorization: `Bearer ${accessToken}`,

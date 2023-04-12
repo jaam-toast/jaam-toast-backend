@@ -1,46 +1,46 @@
-import type { ServiceHandler } from "@src/types";
+// import type { ServiceHandler } from "@src/types";
 
-abstract class Service {
-  public layers: ServiceHandler<this>[] = [];
-  public layerIndex = 0;
+// abstract class Service {
+//   public layers: ServiceHandler<this>[] = [];
+//   public layerIndex = 0;
 
-  public async use(...handlers: ServiceHandler<this>[]) {
-    if (this.layerIndex !== this.layers.length) {
-      this.layerIndex = this.layers.length;
-    }
+//   public async use(...handlers: ServiceHandler<this>[]) {
+//     if (this.layerIndex !== this.layers.length) {
+//       this.layerIndex = this.layers.length;
+//     }
 
-    this.layers.push(...handlers);
+//     this.layers.push(...handlers);
 
-    try {
-      await this.handle();
-    } catch (error) {
-      throw error;
-    }
+//     try {
+//       await this.handle();
+//     } catch (error) {
+//       throw error;
+//     }
 
-    return this;
-  }
+//     return this;
+//   }
 
-  public async handle() {
-    const next = async (message?: string) => {
-      if (message) {
-        this.layerIndex = this.layers.length;
-      }
-      if (this.layerIndex >= this.layers.length) {
-        return;
-      }
+//   public async handle() {
+//     const next = async (message?: string) => {
+//       if (message) {
+//         this.layerIndex = this.layers.length;
+//       }
+//       if (this.layerIndex >= this.layers.length) {
+//         return;
+//       }
 
-      const handler = this.layers[this.layerIndex];
-      this.layerIndex += 1;
+//       const handler = this.layers[this.layerIndex];
+//       this.layerIndex += 1;
 
-      try {
-        await handler(this, next);
-      } catch (error) {
-        throw error;
-      }
-    };
+//       try {
+//         await handler(this, next);
+//       } catch (error) {
+//         throw error;
+//       }
+//     };
 
-    next();
-  }
-}
+//     next();
+//   }
+// }
 
-export default Service;
+// export default Service;

@@ -1,4 +1,4 @@
-import type { DomainAggregate } from "@src/core/domain/types/DomainAggregate";
+import type { DomainAggregate } from "../../core/domain/types/DomainAggregate";
 import type { DomainEvent } from "../domain/types/DomainEvent";
 
 export type BaseHandler<

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-import Config from "@src/config";
-import { Logger as log } from "@src/common/Logger";
+import Config from "./@config";
+import { Logger as log } from "../common/Logger";
 
 import type {
   GithubUser,
@@ -12,7 +12,9 @@ import type {
   PostGithubWebhooks,
   GetGithubCommits,
   GetGithubPullRequestCommits,
-} from "@src/types/github";
+} from "./@types/github";
+
+// 배포 에러로 인해 잠시 type 삭제
 
 export class Github {
   client;
@@ -30,7 +32,7 @@ export class Github {
 
   async getUserData() {
     try {
-      const { data } = await this.client.get<GithubUser>("/user");
+      const { data } = await this.client.get("/user");
 
       return data;
     } catch (error) {
@@ -41,7 +43,7 @@ export class Github {
 
   async getRepos(repoType: string) {
     try {
-      const { data } = await this.client.get<GetGithubRepos>("/user/repos", {
+      const { data } = await this.client.get("/user/repos", {
         params: {
           visibility: `${repoType}`,
           affiliation: "owner",
@@ -60,7 +62,7 @@ export class Github {
 
   async getOrgs() {
     try {
-      const { data } = await this.client.get<GetGithubOrgs>("/user/orgs");
+      const { data } = await this.client.get("/user/orgs");
 
       return data;
     } catch (error) {
@@ -73,16 +75,13 @@ export class Github {
 
   async getOrgRepos(org: string) {
     try {
-      const { data } = await this.client.get<GetGithubOrgRepos>(
-        `/orgs/${org}/repos`,
-        {
-          params: {
-            visibility: "public",
-            affiliation: "organization_member",
-            sort: "updated",
-          },
+      const { data } = await this.client.get(`/orgs/${org}/repos`, {
+        params: {
+          visibility: "public",
+          affiliation: "organization_member",
+          sort: "updated",
         },
-      );
+      });
 
       return data;
     } catch (error) {
@@ -95,7 +94,7 @@ export class Github {
 
   async getRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<GetGithubWebhooks>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           params: {
@@ -116,17 +115,17 @@ export class Github {
 
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.post<PostGithubWebhooks>(
+      const { data } = await this.client.post(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           name: "web",
           active: true,
           events: ["push"],
           config: {
-            url: `${Config.WEBHOOK_PAYLOAD_URL}`,
+            url: `${Config.GITHUB_WEBHOOK_PAYLOAD_URL}`,
             content_type: "json",
             insecure_ssl: "0",
-            secret: `${Config.WEBHOOK_SECRET_KEY}`,
+            secret: `${Config.GITHUB_WEBHOOK_SECRET_KEY}`,
           },
         },
         {
@@ -148,7 +147,7 @@ export class Github {
 
   async getCommits(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get<GetGithubCommits>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/commits`,
       );
 
@@ -165,7 +164,7 @@ export class Github {
     commitRef: string,
   ) {
     try {
-      const { data } = await this.client.get<GetGithubPullRequestCommits>(
+      const { data } = await this.client.get(
         `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
       );
 

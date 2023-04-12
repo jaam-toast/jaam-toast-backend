@@ -1,9 +1,9 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "@src/config";
+import Config from "../../config";
 
-import type { User } from "@src/types/db";
+import type { User } from "../../types/db";
 import type { RequestHandler } from "express";
 
 const verifyToken: RequestHandler = (req, res, next) => {
@@ -50,7 +50,7 @@ const verifyToken: RequestHandler = (req, res, next) => {
     );
   }
 
-  req.user = verifiedUserData as User;
+  req.app.locals = verifiedUserData as User;
 
   next();
 };

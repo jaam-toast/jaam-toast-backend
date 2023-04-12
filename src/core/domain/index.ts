@@ -1,4 +1,4 @@
-import { createService } from "@src/core";
+import { createService } from "../../core";
 
 import { buildSlice } from "./slices/buildSlice";
 
