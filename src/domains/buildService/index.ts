@@ -1,22 +1,28 @@
+import { injectable } from "inversify";
+
+import { connectDomain } from "./connectDomain";
 import { createBuildProject } from "./createBuildProject";
-import { makeBuildResource } from "./makeBuildResource";
+import { createBuildResource } from "./createBuildResource";
+import { deleteBuildProject } from "./deleteBuildProject";
+import { Logger as log } from "../../util/Logger";
+import Config from "../../config";
+import { BUILD_MESSAGE } from "../../config/constants";
 
-import type { OptionalProject } from "../types/entity";
-import type { Framework } from "../types";
+import type { BaseProject } from "../@types/entity";
+import { ClientFrameworkInput } from "../@types";
 
-// type 정리중..
-type Options = {
-  repoName: string;
-  repoCloneUrl: string;
-  projectName: string;
-  framework: Framework;
-  installCommand: string;
-  buildCommand: string;
-  envList: string;
-};
+interface IBuildService {
+  createBuild(options: BaseProject): Promise<{
+    buildDomain: string;
+    buildOriginalDomain: string;
+  }>;
+  updateBuild(): Promise<void>;
+  deleteBuild({ projectName }): Promise<void>;
+}
 
-export class BuildService {
-  static async createBuild(options: Options) {
+@injectable()
+export class BuildService implements IBuildService {
+  async createBuild(options: BaseProject) {
     try {
       const {
         repoName,
@@ -37,39 +43,59 @@ export class BuildService {
         !buildCommand ||
         !envList
       ) {
-        throw Error("Cannot find environment data before create project.");
+        throw new Error(BUILD_MESSAGE.ERROR.ENVIRONMENT_DATA_NOT_FOUND);
       }
 
-      const buildResourceLocation = await makeBuildResource({
+      const buildResourceLocation = await createBuildResource({
         repoName,
         repoCloneUrl,
-        framework,
+        framework: ClientFrameworkInput[framework],
         installCommand,
         buildCommand,
       });
 
       if (!buildResourceLocation) {
-        throw Error("Cannot find build Resource");
+        throw new Error(BUILD_MESSAGE.ERROR.FAIL_RESOURCE_CREATION);
       }
 
-      const buildUrl = await createBuildProject({
+      const buildOriginalDomain = await createBuildProject({
         buildResourceLocation,
         projectName,
       });
 
-      if (!buildUrl) {
-        throw Error("An unexpected error occurred during build project");
+      if (!buildOriginalDomain) {
+        throw new Error(BUILD_MESSAGE.ERROR.DOMAIN_CREATE_FAIL);
       }
 
-      return buildUrl;
+      const buildDomain = await connectDomain({
+        projectName,
+        changeDomain: `${projectName}.${Config.SERVER_URL}`,
+        originalDomain: buildOriginalDomain,
+      });
+
+      if (!buildDomain) {
+        throw new Error(BUILD_MESSAGE.ERROR.DOMAIN_CREATE_FAIL);
+      }
+
+      log.build(BUILD_MESSAGE.COMPLETE);
+
+      return { buildDomain, buildOriginalDomain };
     } catch (error) {
+      log.buildError(BUILD_MESSAGE.ERROR.UNEXPECTED_DURING_BUILD);
+
       throw error;
     }
   }
 
-  async readBuild() {}
+  async updateBuild() {}
 
-  async updateBuild(options: OptionalProject) {}
+  async deleteBuild({ projectName }) {
+    if (!projectName) {
+      throw Error("Cannot find environment data before delete project.");
+    }
 
-  async deleteBuild(id: string) {}
+    await deleteBuildProject({
+      projectName,
+    });
+  }
 }
