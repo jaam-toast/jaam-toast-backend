@@ -1,9 +1,8 @@
 import { spawn } from "child_process";
 
-import { Logger as log } from "../../common/Logger";
-import { BUILD_COMPLETE_MESSAGE } from "../../common/constants";
-import Config from "../../infrastructure/@config";
+import { Logger as log } from "../../util/Logger";
 import { CloudFlare } from "../../infrastructure/cloudFlare";
+import { BUILD_MESSAGE } from "src/config/constants";
 
 type Options = {
   buildResourceLocation: string;
@@ -14,8 +13,10 @@ const createDeployment = async ({
   buildResourceLocation,
   projectName,
 }: Options) => {
+  const cloudFlare = new CloudFlare();
   const command = [
-    `CLOUDFLARE_ACCOUNT_ID=${Config.CLOUDFLARE_ACCOUNT_ID} CLOUDFLARE_API_TOKEN=${Config.CLOUDFLARE_API_TOKEN} npx wrangler pages publish ${buildResourceLocation} --project-name ${projectName} --branch main`,
+    cloudFlare.makePublishPageCommand({ buildResourceLocation, projectName }),
+    "rm -rf buildResource",
   ].join(" && ");
 
   const childProcess = spawn(command, {
@@ -27,15 +28,20 @@ const createDeployment = async ({
   childProcess.stdout.setEncoding("utf8");
   childProcess.stderr.setEncoding("utf8");
   childProcess.stdout?.on("data", log.debug);
-  childProcess.stderr?.on("data", log.buildError);
+  childProcess.stderr?.on("data", log.debug);
 
   await new Promise<number>((resolve, reject) => {
     childProcess.on("exit", (code: number) => {
       if (code === null) {
-        reject(`Git clone childProcess exited with code ${code}`);
+        log.error(
+          `publish cloud flare page ${BUILD_MESSAGE.CHILD_PROCESS_EXITED_WITH_CODE} null`,
+        );
       }
 
-      log.debug(`Git clone childProcess exited with code ${code}`);
+      log.debug(
+        `publish cloud flare page ${BUILD_MESSAGE.CHILD_PROCESS_EXITED_WITH_CODE} ${code}`,
+      );
+
       resolve(code || 0);
     });
   });
@@ -47,24 +53,23 @@ export async function createBuildProject({
   buildResourceLocation,
   projectName,
 }: Options) {
-  const cloudflareApi = new CloudFlare({
-    accountId: Config.CLOUDFLARE_ACCOUNT_ID,
-    apiKey: Config.CLOUDFLARE_API_KEY,
-    authEmail: Config.CLOUDFLARE_EMAIL,
-  });
+  try {
+    log.build(BUILD_MESSAGE.WORKING_ON_BUILD_PROJECT);
 
-  log.build("Creating a project data...");
+    const cloudFlareApi = new CloudFlare();
+    const { result } = await cloudFlareApi.createProject({
+      projectName: projectName,
+    });
 
-  const data = await cloudflareApi.createProject({ projectName });
+    if (result.success === false) {
+      throw new Error(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION);
+    }
 
-  if (!data) {
-    throw Error("Project creation failed.");
+    const buildOriginalDomain: string = result.subdomain;
+    await createDeployment({ buildResourceLocation, projectName });
+
+    return buildOriginalDomain;
+  } catch (error) {
+    throw new Error(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION);
   }
-
-  await createDeployment({ buildResourceLocation, projectName });
-  const buildUrl = `https://${projectName}.pages.dev/`;
-
-  log.build(BUILD_COMPLETE_MESSAGE);
-
-  return buildUrl;
 }
