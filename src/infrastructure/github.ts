@@ -1,7 +1,9 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
 import Config from "./@config";
-import { Logger as log } from "../common/Logger";
+import { Logger as log } from "../util/Logger";
+
+import type { GithubToken } from "./@types/github";
 
 import type {
   GithubUser,
@@ -14,10 +16,8 @@ import type {
   GetGithubPullRequestCommits,
 } from "./@types/github";
 
-// 배포 에러로 인해 잠시 type 삭제
-
 export class Github {
-  client;
+  client: AxiosInstance;
 
   constructor(accessToken: string) {
     this.client = axios.create({
@@ -32,7 +32,7 @@ export class Github {
 
   async getUserData() {
     try {
-      const { data } = await this.client.get("/user");
+      const { data } = await this.client.get<GithubUser>("/user");
 
       return data;
     } catch (error) {
@@ -43,7 +43,7 @@ export class Github {
 
   async getRepos(repoType: string) {
     try {
-      const { data } = await this.client.get("/user/repos", {
+      const { data } = await this.client.get<GetGithubRepos>("/user/repos", {
         params: {
           visibility: `${repoType}`,
           affiliation: "owner",
@@ -62,7 +62,7 @@ export class Github {
 
   async getOrgs() {
     try {
-      const { data } = await this.client.get("/user/orgs");
+      const { data } = await this.client.get<GetGithubOrgs>("/user/orgs");
 
       return data;
     } catch (error) {
@@ -75,13 +75,16 @@ export class Github {
 
   async getOrgRepos(org: string) {
     try {
-      const { data } = await this.client.get(`/orgs/${org}/repos`, {
-        params: {
-          visibility: "public",
-          affiliation: "organization_member",
-          sort: "updated",
+      const { data } = await this.client.get<GetGithubOrgRepos>(
+        `/orgs/${org}/repos`,
+        {
+          params: {
+            visibility: "public",
+            affiliation: "organization_member",
+            sort: "updated",
+          },
         },
-      });
+      );
 
       return data;
     } catch (error) {
@@ -94,7 +97,7 @@ export class Github {
 
   async getRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get(
+      const { data } = await this.client.get<GetGithubWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           params: {
@@ -115,7 +118,7 @@ export class Github {
 
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.post(
+      const { data } = await this.client.post<PostGithubWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
           name: "web",
@@ -147,7 +150,7 @@ export class Github {
 
   async getCommits(repoOwner: string, repoName: string) {
     try {
-      const { data } = await this.client.get(
+      const { data } = await this.client.get<GetGithubCommits>(
         `/repos/${repoOwner}/${repoName}/commits`,
       );
 
@@ -164,7 +167,7 @@ export class Github {
     commitRef: string,
   ) {
     try {
-      const { data } = await this.client.get(
+      const { data } = await this.client.get<GetGithubPullRequestCommits>(
         `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
       );
 
@@ -175,5 +178,31 @@ export class Github {
       );
       throw error;
     }
+  }
+}
+
+export class OauthClient {
+  client = axios.create({
+    baseURL: "https://github.com",
+    timeout: 2500,
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  async getToken(code: string) {
+    const { data } = await this.client.post<GithubToken>(
+      "/login/oauth/access_token?",
+      {},
+      {
+        params: {
+          client_id: Config.GITHUB_CLIENT_ID,
+          client_secret: Config.GITHUB_CLIENT_SECRET,
+          code,
+        },
+      },
+    );
+
+    return data.access_token;
   }
 }
