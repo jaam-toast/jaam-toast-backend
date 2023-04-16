@@ -1,5 +1,5 @@
 import { CloudFlare } from "../../infrastructure/cloudFlare";
-import { Logger as log } from "../../util/Logger";
+import { BUILD_MESSAGE } from "./../../config/constants";
 
 type Options = {
   projectName: string;
@@ -11,7 +11,7 @@ export async function deleteBuildProject({ projectName }: Options) {
     const { result } = await cloudFlareApi.getProject({ projectName });
 
     if (!result) {
-      throw Error("The project name is invalid.");
+      throw Error(BUILD_MESSAGE.DELETE_ERROR.INVALID_PROJECT_NAME);
     }
 
     if (result.domains.length > 1) {
@@ -22,7 +22,7 @@ export async function deleteBuildProject({ projectName }: Options) {
         });
 
       if (!isSuccessRemoveDomain) {
-        throw Error("Fail to remove project domain");
+        throw Error(BUILD_MESSAGE.DELETE_ERROR.FAIL_TO_DELETE_DOMAIN);
       }
     }
 

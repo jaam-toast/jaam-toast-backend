@@ -43,7 +43,7 @@ export class BuildService implements IBuildService {
         !buildCommand ||
         !envList
       ) {
-        throw new Error(BUILD_MESSAGE.ERROR.ENVIRONMENT_DATA_NOT_FOUND);
+        throw Error(BUILD_MESSAGE.CREATE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
       }
 
       const buildResourceLocation = await createBuildResource({
@@ -55,7 +55,7 @@ export class BuildService implements IBuildService {
       });
 
       if (!buildResourceLocation) {
-        throw new Error(BUILD_MESSAGE.ERROR.FAIL_RESOURCE_CREATION);
+        throw Error(BUILD_MESSAGE.CREATE_ERROR.FAIL_RESOURCE_CREATION);
       }
 
       const buildOriginalDomain = await createBuildProject({
@@ -64,7 +64,7 @@ export class BuildService implements IBuildService {
       });
 
       if (!buildOriginalDomain) {
-        throw new Error(BUILD_MESSAGE.ERROR.DOMAIN_CREATE_FAIL);
+        throw Error(BUILD_MESSAGE.CREATE_ERROR.DOMAIN_CREATE_FAIL);
       }
 
       const buildDomain = await connectDomain({
@@ -74,14 +74,14 @@ export class BuildService implements IBuildService {
       });
 
       if (!buildDomain) {
-        throw new Error(BUILD_MESSAGE.ERROR.DOMAIN_CREATE_FAIL);
+        throw Error(BUILD_MESSAGE.CREATE_ERROR.DOMAIN_CREATE_FAIL);
       }
 
-      log.build(BUILD_MESSAGE.COMPLETE);
+      log.build(BUILD_MESSAGE.CREATE.COMPLETE);
 
       return { buildDomain, buildOriginalDomain };
     } catch (error) {
-      log.buildError(BUILD_MESSAGE.ERROR.UNEXPECTED_DURING_BUILD);
+      log.buildError(BUILD_MESSAGE.CREATE_ERROR.UNEXPECTED_DURING_BUILD);
 
       throw error;
     }
@@ -92,7 +92,7 @@ export class BuildService implements IBuildService {
   async deleteBuild({ projectName }) {
     try {
       if (!projectName) {
-        throw Error("Cannot find environment data before delete project.");
+        throw Error(BUILD_MESSAGE.DELETE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
       }
 
       const result = await deleteBuildProject({

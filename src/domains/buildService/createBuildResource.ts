@@ -3,8 +3,8 @@ import { spawn } from "child_process";
 import { FrameWorkPresets } from "../@config/frameWorkPresets";
 import { Logger as log } from "../../util/Logger";
 
-import { Framework } from "../@types";
-import { BUILD_MESSAGE } from "src/config/constants";
+import { Framework } from "../../repositories/@types";
+import { BUILD_MESSAGE } from "../../config/constants";
 
 type Options = {
   repoCloneUrl: string;
@@ -131,15 +131,15 @@ export async function createBuildResource({
     await runGitClone({ repoCloneUrl });
 
     await runDependenciesInstall({ repoName, installCommand });
-    log.build(BUILD_MESSAGE.COMPLETE_INSTALL_DEPENDENCIES);
+    log.build(BUILD_MESSAGE.CREATE.COMPLETE_INSTALL_DEPENDENCIES);
 
     await runBuild({ repoName, buildCommand });
-    log.build(BUILD_MESSAGE.COMPLETE_RESOURCE_CREATE);
+    log.build(BUILD_MESSAGE.CREATE.COMPLETE_RESOURCE_CREATE);
 
     const buildResourceLocation = `./buildResource/${repoName}/${FrameWorkPresets[framework].buildDirectory}`;
 
     return buildResourceLocation;
   } catch (error) {
-    throw new Error(BUILD_MESSAGE.ERROR.FAIL_RESOURCE_CREATION);
+    throw Error(BUILD_MESSAGE.CREATE_ERROR.FAIL_RESOURCE_CREATION);
   }
 }

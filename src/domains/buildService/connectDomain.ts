@@ -1,5 +1,6 @@
 import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { Route53 } from "../../infrastructure/aws";
+import { BUILD_MESSAGE } from "src/config/constants";
 
 type Options = {
   projectName: string;
@@ -20,7 +21,7 @@ export async function connectDomain({
     });
 
     if (!recordChangeInfo?.recordId) {
-      throw Error("Cannot find record id after creating DNS Record.");
+      throw Error(BUILD_MESSAGE.CREATE_ERROR.RECORD_NOT_FOUND);
     }
 
     const domainCreationResult = await route53.waitForRecordCreation({
@@ -29,9 +30,7 @@ export async function connectDomain({
     });
 
     if (domainCreationResult === "FAIL") {
-      throw Error(
-        "An unexpected error occurred while waiting for domain creation.",
-      );
+      throw Error(BUILD_MESSAGE.CREATE_ERROR.RECORD_NOT_FOUND);
     }
 
     const cloudFlareApi = new CloudFlare();
@@ -41,11 +40,11 @@ export async function connectDomain({
     });
 
     if (resultAddDomain.success === false) {
-      throw Error("Project creation failed.");
+      throw Error(BUILD_MESSAGE.CREATE_ERROR.FAIL_DOMAIN_CONNECTION);
     }
 
     return changeDomain;
   } catch (error) {
-    console.log("createDomain", error);
+    throw error;
   }
 }

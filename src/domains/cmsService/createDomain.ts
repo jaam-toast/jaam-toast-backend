@@ -1,6 +1,7 @@
 import { Route53 } from "../../infrastructure/aws";
 import { Logger as log } from "../../util/Logger";
 import Config from "../../config";
+import { CMS_MESSAGE } from "../../config/constants";
 
 export async function createDomain({ subdomain }: any) {
   const route53 = new Route53();
@@ -9,7 +10,7 @@ export async function createDomain({ subdomain }: any) {
   });
 
   if (!recordChangeInfo?.recordId) {
-    throw Error("Cannot find record id after creating DNS Record.");
+    throw Error(CMS_MESSAGE.CREATE_ERROR.RECORD_NOT_FOUND);
   }
 
   const domainCreationResult = await route53.waitForRecordCreation({
@@ -18,9 +19,7 @@ export async function createDomain({ subdomain }: any) {
   });
 
   if (domainCreationResult === "FAIL") {
-    throw Error(
-      "An unexpected error occurred while waiting for domain creation.",
-    );
+    throw Error(CMS_MESSAGE.CREATE_ERROR.UNEXPECTED_DURING_DOMAIN_CREATION);
   }
 
   log.build("record is ready.");
