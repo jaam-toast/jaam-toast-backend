@@ -5,7 +5,7 @@ import Project from "./models/Project";
 import type {
   BaseProject,
   Project as ProjectType,
-} from "../domains/@types/entity";
+} from "../repositories/@types";
 import type { Document } from "mongodb";
 
 export interface IProjectRepository {

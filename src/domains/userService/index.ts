@@ -8,7 +8,7 @@ import {
   getUserRepositories,
 } from "./getUserRepositories";
 
-import type { User } from "../@types/entity";
+import type { User } from "../../repositories/@types";
 
 interface IUserService {
   login(userData: User): Promise<Document | null>;

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 import Config from "../../config";
 
-import type { User } from "../../types/db";
+import type { User } from "../../repositories/@types";
 import type { RequestHandler } from "express";
 
 const verifyToken: RequestHandler = (req, res, next) => {
