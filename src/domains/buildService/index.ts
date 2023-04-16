@@ -90,12 +90,18 @@ export class BuildService implements IBuildService {
   async updateBuild() {}
 
   async deleteBuild({ projectName }) {
-    if (!projectName) {
-      throw Error("Cannot find environment data before delete project.");
-    }
+    try {
+      if (!projectName) {
+        throw Error("Cannot find environment data before delete project.");
+      }
 
-    await deleteBuildProject({
-      projectName,
-    });
+      const result = await deleteBuildProject({
+        projectName,
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 }

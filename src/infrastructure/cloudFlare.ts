@@ -34,6 +34,19 @@ export class CloudFlare {
     }
   }
 
+  async getProject({ projectName }: { projectName: string }) {
+    try {
+      const { data } = await this.api.get(`/${projectName}`);
+
+      return data;
+    } catch (error) {
+      log.serverError(
+        "Error occurred during the Cloudflare page project get operation",
+      );
+      throw error;
+    }
+  }
+
   async deleteProject({ projectName }: { projectName: string }) {
     try {
       const { data } = await this.api.delete(`/${projectName}`);
@@ -77,10 +90,12 @@ export class CloudFlare {
 
   async removeDomain({ projectName, domain }) {
     try {
+      console.log("hihi");
       const { data } = await this.api.delete(
         `/${projectName}/domains/${domain}`,
       );
 
+      console.log({ data });
       return data;
     } catch (error) {
       log.serverError(
