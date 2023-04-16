@@ -104,8 +104,6 @@ export class UserRepository implements IUserRepository {
         { $push: { projects: projectName } },
       );
 
-      console.log({ user });
-
       return user;
     } catch (error) {
       throw error;
@@ -114,8 +112,6 @@ export class UserRepository implements IUserRepository {
 
   async findOneAndDeleteProject(username: Partial<User>, projectName: string) {
     try {
-      console.log({ username, projectName });
-
       if (!username || !projectName) {
         throw Error("Expected 2 arguments, but insufficient arguments.");
       }
@@ -124,8 +120,6 @@ export class UserRepository implements IUserRepository {
         { username },
         { $pull: { projects: projectName } },
       );
-
-      console.log({ user });
 
       return user;
     } catch (error) {
