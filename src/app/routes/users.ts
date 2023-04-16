@@ -4,7 +4,7 @@ import Joi from "joi";
 import verifyToken from "../middlewares/verifyToken";
 import validateRequest from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
-import { container } from "../../domains/@config/inversify.config";
+import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
 
 const route = Router();
