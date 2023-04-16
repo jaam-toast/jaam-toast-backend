@@ -90,12 +90,10 @@ export class CloudFlare {
 
   async removeDomain({ projectName, domain }) {
     try {
-      console.log("hihi");
       const { data } = await this.api.delete(
         `/${projectName}/domains/${domain}`,
       );
 
-      console.log({ data });
       return data;
     } catch (error) {
       log.serverError(
