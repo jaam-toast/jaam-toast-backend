@@ -1,12 +1,11 @@
 import { Router } from "express";
-import createError from "http-errors";
 import Joi from "joi";
 
-import { Github } from "../../infrastructure/github";
-import { UserRepository } from "../../domains/repositories/userRepository";
 import verifyToken from "../middlewares/verifyToken";
-import validateSchema from "../middlewares/validateSchema";
+import validateRequest from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
+import { container } from "../../domains/@config/inversify.config";
+import { UserService } from "../../domains/userService";
 
 const route = Router();
 
@@ -15,26 +14,25 @@ const usersRouter = (app: Router) => {
 
   route.get(
     "/:user_id/orgs",
-    validateSchema(
+    validateRequest(
       Joi.object({
         user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
       }),
       "params",
     ),
+    validateRequest(
+      Joi.object({
+        githubAccessToken: Joi.string().required(),
+      }),
+      "query",
+    ),
     asyncHandler(async (req, res, next) => {
       const { githubAccessToken } = req.query;
 
-      if (!githubAccessToken) {
-        return next(createError(400));
-      }
-
-      const githubClient = new Github(githubAccessToken as string);
-      const organizations = await githubClient.getOrgs();
-      const orgsData = organizations.map(org => ({
-        spaceName: org.login,
-        spaceUrl: org.repos_url,
-        spaceImage: org.avatar_url,
-      }));
+      const userService = container.get<UserService>("UserService");
+      const orgsData = await userService.getUserGithubOrgs({
+        githubAccessToken,
+      });
 
       return res.json({
         message: "ok",
@@ -45,44 +43,25 @@ const usersRouter = (app: Router) => {
 
   route.get(
     "/:user_id/repos",
-    validateSchema(
+    validateRequest(
       Joi.object({
         user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
       }),
       "params",
     ),
-    asyncHandler(async (req, res, next) => {
+    validateRequest(
+      Joi.object({
+        githubAccessToken: Joi.string().required(),
+      }),
+      "query",
+    ),
+    asyncHandler(async (req, res) => {
       const { githubAccessToken } = req.query;
 
-      if (!githubAccessToken) {
-        return next(createError(400));
-      }
-
-      const githubClient = new Github(githubAccessToken as string);
-      const publicRepos = await githubClient.getRepos("public");
-      const privateRepos = await githubClient.getRepos("private");
-
-      if (!publicRepos || !privateRepos) {
-        return next(createError(401));
-      }
-
-      const repositories = [...publicRepos, ...privateRepos];
-
-      const userReposList = repositories.map(repo => {
-        const repoData = {
-          repoName: repo.full_name,
-          repoCloneUrl: repo.clone_url,
-          repoUpdatedAt: repo.updated_at,
-        };
-
-        return repoData;
+      const userService = container.get<UserService>("UserService");
+      const sortedUserReposList = await userService.getUserGithubRepos({
+        githubAccessToken,
       });
-
-      const sortedUserReposList = userReposList.sort(
-        (a, b) =>
-          new Date(`${b.repoUpdatedAt}`).valueOf() -
-          new Date(`${a.repoUpdatedAt}`).valueOf(),
-      );
 
       return res.json({
         message: "ok",
@@ -93,20 +72,19 @@ const usersRouter = (app: Router) => {
 
   route.get(
     "/:user_id/projects",
-    validateSchema(
+    validateRequest(
       Joi.object({
-        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+        user_id: Joi.string()
+          .regex(/^[a-f\d]{24}$/i)
+          .required(),
       }),
       "params",
     ),
-    asyncHandler(async (req, res, next) => {
-      const { user_id } = req.params;
+    asyncHandler(async (req, res) => {
+      const { user_id: userId } = req.params;
 
-      if (!user_id) {
-        return next(createError(401, "Cannot find environment data 'user_id'"));
-      }
-
-      const userProjects = await UserRepository.findByIdAndGetProjects(user_id);
+      const userService = container.get<UserService>("UserService");
+      const userProjects = await userService.getUserProjects({ userId });
 
       return res.json({
         message: "ok",
@@ -117,32 +95,28 @@ const usersRouter = (app: Router) => {
 
   route.get(
     "/:user_id/orgs/:org/repos",
-    validateSchema(
+    validateRequest(
       Joi.object({
         user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+        org: Joi.string().required(),
       }),
-      "params[user_id]",
+      "params",
+    ),
+    validateRequest(
+      Joi.object({
+        githubAccessToken: Joi.string().required(),
+      }),
+      "query",
     ),
     asyncHandler(async (req, res, next) => {
       const { githubAccessToken } = req.query;
       const { org } = req.params;
 
-      if (!githubAccessToken || !org) {
-        return next(createError(400));
-      }
-
-      const githubClient = new Github(githubAccessToken as string);
-      const organizationRepos = await githubClient.getOrgRepos(org);
-
-      if (!organizationRepos) {
-        return next(createError(401));
-      }
-
-      const organizationReposList = organizationRepos.map(repo => ({
-        repoName: repo.full_name,
-        repoCloneUrl: repo.clone_url,
-        repoUpdatedAt: repo.updated_at,
-      }));
+      const userService = container.get<UserService>("UserService");
+      const organizationReposList = await userService.getUserGithubOrgsRepos({
+        githubAccessToken: githubAccessToken as string,
+        org,
+      });
 
       return res.json({
         message: "ok",
