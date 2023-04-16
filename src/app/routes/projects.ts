@@ -53,7 +53,7 @@ const projectsRouter = (app: Router) => {
         await userService.addProject({ userId, projectName });
       } catch (error) {
         console.log(error);
-        log.serverError(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION);
+        log.serverError(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
       }
     }),
   );

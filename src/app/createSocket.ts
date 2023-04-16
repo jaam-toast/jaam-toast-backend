@@ -39,11 +39,13 @@ export const createSocket = async ({
       log.debug(`Getting ready for sending a building log for ${repoName}`);
 
       log.subscribe((message: string) => {
-        if (message.includes(BUILD_MESSAGE.COMPLETE)) {
+        if (message.includes(BUILD_MESSAGE.CREATE.COMPLETE)) {
           socket.emit("build-complete", message);
         }
 
-        if (message.includes(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION)) {
+        if (
+          message.includes(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION)
+        ) {
           socket.emit("build-error", message);
         }
 

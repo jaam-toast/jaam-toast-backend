@@ -3,6 +3,7 @@ import { injectable } from "inversify";
 import { createDomain } from "./createDomain";
 import { createToken } from "./createToken";
 import { deleteDomain } from "./deleteDomain";
+import { CMS_MESSAGE } from "src/config/constants";
 
 export interface ICmsService {
   createApi({
@@ -19,7 +20,7 @@ export class CmsService implements ICmsService {
   async createApi({ projectName }: any) {
     try {
       if (!projectName) {
-        throw Error("Cannot find environment data before create api");
+        throw Error(CMS_MESSAGE.CREATE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
       }
 
       const cmsDomain = await createDomain({ subdomain: `api-${projectName}` });
@@ -37,7 +38,7 @@ export class CmsService implements ICmsService {
   async deleteApi({ projectName }: { projectName: string }) {
     try {
       if (!projectName) {
-        throw Error("Cannot find environment data before delete api");
+        throw Error(CMS_MESSAGE.DELETE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
       }
       await deleteDomain({ subdomain: `api-${projectName}` });
     } catch (error) {

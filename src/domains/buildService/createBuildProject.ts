@@ -46,7 +46,7 @@ const createDeployment = async ({
     });
   });
 
-  log.debug("Cloning complete.");
+  log.debug("Project deploying complete");
 };
 
 export async function createBuildProject({
@@ -54,7 +54,7 @@ export async function createBuildProject({
   projectName,
 }: Options) {
   try {
-    log.build(BUILD_MESSAGE.WORKING_ON_BUILD_PROJECT);
+    log.build(BUILD_MESSAGE.CREATE.WORKING_ON_BUILD_PROJECT);
 
     const cloudFlareApi = new CloudFlare();
     const { result } = await cloudFlareApi.createProject({
@@ -62,7 +62,7 @@ export async function createBuildProject({
     });
 
     if (result.success === false) {
-      throw new Error(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION);
+      throw new Error(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
     }
 
     const buildOriginalDomain: string = result.subdomain;
@@ -70,6 +70,6 @@ export async function createBuildProject({
 
     return buildOriginalDomain;
   } catch (error) {
-    throw new Error(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION);
+    throw new Error(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
   }
 }
