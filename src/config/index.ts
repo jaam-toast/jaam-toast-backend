@@ -8,7 +8,9 @@ const Config = {
   DATABASE_URL: process.env.MONGODB_URI!,
   JWT_SECRET: process.env.JWT_SECRET_KEY!,
   SERVER_URL: process.env.ORIGIN_SERVER_URL!,
+  SERVER_IP: process.env.ORIGIN_SERVER_IP!,
   SERVER_PORT: process.env.SERVER_PORT!,
+  SERVER_DOMAIN: process.env.SERVER_DOMAIN!,
   CLIENT_URL: process.env.CLIENT_URL!,
 
   // 변경중

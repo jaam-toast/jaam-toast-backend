@@ -1,6 +1,6 @@
 import createError from "http-errors";
 
-import OauthClient from "../../__temp/services/OauthClient";
+import { OauthClient } from "../../infrastructure/github";
 import { asyncHandler as catchAsync } from "../../app/utils/asyncHandler";
 import { Github } from "../../infrastructure/github";
 

@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { createApp } from "./app/createApp";
 import { createServer } from "./app/createServer";
 import { createSocket } from "./app/createSocket";
