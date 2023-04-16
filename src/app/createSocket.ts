@@ -20,6 +20,8 @@ export const createSocket = async ({
   });
   const socketInstance = socket.getInstance();
 
+  log.debug("🚀 A new socket instance is created");
+
   if (!socketInstance) {
     log.serverError("❌ Socket creation failed.");
 
@@ -37,8 +39,12 @@ export const createSocket = async ({
       log.debug(`Getting ready for sending a building log for ${repoName}`);
 
       log.subscribe((message: string) => {
-        if (message === BUILD_COMPLETE_MESSAGE) {
+        if (message.includes(BUILD_MESSAGE.COMPLETE)) {
           socket.emit("build-complete", message);
+        }
+
+        if (message.includes(BUILD_MESSAGE.ERROR.FAIL_PROJECT_CREATION)) {
+          socket.emit("build-error", message);
         }
 
         socket.emit("new-building-log", message);
