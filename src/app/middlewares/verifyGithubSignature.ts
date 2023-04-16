@@ -2,7 +2,7 @@ import createError from "http-errors";
 import { createHmac } from "crypto";
 
 import Config from "../../config";
-import { Logger as log } from "../../common/Logger";
+import { Logger as log } from "../../util/Logger";
 
 import type { RequestHandler } from "express";
 
