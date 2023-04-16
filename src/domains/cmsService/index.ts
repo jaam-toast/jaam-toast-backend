@@ -11,13 +11,17 @@ export interface ICmsService {
     projectName: string;
   }): Promise<{ cmsDomain: string; cmsToken: string }>;
   updateApi(): Promise<void>;
-  deleteApi({ subdomain }: { subdomain: string }): Promise<void>;
+  deleteApi({ projectName }: { projectName: string }): Promise<void>;
 }
 
 @injectable()
 export class CmsService implements ICmsService {
   async createApi({ projectName }: any) {
     try {
+      if (!projectName) {
+        throw Error("Cannot find environment data before create api");
+      }
+
       const cmsDomain = await createDomain({ subdomain: `api-${projectName}` });
 
       const cmsToken = createToken({ payload: projectName });
@@ -30,7 +34,14 @@ export class CmsService implements ICmsService {
 
   async updateApi() {}
 
-  async deleteApi({ subdomain }: { subdomain: string }) {
-    await deleteDomain({ subdomain });
+  async deleteApi({ projectName }: { projectName: string }) {
+    try {
+      if (!projectName) {
+        throw Error("Cannot find environment data before delete api");
+      }
+      await deleteDomain({ subdomain: `api-${projectName}` });
+    } catch (error) {
+      throw error;
+    }
   }
 }

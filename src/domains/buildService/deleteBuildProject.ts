@@ -6,31 +6,31 @@ type Options = {
 };
 
 export async function deleteBuildProject({ projectName }: Options) {
-  const cloudFlareApi = new CloudFlare();
+  try {
+    const cloudFlareApi = new CloudFlare();
+    const { result } = await cloudFlareApi.getProject({ projectName });
 
-  //TODO
-  const project = await cloudFlareApi.getProject({ projectName });
+    if (!result) {
+      throw Error("The project name is invalid.");
+    }
 
-  /**
-   * return format
-   * { result: null, success: true, errors: [], messages: [] }
-   */
+    if (result.domains.length > 1) {
+      const { success: isSuccessRemoveDomain } =
+        await cloudFlareApi.removeDomain({
+          projectName,
+          domain: result.domains[1],
+        });
 
-  // TODO
-  const { success: isSuccessRemoveDomain } = await cloudFlareApi.removeDomain({
-    projectName,
-    domain: project.domain,
-  });
+      if (!isSuccessRemoveDomain) {
+        throw Error("Fail to remove project domain");
+      }
+    }
 
-  if (!isSuccessRemoveDomain) {
-    throw Error("Fail to remove project domain");
-  }
+    const { success: isSuccessDeleteProject } =
+      await cloudFlareApi.deleteProject({ projectName });
 
-  const { success: isSuccessDeleteProject } = await cloudFlareApi.deleteProject(
-    { projectName },
-  );
-
-  if (!isSuccessDeleteProject) {
-    throw Error("Fail to delete project");
+    return isSuccessDeleteProject;
+  } catch (error) {
+    throw error;
   }
 }
