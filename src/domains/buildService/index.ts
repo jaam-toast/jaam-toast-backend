@@ -8,10 +8,10 @@ import { Logger as log } from "../../util/Logger";
 import Config from "../../config";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-import type { BaseProject } from "../@types/entity";
 import { ClientFrameworkInput } from "../@types";
+import type { BaseProject } from "../../repositories/@types";
 
-interface IBuildService {
+export interface IBuildService {
   createBuild(options: BaseProject): Promise<{
     buildDomain: string;
     buildOriginalDomain: string;

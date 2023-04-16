@@ -1,0 +1,15 @@
+export enum ClientFrameworkInput {
+  "Create React App" = "CreateReactApp",
+  "React Static" = "ReactStatic",
+  "Next.js (Static HTML Export)" = "NextJs",
+  "Nuxt.js" = "NuxtJs",
+  "Angular (Angular CLI)" = "Angular",
+  "Astro" = "Astro",
+  "Gatsby" = "Gatsby",
+  "GitBook" = "GitBook",
+  "Jekyll" = "Jekyll",
+  "Remix" = "Remix",
+  "Svelte" = "Svelte",
+  "Vue" = "Vue",
+  "VuePress" = "VuePress",
+}

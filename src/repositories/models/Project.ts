@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import joi from "joi";
 import joigoose from "joigoose";
 
-import type { Project } from "../../domains/@types/entity";
+import type { Project } from "../@types";
 
 const Joigoose = joigoose(mongoose);
 

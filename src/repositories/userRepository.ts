@@ -1,17 +1,13 @@
+import { injectable } from "inversify";
+
 import User from "./models/User";
 
 import type { Document } from "mongodb";
-import type {
-  User as UserType,
-  Project,
-  UserOptions,
-  IdParameter,
-} from "../types/db";
-import { injectable } from "inversify";
+import type { User as UserType, IdParameter } from "./@types";
 
 export interface IUserRepository {
   create(data: UserType): Promise<Document | null>;
-  findOne(options: UserOptions): Promise<Document | null>;
+  findOne(options: Partial<UserType>): Promise<Document | null>;
   findById(id: IdParameter): Promise<Document | null>;
   findByIdAndGetProjects(id: IdParameter): Promise<Document | null>;
   findByIdAndUpdateProject(
@@ -46,7 +42,7 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async findOne(options: UserOptions) {
+  async findOne(options: Partial<UserType>) {
     try {
       if (!options) {
         throw Error("Expected 1 arguments, but insufficient arguments.");
@@ -82,10 +78,10 @@ export class UserRepository implements IUserRepository {
 
       const user:
         | {
-            projects: Project[];
+            projects: string[];
           }
         | undefined = await User.findOne({ _id: id })
-        .populate<{ projects: Project[] }>("projects")
+        .populate<{ projects: string[] }>("projects")
         .lean();
 
       return user?.projects || [];
