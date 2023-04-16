@@ -27,16 +27,8 @@ const joiProjectSchema = joi.object({
   buildOriginalDomain: joi.string().allow(""),
   cmsDomain: joi.string().allow(""),
   cmsToken: joi.string(),
-  schemaList: joi.array().items(
-    joi.string().meta({
-      _mongoose: { type: "string" },
-    }),
-  ),
-  contentList: joi.array().items(
-    joi.string().meta({
-      _mongoose: { type: "string" },
-    }),
-  ),
+  schemaList: joi.array().items(joi.string()),
+  contentList: joi.array().items(joi.string()),
   assetStorageUrl: joi.string(),
 
   webhookId: joi.string(),
