@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
+dotenv.config();
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
-
-dotenv.config();
 
 const Config = {
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN!,
@@ -16,6 +15,14 @@ const Config = {
   GITHUB_USER_CREDENTIAL_TOKEN: process.env.GITHUB_USER_CREDENTIAL_TOKEN!,
   GITHUB_WEBHOOK_SECRET_KEY: process.env.GITHUB_WEBHOOK_SECRET_KEY!,
   GITHUB_WEBHOOK_PAYLOAD_URL: process.env.GITHUB_WEBHOOK_PAYLOAD_URL!,
+
+  AWS_KEY_PAIR_NAM: process.env.AWS_KEY_PAIR_NAM!,
+  AWS_SECURITY_GROUP_ID: process.env.AWS_SECURITY_GROUP_ID!,
+  AWS_HOSTED_ZONE_ID: process.env.AWS_HOSTED_ZONE_ID!,
+  AWS_DNS_HOSTED_ZONE_ID: process.env.AWS_DNS_HOSTED_ZONE_ID!,
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+  AWS_JAAM_SERVER_DNS_NAME: process.env.AWS_JAAM_SERVER_DNS_NAME!,
 };
 
 export default Config;
