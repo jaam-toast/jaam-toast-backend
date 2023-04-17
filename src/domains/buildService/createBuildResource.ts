@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 
 import { FrameWorkPresets } from "../@config/frameWorkPresets";
-import { Logger as log } from "../../util/Logger";
+import { Logger as log } from "../../utils/Logger";
 
 import { Framework } from "../../repositories/@types";
 import { BUILD_MESSAGE } from "../../config/constants";

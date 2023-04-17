@@ -1,7 +1,7 @@
 import { Server } from "http";
 import { Server as socketServer } from "socket.io";
 
-import { Logger as log } from "../util/Logger";
+import { Logger as log } from "../utils/Logger";
 
 type Options = {
   server: Server;

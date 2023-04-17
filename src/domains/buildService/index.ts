@@ -4,7 +4,7 @@ import { connectDomain } from "./connectDomain";
 import { createBuildProject } from "./createBuildProject";
 import { createBuildResource } from "./createBuildResource";
 import { deleteBuildProject } from "./deleteBuildProject";
-import { Logger as log } from "../../util/Logger";
+import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
 import { BUILD_MESSAGE } from "../../config/constants";
 
