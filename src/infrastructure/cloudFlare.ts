@@ -60,7 +60,7 @@ export class CloudFlare {
     }
   }
 
-  async getDomain({ projectName }) {
+  async getDomain({ projectName }: { projectName: string }) {
     try {
       const { data } = await this.api.get(`/${projectName}/domains`);
 
@@ -73,7 +73,13 @@ export class CloudFlare {
     }
   }
 
-  async addDomain({ projectName, changeDomain }) {
+  async addDomain({
+    projectName,
+    changeDomain,
+  }: {
+    projectName: string;
+    changeDomain: string;
+  }) {
     try {
       const { data } = await this.api.post(`/${projectName}/domains`, {
         name: changeDomain,
@@ -88,7 +94,13 @@ export class CloudFlare {
     }
   }
 
-  async removeDomain({ projectName, domain }) {
+  async removeDomain({
+    projectName,
+    domain,
+  }: {
+    projectName: string;
+    domain: string;
+  }) {
     try {
       const { data } = await this.api.delete(
         `/${projectName}/domains/${domain}`,
@@ -103,7 +115,13 @@ export class CloudFlare {
     }
   }
 
-  makePublishPageCommand({ buildResourceLocation, projectName }) {
+  makePublishPageCommand({
+    buildResourceLocation,
+    projectName,
+  }: {
+    buildResourceLocation: string;
+    projectName: string;
+  }) {
     return `CLOUDFLARE_ACCOUNT_ID=${Config.CLOUDFLARE_ACCOUNT_ID} CLOUDFLARE_API_TOKEN=${Config.CLOUDFLARE_API_TOKEN} npx wrangler pages publish ${buildResourceLocation} --project-name ${projectName} --branch main`;
   }
 }

@@ -198,7 +198,13 @@ export class Route53 {
     }
   }
 
-  async waitForRecordCreation({ recordId, limitWait }: any): Promise<string> {
+  async waitForRecordCreation({
+    recordId,
+    limitWait,
+  }: {
+    recordId: string;
+    limitWait: number;
+  }): Promise<string> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         clearInterval(interval);

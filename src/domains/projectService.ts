@@ -12,7 +12,7 @@ interface IProjectService {
   createProject(options: BaseProject): Promise<void>;
   updateProject(options: Partial<Project>): Promise<void>;
   getByProjectName(projectName: string): Promise<Document | null>;
-  deleteProject({ projectName }): Promise<void>;
+  deleteProject({ projectName }: { projectName: string }): Promise<void>;
   addSchema(): Promise<void>;
   deleteSchema(): Promise<void>;
 }
@@ -100,11 +100,13 @@ export class ProjectService implements IProjectService {
     return project as Promise<Document | null>;
   }
 
-  public async deleteProject({ projectName }) {
+  public async deleteProject({ projectName }: { projectName: string }) {
     await this.projectRepository.findOneAndDelete({ projectName });
   }
 
-  public async addSchema() {}
+  public async addSchema() {
+    //   -> db.createCollection("students", {
+  }
 
   public async deleteSchema() {}
 }

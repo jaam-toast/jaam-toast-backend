@@ -17,7 +17,7 @@ export interface ICmsService {
 
 @injectable()
 export class CmsService implements ICmsService {
-  async createApi({ projectName }: any) {
+  async createApi({ projectName }: { projectName: string }) {
     try {
       if (!projectName) {
         throw Error(CMS_MESSAGE.CREATE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);

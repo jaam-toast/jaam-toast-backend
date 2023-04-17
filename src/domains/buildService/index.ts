@@ -17,7 +17,7 @@ export interface IBuildService {
     buildOriginalDomain: string;
   }>;
   updateBuild(): Promise<void>;
-  deleteBuild({ projectName }): Promise<void>;
+  deleteBuild({ projectName }: { projectName: string }): Promise<void>;
 }
 
 @injectable()
@@ -93,7 +93,7 @@ export class BuildService implements IBuildService {
 
   async updateBuild() {}
 
-  async deleteBuild({ projectName }) {
+  async deleteBuild({ projectName }: { projectName: string }) {
     try {
       if (!projectName) {
         throw Error(BUILD_MESSAGE.DELETE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
