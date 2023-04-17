@@ -3,7 +3,11 @@ import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
 import { CMS_MESSAGE } from "../../config/constants";
 
-export async function createDomain({ subdomain }: any): Promise<string> {
+export async function createDomain({
+  subdomain,
+}: {
+  subdomain: string;
+}): Promise<string> {
   const route53 = new Route53();
   const recordChangeInfo = await route53.createARecord({
     recordName: `${subdomain}.${Config.SERVER_URL}`,
