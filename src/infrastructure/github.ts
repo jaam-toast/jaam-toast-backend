@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 
 import Config from "./@config";
-import { Logger as log } from "../util/Logger";
+import { Logger as log } from "../utils/Logger";
 
 import type { GithubToken } from "./@types/github";
 

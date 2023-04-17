@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-import { Logger as log } from "../../util/Logger";
+import { Logger as log } from "../../utils/Logger";
 import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { BUILD_MESSAGE } from "src/config/constants";
 

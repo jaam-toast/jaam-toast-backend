@@ -1,7 +1,7 @@
 import { Server } from "http";
 import { Socket } from "socket.io";
 
-import { Logger as log } from "../util/Logger";
+import { Logger as log } from "../utils/Logger";
 import { BUILD_MESSAGE } from "../config/constants";
 import { SocketSingleton } from "../infrastructure/socket";
 

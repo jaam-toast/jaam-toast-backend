@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-route-53";
 
 import Config from "./@config";
-import { Logger as log } from "src/util/Logger";
+import { Logger as log } from "src/utils/Logger";
 
 export class Route53 {
   client = new Route53Client({
@@ -34,7 +34,7 @@ export class Route53 {
     }
   }
 
-  async createARecord({ recordName }: any) {
+  async createARecord({ recordName }: { recordName: string }) {
     try {
       const changeRecordOptions = {
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
@@ -80,7 +80,13 @@ export class Route53 {
     }
   }
 
-  async createCnameRecord({ recordName, recordValue }: any) {
+  async createCnameRecord({
+    recordName,
+    recordValue,
+  }: {
+    recordName: string;
+    recordValue: string;
+  }) {
     try {
       const changeRecordOptions = {
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,

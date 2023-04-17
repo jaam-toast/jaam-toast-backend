@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { Logger as log } from "../util/Logger";
+import { Logger as log } from "../utils/Logger";
 
 export async function connectDB(databaseUrl: string) {
   try {
