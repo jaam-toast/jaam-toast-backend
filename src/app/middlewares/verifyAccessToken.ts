@@ -6,7 +6,7 @@ import Config from "../../config";
 import type { User } from "../../repositories/@types";
 import type { RequestHandler } from "express";
 
-const verifyToken: RequestHandler = (req, res, next) => {
+export const verifyAccessToken: RequestHandler = (req, res, next) => {
   const authToken = req.headers.authorization;
 
   if (!authToken) {
@@ -54,5 +54,3 @@ const verifyToken: RequestHandler = (req, res, next) => {
 
   next();
 };
-
-export default verifyToken;

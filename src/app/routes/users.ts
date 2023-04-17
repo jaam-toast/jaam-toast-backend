@@ -1,8 +1,8 @@
 import { Router } from "express";
 import Joi from "joi";
 
-import verifyToken from "../middlewares/verifyToken";
-import validateRequest from "../middlewares/validateRequest";
+import { verifyAccessToken } from "../middlewares/verifyAccessToken";
+import { validateRequest } from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
 import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
@@ -10,7 +10,12 @@ import { UserService } from "../../domains/userService";
 const route = Router();
 
 const usersRouter = (app: Router) => {
-  app.use("/users", verifyToken, route);
+  app.use("/users", verifyAccessToken, route);
+
+  // route.get(
+  //   "/:user_id",
+  // verifyToken,
+  // ) // get user
 
   route.get(
     "/:user_id/orgs",
