@@ -9,7 +9,11 @@ const joiUserSchema = joi.object({
   userGithubUri: joi.string().required(),
   userImage: joi.string(),
   githubAccessToken: joi.string(),
-  projects: joi.array().items(joi.string()),
+  projects: joi.array().items(
+    joi.string().meta({
+      _mongoose: { ref: "Project" },
+    }),
+  ),
 });
 
 const Joigoose = joigoose(mongoose);

@@ -53,6 +53,7 @@ export class ProjectRepository implements IProjectRepository {
       }
 
       const newProject = await Project.create({
+        _id: projectName,
         space,
         repoName,
         repoCloneUrl,
@@ -85,11 +86,11 @@ export class ProjectRepository implements IProjectRepository {
   }
 
   async findOneAndUpdate(
-    targetOption: string,
+    projectName: string,
     updateOptions: Partial<ProjectType>,
   ) {
     try {
-      if (!targetOption || !updateOptions) {
+      if (!projectName || !updateOptions) {
         throw Error("Expected 2 arguments, but insufficient arguments.");
       }
 
@@ -98,8 +99,9 @@ export class ProjectRepository implements IProjectRepository {
       }
 
       const updatedProject = await Project.findOneAndUpdate(
-        { targetOption },
+        { projectName },
         { $set: updateOptions },
+        { new: true },
       );
 
       return updatedProject;

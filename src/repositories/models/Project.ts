@@ -7,6 +7,7 @@ import type { Project } from "../@types";
 const Joigoose = joigoose(mongoose);
 
 const joiProjectSchema = joi.object({
+  _id: joi.string().required(),
   space: joi.string().required(),
   repoName: joi.string().required(),
   repoCloneUrl: joi.string().required(),
@@ -22,6 +23,7 @@ const joiProjectSchema = joi.object({
       value: joi.string(),
     }),
   ),
+  nodeVersion: joi.string().allow("").default("12.18.0"),
 
   buildDomain: joi.string().allow(""),
   buildOriginalDomain: joi.string().allow(""),
