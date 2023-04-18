@@ -27,6 +27,7 @@ export enum ProjectStatus {
 }
 
 export type BaseProject = {
+  _id?: string;
   space?: string;
   repoName: string;
   repoCloneUrl: string;
@@ -34,6 +35,7 @@ export type BaseProject = {
   projectUpdatedAt?: string;
 
   framework: Framework;
+  nodeVersion?: string;
   installCommand: string;
   buildCommand: string;
   envList: Env[];

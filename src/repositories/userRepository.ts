@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 import User from "./models/User";
 
 import type { Document } from "mongodb";
-import type { User as UserType, IdParameter } from "./@types";
+import type { User as UserType, IdParameter, Project } from "./@types";
 
 export interface IUserRepository {
   create(data: UserType): Promise<Document | null>;
@@ -81,7 +81,7 @@ export class UserRepository implements IUserRepository {
             projects: string[];
           }
         | undefined = await User.findOne({ _id: id })
-        .populate<{ projects: string[] }>("projects")
+        .populate<{ projects: Project[] }>("projects")
         .lean();
 
       return user?.projects || [];
