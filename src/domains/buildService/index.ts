@@ -77,8 +77,12 @@ export class BuildService implements IBuildService {
         throw Error(BUILD_MESSAGE.CREATE_ERROR.DOMAIN_CREATE_FAIL);
       }
 
-      log.build(BUILD_MESSAGE.CREATE.COMPLETE);
-
+      log.build(
+        `${BUILD_MESSAGE.CREATE.COMPLETE}-
+        ${JSON.stringify({
+          buildOriginalDomain,
+        })}`,
+      );
       return { buildDomain, buildOriginalDomain };
     } catch (error) {
       log.buildError(BUILD_MESSAGE.CREATE_ERROR.UNEXPECTED_DURING_BUILD);
