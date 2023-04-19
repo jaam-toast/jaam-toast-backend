@@ -1,21 +1,26 @@
+import { Document, MongoClient } from "mongodb";
 import { injectable } from "inversify";
+import { pipe } from "lodash/fp";
+import { omit } from "lodash";
 
 import Project from "./models/Project";
+import Config from "src/config";
 
 import type {
   BaseProject,
   Project as ProjectType,
 } from "../repositories/@types";
-import type { Document } from "mongodb";
 
 export interface IProjectRepository {
   create(data: BaseProject): Promise<Document | null>;
   findOne(option: Partial<ProjectType>): Promise<Document | null>;
   findOneAndUpdate(
-    targetOption: string,
+    projectName: string,
     updateOptions: Partial<ProjectType>,
   ): Promise<Document | null>;
   findOneAndDelete(option: Partial<Project>): Promise<Document | null>;
+  getSnapshot(projectName: string): Promise<Project>;
+  updateSnapshot(projectName: string, snapshot: Project): Promise<void>;
 }
 
 @injectable()
@@ -77,7 +82,9 @@ export class ProjectRepository implements IProjectRepository {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
-      const project = await Project.findOne(option);
+      const project = await Project.findOne(option)
+        .populate("schemaList")
+        .lean();
 
       return project;
     } catch (error) {
@@ -121,6 +128,50 @@ export class ProjectRepository implements IProjectRepository {
       return deletedProject;
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getSnapshot(projectName: string): Promise<Project> {
+    const client = new MongoClient(Config.CONTENTS_DATABASE_URL);
+
+    try {
+      await client.connect();
+
+      const project = await client
+        .db("test")
+        .collection("projects")
+        .findOne<Project>({ projectName });
+
+      if (!project) {
+        throw new Error("Cannot find document");
+      }
+
+      return project;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      await client.close();
+    }
+  }
+
+  async updateSnapshot(projectName: string, snapshot: Project): Promise<void> {
+    const client = new MongoClient(Config.CONTENTS_DATABASE_URL);
+    const updatedSnapshot = pipe(
+      snapshot => JSON.parse(JSON.stringify(snapshot)),
+      snapshot => omit(snapshot, ["_id"]),
+    )(snapshot);
+
+    try {
+      await client.connect();
+      await client
+        .db("test")
+        .collection("projects")
+        .updateOne({ projectName }, { $set: updatedSnapshot });
+    } catch (error) {
+      throw error;
+    } finally {
+      await client.close();
     }
   }
 }
