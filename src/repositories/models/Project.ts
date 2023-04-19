@@ -29,7 +29,7 @@ const joiProjectSchema = joi.object({
   buildOriginalDomain: joi.string().allow(""),
   cmsDomain: joi.string().allow(""),
   cmsToken: joi.string(),
-  schemaList: joi.array().items(joi.string()),
+  schemaList: joi.array().items(joi.object()),
   contentList: joi.array().items(joi.string()),
   assetStorageUrl: joi.string(),
 

@@ -6,6 +6,7 @@ dotenv.config();
 
 const Config = {
   DATABASE_URL: process.env.MONGODB_URI!,
+  CONTENTS_DATABASE_URL: process.env.MONGODB_CONTENTS_URI!,
   JWT_SECRET: process.env.JWT_SECRET_KEY!,
   SERVER_URL: process.env.ORIGIN_SERVER_URL!,
   SERVER_IP: process.env.ORIGIN_SERVER_IP!,

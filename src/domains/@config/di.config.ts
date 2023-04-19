@@ -11,6 +11,10 @@ import {
   UserRepository,
 } from "../../repositories/userRepository";
 import { UserService } from "../userService";
+import {
+  ContentsClient,
+  mongodbContentsClient,
+} from "src/infrastructure/mongodbContentsClient";
 
 /**
  * 의존성 등록 - identifier(ex "ProjectService" 등 string으로 입력된 곳)를 to("등록할 곳")에 등록합니다.
@@ -24,5 +28,8 @@ container.bind<ICmsService>("CmsService").to(CmsService);
 container.bind<UserService>("UserService").to(UserService);
 container.bind<IProjectRepository>("ProjectRepository").to(ProjectRepository);
 container.bind<IUserRepository>("UserRepository").to(UserRepository);
+container
+  .bind<ContentsClient>("MongoDBContentsClient")
+  .to(mongodbContentsClient);
 
 export { container };

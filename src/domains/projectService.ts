@@ -7,13 +7,24 @@ import { IProjectRepository } from "../repositories/projectRepository";
 
 import type { Document } from "mongoose";
 import type { BaseProject, Project } from "../repositories/@types";
+import type { ContentsClient } from "src/infrastructure/mongodbContentsClient";
 
 interface IProjectService {
   createProject(options: BaseProject): Promise<void>;
   updateProject(options: Partial<Project>): Promise<void>;
   getByProjectName(projectName: string): Promise<Document | null>;
   deleteProject({ projectName }: { projectName: string }): Promise<void>;
-  addSchema(): Promise<void>;
+  addSchema({
+    projectName,
+    schemaName,
+    schema,
+  }: {
+    projectName: string;
+    schemaName: string;
+    schema: {
+      title: string;
+    };
+  }): Promise<void>;
   deleteSchema(): Promise<void>;
 }
 
@@ -29,7 +40,7 @@ export class ProjectService implements IProjectService {
   private buildService: IBuildService;
   private cmsService: ICmsService;
   private projectRepository: IProjectRepository;
-
+  private contentsClient: ContentsClient;
   /**
    *
    * @param buildService: 의존성 주입
@@ -39,10 +50,12 @@ export class ProjectService implements IProjectService {
     @inject("BuildService") buildService: IBuildService,
     @inject("CmsService") cmsService: ICmsService,
     @inject("ProjectRepository") projectRepository: IProjectRepository,
+    @inject("MongoDBContentsClient") mongodbContentsClient: ContentsClient,
   ) {
     this.buildService = buildService;
     this.cmsService = cmsService;
     this.projectRepository = projectRepository;
+    this.contentsClient = mongodbContentsClient;
   }
 
   public async createProject(options: BaseProject) {
@@ -104,9 +117,38 @@ export class ProjectService implements IProjectService {
     await this.projectRepository.findOneAndDelete({ projectName });
   }
 
-  public async addSchema() {
-    //   -> db.createCollection("students", {
+  public async addSchema({
+    projectName,
+    schema,
+  }: {
+    projectName: string;
+    schema: {
+      title: string;
+    };
+  }) {
+    try {
+      await this.contentsClient.createRepository({
+        projectName,
+        jsonSchema: schema,
+      });
+    } catch (error) {
+      console.error(error);
+      throw new Error("Cannot create contents's repository.");
+    }
+
+    try {
+      const project = await this.projectRepository.getSnapshot(projectName);
+
+      await this.projectRepository.updateSnapshot(projectName, {
+        ...project,
+        schemaList: project.schemaList?.concat(schema) ?? [schema],
+      });
+    } catch (error) {
+      console.error(error);
+      throw new Error("Cannot update user info.");
+    }
   }
 
+  // public async updateSchema({ projectName, schemaName }: { projectName: string })
   public async deleteSchema() {}
 }
