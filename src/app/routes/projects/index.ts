@@ -2,6 +2,7 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 import * as _ from "lodash";
+import Ajv from "ajv";
 
 import { schemasRouter } from "./schemas";
 import { verifyAccessToken } from "../../middlewares/verifyAccessToken";
@@ -124,4 +125,43 @@ projectsRouter.delete(
   }),
 );
 
-projectsRouter.use("/project_name", schemasRouter);
+const ajv = new Ajv();
+
+projectsRouter.post(
+  "/:project_name/schemas",
+  validateRequest(
+    Joi.object({
+      project_name: Joi.string().required(),
+    }),
+    "params",
+  ),
+  validateRequest(
+    Joi.object({
+      title: Joi.string().required(),
+    }),
+    "body",
+  ),
+  asyncHandler(async (req, res, next) => {
+    const schema = req.body;
+
+    try {
+      ajv.compile(schema);
+    } catch (error) {
+      return res.status(400).json({
+        message: "The schema field is not of JSON Schema or failed validation.",
+      });
+    }
+
+    const projectService = container.get<ProjectService>("ProjectService");
+    const { project_name: projectName } = req.params;
+
+    await projectService.addSchema({
+      projectName,
+      schema,
+    });
+
+    return res.status(201).json({
+      message: "ok",
+    });
+  }),
+);

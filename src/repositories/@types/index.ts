@@ -47,7 +47,7 @@ export type OptionalProject = {
   cmsDomain?: string;
   cmsToken?: string;
 
-  schemaList?: string[];
+  schemaList?: {}[];
   contentList?: string[];
   assetStorageUrl?: string;
 
