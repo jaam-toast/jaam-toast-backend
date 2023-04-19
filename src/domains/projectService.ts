@@ -132,7 +132,6 @@ export class ProjectService implements IProjectService {
         jsonSchema: schema,
       });
     } catch (error) {
-      console.error(error);
       throw new Error("Cannot create contents's repository.");
     }
 
@@ -144,11 +143,15 @@ export class ProjectService implements IProjectService {
         schemaList: project.schemaList?.concat(schema) ?? [schema],
       });
     } catch (error) {
-      console.error(error);
       throw new Error("Cannot update user info.");
     }
   }
 
-  // public async updateSchema({ projectName, schemaName }: { projectName: string })
+  // public async updateSchema({
+  //   projectName,
+  //   schemaName,
+  // }: {
+  //   projectName: string;
+  // });
   public async deleteSchema() {}
 }
