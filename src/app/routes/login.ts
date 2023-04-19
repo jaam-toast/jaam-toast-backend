@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import verifyGithubCode from "../middlewares/verifyGithubCode";
 import { asyncHandler } from "../utils/asyncHandler";
 import Config from "../../config";
-import validateRequest from "../middlewares/validateRequest";
+import { validateRequest } from "../middlewares/validateRequest";
 import Joi from "joi";
 import { container } from "src/domains/@config/di.config";
 import { UserService } from "../../domains/userService";
