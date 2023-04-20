@@ -11,7 +11,7 @@ import { UserService } from "../../domains/userService";
 import { container } from "../../domains/@config/di.config";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Logger as log } from "../../utils/Logger";
-import { BaseProject } from "src/repositories/@types";
+import { BaseProject } from "../../repositories/@types";
 
 export const projectsRouter = Router();
 

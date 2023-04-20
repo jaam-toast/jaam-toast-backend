@@ -14,7 +14,7 @@ import { UserService } from "../userService";
 import {
   ContentsClient,
   mongodbContentsClient,
-} from "src/infrastructure/mongodbContentsClient";
+} from "../../infrastructure/mongodbContentsClient";
 
 /**
  * 의존성 등록 - identifier(ex "ProjectService" 등 string으로 입력된 곳)를 to("등록할 곳")에 등록합니다.
