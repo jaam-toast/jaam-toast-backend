@@ -5,14 +5,13 @@ import { IBuildService } from "./buildService";
 import { ICmsService } from "./cmsService";
 import { IProjectRepository } from "../repositories/projectRepository";
 
-import type { Document } from "mongoose";
 import type { BaseProject, Project } from "../repositories/@types";
 import type { ContentsClient } from "src/infrastructure/mongodbContentsClient";
 
 interface IProjectService {
   createProject(options: BaseProject): Promise<void>;
   updateProject(options: Partial<Project>): Promise<void>;
-  getByProjectName(projectName: string): Promise<Document | null>;
+  getByProjectName(projectName: string): Promise<Project | null>;
   deleteProject({ projectName }: { projectName: string }): Promise<void>;
   addSchema({
     projectName,
@@ -25,7 +24,24 @@ interface IProjectService {
       title: string;
     };
   }): Promise<void>;
-  deleteSchema(): Promise<void>;
+  updateSchema({
+    projectName,
+    schemaName,
+    schema,
+  }: {
+    projectName: string;
+    schemaName: string;
+    schema: {
+      title: string;
+    };
+  }): Promise<void>;
+  deleteSchema({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }): Promise<void>;
 }
 
 /**
@@ -107,10 +123,14 @@ export class ProjectService implements IProjectService {
     );
   }
 
-  public async getByProjectName(projectName: string) {
-    const project = await this.projectRepository.findOne({ projectName });
+  public async getByProjectName(projectName: string): Promise<Project | null> {
+    try {
+      const project = await this.projectRepository.getSnapshot(projectName);
 
-    return project as Promise<Document | null>;
+      return project;
+    } catch (error) {
+      return null;
+    }
   }
 
   public async deleteProject({ projectName }: { projectName: string }) {
@@ -137,21 +157,91 @@ export class ProjectService implements IProjectService {
 
     try {
       const project = await this.projectRepository.getSnapshot(projectName);
+      const updatedSchemaList = project.schemaList.concat({
+        schemaName: schema.title,
+        schema,
+      });
 
       await this.projectRepository.updateSnapshot(projectName, {
         ...project,
-        schemaList: project.schemaList?.concat(schema) ?? [schema],
+        schemaList: updatedSchemaList,
       });
     } catch (error) {
       throw new Error("Cannot update user info.");
     }
   }
 
-  // public async updateSchema({
-  //   projectName,
-  //   schemaName,
-  // }: {
-  //   projectName: string;
-  // });
-  public async deleteSchema() {}
+  public async updateSchema({
+    projectName,
+    schemaName,
+    schema,
+  }: {
+    projectName: string;
+    schemaName: string;
+    schema: {
+      title: string;
+    };
+  }) {
+    try {
+      await this.contentsClient.setRepositorySchema({
+        projectName,
+        schemaName,
+        jsonSchema: schema,
+      });
+    } catch (error) {
+      throw new Error("Cannot update contents's repository.");
+    }
+
+    try {
+      const project = await this.projectRepository.getSnapshot(projectName);
+      const updatedSchemaList = project.schemaList.map(projectSchema => {
+        if (projectSchema.schemaName !== schemaName) {
+          return projectSchema;
+        }
+
+        return {
+          schemaName,
+          schema,
+        };
+      });
+
+      await this.projectRepository.updateSnapshot(projectName, {
+        ...project,
+        schemaList: updatedSchemaList,
+      });
+    } catch (error) {
+      throw new Error("Cannot update user info.");
+    }
+  }
+
+  public async deleteSchema({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) {
+    try {
+      await this.contentsClient.deleteRepository({
+        projectName,
+        schemaName,
+      });
+    } catch (error) {
+      throw new Error("Cannot delete contents's repository.");
+    }
+
+    try {
+      const project = await this.projectRepository.getSnapshot(projectName);
+      const updatedSchemaList = project.schemaList.filter(
+        projectSchema => projectSchema.schemaName !== schemaName,
+      );
+
+      await this.projectRepository.updateSnapshot(projectName, {
+        ...project,
+        schemaList: updatedSchemaList,
+      });
+    } catch (error) {
+      throw new Error("Cannot update user info.");
+    }
+  }
 }

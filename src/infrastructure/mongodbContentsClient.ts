@@ -1,9 +1,9 @@
 import { injectable } from "inversify";
 import { MongoClient } from "mongodb";
-import Config from "../config";
 
+import Config from "../config";
 export interface ContentsClient {
-  createRepository({
+  createRepository: ({
     jsonSchema,
     projectName,
   }: {
@@ -11,12 +11,56 @@ export interface ContentsClient {
       title: string;
     };
     projectName: string;
-  }): Promise<void>;
+  }) => Promise<void>;
+  setRepositorySchema: ({
+    projectName,
+    schemaName,
+    jsonSchema,
+  }: {
+    projectName: string;
+    schemaName: string;
+    jsonSchema: {};
+  }) => Promise<void>;
+  deleteRepository: ({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) => Promise<void>;
 }
 
 @injectable()
 export class mongodbContentsClient implements ContentsClient {
-  private client = new MongoClient(Config.CONTENTS_DATABASE_URL);
+  private static _client: MongoClient | null = null;
+
+  get client(): MongoClient {
+    if (!mongodbContentsClient._client) {
+      throw new Error(
+        "The connection to the contents database was not established.",
+      );
+    }
+
+    return mongodbContentsClient._client;
+  }
+
+  static async connect() {
+    mongodbContentsClient._client = new MongoClient(
+      Config.CONTENTS_DATABASE_URL,
+    );
+
+    try {
+      await mongodbContentsClient._client.connect();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async close() {
+    await mongodbContentsClient._client?.close();
+
+    mongodbContentsClient._client = null;
+  }
 
   async createRepository({
     jsonSchema,
@@ -28,7 +72,6 @@ export class mongodbContentsClient implements ContentsClient {
     projectName: string;
   }) {
     try {
-      await this.client.connect();
       await this.client.db(projectName).createCollection(jsonSchema.title, {
         validator: {
           $jsonSchema: jsonSchema,
@@ -36,8 +79,41 @@ export class mongodbContentsClient implements ContentsClient {
       });
     } catch (error) {
       throw error;
-    } finally {
-      await this.client.close();
+    }
+  }
+
+  async setRepositorySchema({
+    projectName,
+    schemaName,
+    jsonSchema,
+  }: {
+    projectName: string;
+    schemaName: string;
+    jsonSchema: {};
+  }) {
+    try {
+      await this.client.db(projectName).command({
+        collMod: schemaName,
+        validator: {
+          $jsonSchema: jsonSchema,
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteRepository({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) {
+    try {
+      await this.client.db(projectName).dropCollection(schemaName);
+    } catch (error) {
+      throw error;
     }
   }
 }
