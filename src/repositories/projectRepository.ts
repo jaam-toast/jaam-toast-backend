@@ -82,9 +82,7 @@ export class ProjectRepository implements IProjectRepository {
         throw Error("Expected 1 arguments, but insufficient arguments.");
       }
 
-      const project = await Project.findOne(option)
-        .populate("schemaList")
-        .lean();
+      const project = await Project.findOne(option).lean();
 
       return project;
     } catch (error) {
@@ -138,7 +136,7 @@ export class ProjectRepository implements IProjectRepository {
       await client.connect();
 
       const project = await client
-        .db("test")
+        .db(Config.APP_DB_NAME)
         .collection("projects")
         .findOne<Project>({ projectName });
 
@@ -164,7 +162,7 @@ export class ProjectRepository implements IProjectRepository {
     try {
       await client.connect();
       await client
-        .db("test")
+        .db(Config.APP_DB_NAME)
         .collection("projects")
         .updateOne({ projectName }, { $set: updatedSnapshot });
     } catch (error) {
