@@ -13,30 +13,56 @@ import type { User } from "../../repositories/@types";
 interface IUserService {
   login(userData: User): Promise<Document | null>;
   getUserProjects({ userId }: { userId: string }): Promise<Document | null>;
-  getUserGithubRepos({ githubAccessToken }): Promise<
+  getUserGithubRepos({
+    githubAccessToken,
+  }: {
+    githubAccessToken: string;
+  }): Promise<
     {
       repoName: string;
       repoCloneUrl: string;
       repoUpdatedAt: string | null;
     }[]
   >;
-  getUserGithubOrgs({ githubAccessToken }): Promise<
+  getUserGithubOrgs({
+    githubAccessToken,
+  }: {
+    githubAccessToken: string;
+  }): Promise<
     {
       spaceName: string;
       spaceUrl: string;
       spaceImage: string;
     }[]
   >;
-  getUserGithubOrgsRepos({ githubAccessToken, org }): Promise<
+  getUserGithubOrgsRepos({
+    githubAccessToken,
+    org,
+  }: {
+    githubAccessToken: string;
+    org: string;
+  }): Promise<
     {
       repoName: string;
       repoCloneUrl: string | undefined;
       repoUpdatedAt: string | null | undefined;
     }[]
   >;
-  addProject({ userId, projectName }): Promise<void>;
+  addProject({
+    userId,
+    projectName,
+  }: {
+    userId: string;
+    projectName: string;
+  }): Promise<void>;
   deleteUser(): void;
-  deleteProject({ username, projectName }): void;
+  deleteProject({
+    username,
+    projectName,
+  }: {
+    username: string;
+    projectName: string;
+  }): void;
 }
 
 @injectable()
@@ -69,25 +95,39 @@ export class UserService implements IUserService {
     return userData;
   }
 
-  public async getUserProjects({ userId }) {
+  public async getUserProjects({ userId }: { userId: string }) {
     const projects = await this.userRepository.findByIdAndGetProjects(userId);
 
     return projects;
   }
 
-  public async getUserGithubRepos({ githubAccessToken }) {
+  public async getUserGithubRepos({
+    githubAccessToken,
+  }: {
+    githubAccessToken: string;
+  }) {
     const repos = await getUserRepositories({ githubAccessToken });
 
     return repos;
   }
 
-  public async getUserGithubOrgs({ githubAccessToken }) {
+  public async getUserGithubOrgs({
+    githubAccessToken,
+  }: {
+    githubAccessToken: string;
+  }) {
     const orgsData = await getUserOrganizations({ githubAccessToken });
 
     return orgsData;
   }
 
-  public async getUserGithubOrgsRepos({ githubAccessToken, org }) {
+  public async getUserGithubOrgsRepos({
+    githubAccessToken,
+    org,
+  }: {
+    githubAccessToken: string;
+    org: string;
+  }) {
     const orgsData = await getUserOrganizationsRepos({
       githubAccessToken,
       org,
@@ -96,13 +136,28 @@ export class UserService implements IUserService {
     return orgsData;
   }
 
-  public async addProject({ userId, projectName }) {
+  public async addProject({
+    userId,
+    projectName,
+  }: {
+    userId: string;
+    projectName: string;
+  }) {
     await this.userRepository.findByIdAndUpdateProject(userId, projectName);
   }
 
   public async deleteUser() {}
 
-  public async deleteProject({ username, projectName }) {
-    await this.userRepository.findOneAndDeleteProject(username, projectName);
+  public async deleteProject({
+    username,
+    projectName,
+  }: {
+    username: string;
+    projectName: string;
+  }) {
+    await this.userRepository.findOneAndDeleteProject(
+      { username },
+      projectName,
+    );
   }
 }

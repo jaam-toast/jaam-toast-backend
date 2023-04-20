@@ -12,11 +12,6 @@ const route = Router();
 const usersRouter = (app: Router) => {
   app.use("/users", verifyAccessToken, route);
 
-  // route.get(
-  //   "/:user_id",
-  // verifyToken,
-  // ) // get user
-
   route.get(
     "/:user_id/orgs",
     validateRequest(
@@ -36,7 +31,7 @@ const usersRouter = (app: Router) => {
 
       const userService = container.get<UserService>("UserService");
       const orgsData = await userService.getUserGithubOrgs({
-        githubAccessToken,
+        githubAccessToken: githubAccessToken as string,
       });
 
       return res.json({
@@ -65,7 +60,7 @@ const usersRouter = (app: Router) => {
 
       const userService = container.get<UserService>("UserService");
       const sortedUserReposList = await userService.getUserGithubRepos({
-        githubAccessToken,
+        githubAccessToken: githubAccessToken as string,
       });
 
       return res.json({
