@@ -11,6 +11,7 @@ import { UserService } from "../../domains/userService";
 import { container } from "../../domains/@config/di.config";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Logger as log } from "../../utils/Logger";
+import { BaseProject } from "src/repositories/@types";
 
 export const projectsRouter = Router();
 
@@ -30,7 +31,7 @@ projectsRouter.post(
       installCommand: Joi.string().required(),
       buildCommand: Joi.string().required(),
       envList: Joi.array().required(),
-      // TODO: add nodeVersion
+      nodeVersion: Joi.string().required(),
     }),
     "body",
   ),
@@ -48,7 +49,9 @@ projectsRouter.post(
     const userService = container.get<UserService>("UserService");
 
     try {
-      await projectService.createProject(_.omit(projectOptions, ["userId"]));
+      await projectService.createProject(
+        _.omit(projectOptions, ["userId"]) as BaseProject,
+      );
       await userService.addProject({ userId, projectName });
     } catch (error) {
       log.serverError(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
