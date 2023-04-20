@@ -2,17 +2,15 @@ import { Router } from "express";
 import createError from "http-errors";
 import Joi from "joi";
 import * as _ from "lodash";
-import Ajv from "ajv";
 
-import { schemasRouter } from "./schemas";
-import { verifyAccessToken } from "../../middlewares/verifyAccessToken";
-import { validateRequest } from "../../middlewares/validateRequest";
-import { BUILD_MESSAGE } from "../../../config/constants";
-import { ProjectService } from "../../../domains/projectService";
-import { UserService } from "../../../domains/userService";
-import { container } from "../../../domains/@config/di.config";
-import { asyncHandler } from "../../utils/asyncHandler";
-import { Logger as log } from "../../../utils/Logger";
+import { verifyAccessToken } from "../middlewares/verifyAccessToken";
+import { validateRequest } from "../middlewares/validateRequest";
+import { BUILD_MESSAGE } from "../../config/constants";
+import { ProjectService } from "../../domains/projectService";
+import { UserService } from "../../domains/userService";
+import { container } from "../../domains/@config/di.config";
+import { asyncHandler } from "../utils/asyncHandler";
+import { Logger as log } from "../../utils/Logger";
 
 export const projectsRouter = Router();
 
@@ -120,47 +118,6 @@ projectsRouter.delete(
     await userService.deleteProject({ username, projectName });
 
     return res.status(204).json({
-      message: "ok",
-    });
-  }),
-);
-
-const ajv = new Ajv();
-
-projectsRouter.post(
-  "/:project_name/schemas",
-  validateRequest(
-    Joi.object({
-      project_name: Joi.string().required(),
-    }),
-    "params",
-  ),
-  validateRequest(
-    Joi.object({
-      title: Joi.string().required(),
-    }),
-    "body",
-  ),
-  asyncHandler(async (req, res, next) => {
-    const schema = req.body;
-
-    try {
-      ajv.compile(schema);
-    } catch (error) {
-      return res.status(400).json({
-        message: "The schema field is not of JSON Schema or failed validation.",
-      });
-    }
-
-    const projectService = container.get<ProjectService>("ProjectService");
-    const { project_name: projectName } = req.params;
-
-    await projectService.addSchema({
-      projectName,
-      schema,
-    });
-
-    return res.status(201).json({
       message: "ok",
     });
   }),
