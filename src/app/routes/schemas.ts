@@ -25,12 +25,15 @@ schemasRouter.post(
   "/:project_name/schemas",
   validateRequest(
     Joi.object({
-      title: Joi.string().required(),
+      schema_name: Joi.string().required(),
+      schema: Joi.object({
+        title: Joi.string().required(),
+      }),
     }),
     "body",
   ),
   asyncHandler(async (req, res, next) => {
-    const schema = req.body;
+    const { schema_name: schemaName, schema } = req.body;
 
     try {
       ajv.compile(schema);
@@ -51,7 +54,7 @@ schemasRouter.post(
     }
 
     const isSchemaExist = !!project.schemaList.find(
-      proejctSchema => proejctSchema.schemaName === schema.title,
+      proejctSchema => proejctSchema.schemaName === schemaName,
     );
 
     if (isSchemaExist) {
@@ -72,15 +75,18 @@ schemasRouter.post(
 );
 
 schemasRouter.put(
-  "/:project_name/schemas",
+  "/:project_name/schemas/:schema_name",
   validateRequest(
     Joi.object({
-      title: Joi.string().required(),
+      schema: Joi.object({
+        title: Joi.string().required(),
+      }),
     }),
     "body",
   ),
   asyncHandler(async (req, res, next) => {
-    const schema = req.body;
+    const { schema_name: schemaName } = req.params;
+    const { schema } = req.body;
 
     try {
       ajv.compile(schema);
@@ -101,7 +107,7 @@ schemasRouter.put(
     }
 
     const isSchemaExist = !!project.schemaList.find(
-      proejctSchema => proejctSchema.schemaName === schema.title,
+      proejctSchema => proejctSchema.schemaName === schemaName,
     );
 
     if (!isSchemaExist) {
@@ -123,11 +129,10 @@ schemasRouter.put(
 );
 
 schemasRouter.delete(
-  "/:project_name/schemas",
+  "/:project_name/schemas/:schema_name",
   asyncHandler(async (req, res, next) => {
     const projectService = container.get<ProjectService>("ProjectService");
-    const { project_name: projectName } = req.params;
-    const { schema_name: schemaName } = req.body;
+    const { project_name: projectName, schema_name: schemaName } = req.params;
     const project = await projectService.getByProjectName(projectName);
 
     if (!project) {
