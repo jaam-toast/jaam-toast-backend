@@ -12,7 +12,6 @@
     "skipLibCheck": true,
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "baseUrl": ".",
-    // "noImplicitAny": false,
     "types": ["reflect-metadata"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
