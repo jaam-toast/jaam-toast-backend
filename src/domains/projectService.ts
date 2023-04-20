@@ -6,7 +6,7 @@ import { ICmsService } from "./cmsService";
 import { IProjectRepository } from "../repositories/projectRepository";
 
 import type { BaseProject, Project } from "../repositories/@types";
-import type { ContentsClient } from "src/infrastructure/mongodbContentsClient";
+import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
 
 interface IProjectService {
   createProject(options: BaseProject): Promise<void>;

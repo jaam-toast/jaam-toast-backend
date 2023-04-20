@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 
 import Config from "./@config";
-import { Logger as log } from "src/utils/Logger";
+import { Logger as log } from "../utils/Logger";
 
 export class CloudFlare {
   api: AxiosInstance;

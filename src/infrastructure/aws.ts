@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-route-53";
 
 import Config from "./@config";
-import { Logger as log } from "src/utils/Logger";
+import { Logger as log } from "../utils/Logger";
 
 export class Route53 {
   client = new Route53Client({

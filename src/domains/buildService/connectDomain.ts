@@ -1,6 +1,6 @@
 import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { Route53 } from "../../infrastructure/aws";
-import { BUILD_MESSAGE } from "src/config/constants";
+import { BUILD_MESSAGE } from "../../config/constants";
 
 type Options = {
   projectName: string;

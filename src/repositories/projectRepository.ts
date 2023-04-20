@@ -4,7 +4,7 @@ import { pipe } from "lodash/fp";
 import { omit } from "lodash";
 
 import Project from "./models/Project";
-import Config from "src/config";
+import Config from "../config";
 
 import type {
   BaseProject,

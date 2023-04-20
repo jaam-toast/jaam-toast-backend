@@ -1,4 +1,4 @@
-import { Github } from "src/infrastructure/github";
+import { Github } from "../../infrastructure/github";
 
 export async function getUserRepositories({
   githubAccessToken,

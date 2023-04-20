@@ -2,10 +2,10 @@ import { Router } from "express";
 import Joi from "joi";
 import Ajv from "ajv";
 
-import { validateRequest } from "src/app/middlewares/validateRequest";
-import { asyncHandler } from "src/app/utils/asyncHandler";
-import { container } from "src/domains/@config/di.config";
-import { ProjectService } from "src/domains/projectService";
+import { validateRequest } from "../middlewares/validateRequest";
+import { asyncHandler } from "../utils/asyncHandler";
+import { container } from "../../domains/@config/di.config";
+import { ProjectService } from "../../domains/projectService";
 
 const ajv = new Ajv();
 

@@ -6,7 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import Config from "../../config";
 import { validateRequest } from "../middlewares/validateRequest";
 import Joi from "joi";
-import { container } from "src/domains/@config/di.config";
+import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
 
 const route = Router();
