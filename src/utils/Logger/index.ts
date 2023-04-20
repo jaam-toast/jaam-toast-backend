@@ -115,7 +115,7 @@ export class Logger extends Observer {
     }
   }
 
-  private static notify(messageType, ...messages: LogMessage[]) {
+  private static notify(messageType: string, ...messages: LogMessage[]) {
     const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
 
     for (const message of messages) {
