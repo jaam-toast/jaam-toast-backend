@@ -4,6 +4,7 @@ import loginRouter from "./login";
 import usersRouter from "./users";
 import { projectsRouter } from "./projects";
 import { schemasRouter } from "./schemas";
+import { contentsRouter } from "./contents";
 
 const routes = (): Router => {
   const router = Router();
@@ -13,6 +14,7 @@ const routes = (): Router => {
 
   router.use("/projects", projectsRouter);
   router.use("/projects", schemasRouter);
+  router.use("/contents", contentsRouter);
 
   return router;
 };
