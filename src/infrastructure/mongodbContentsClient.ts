@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 import Config from "../config";
 export interface ContentsClient {
@@ -12,6 +12,7 @@ export interface ContentsClient {
     };
     projectName: string;
   }) => Promise<void>;
+
   setStorageSchema: ({
     projectName,
     schemaName,
@@ -21,6 +22,7 @@ export interface ContentsClient {
     schemaName: string;
     jsonSchema: {};
   }) => Promise<void>;
+
   deleteStorage: ({
     projectName,
     schemaName,
@@ -28,6 +30,47 @@ export interface ContentsClient {
     projectName: string;
     schemaName: string;
   }) => Promise<void>;
+
+  createContents: ({
+    projectName,
+    schemaName,
+    contents,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contents: unknown;
+  }) => any;
+  // TODO: remove any
+
+  updateContents: ({
+    projectName,
+    schemaName,
+    contentsId,
+    contents,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contentsId: string;
+    contents: unknown;
+  }) => Promise<void>;
+
+  deleteContents: ({
+    projectName,
+    schemaName,
+    contentsIds,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contentsIds: string[];
+  }) => Promise<void>;
+
+  getContents: ({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) => any;
 }
 
 @injectable()
@@ -113,6 +156,89 @@ export class mongodbContentsClient implements ContentsClient {
     try {
       await this.client.db(projectName).dropCollection(schemaName);
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async createContents({
+    projectName,
+    schemaName,
+    contents,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contents: unknown;
+  }) {
+    try {
+      return this.client
+        .db(projectName)
+        .collection(schemaName)
+        .insertOne(contents);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateContents({
+    projectName,
+    schemaName,
+    contentsId,
+    contents,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contentsId: string;
+    contents: unknown;
+  }) {
+    try {
+      await this.client
+        .db(projectName)
+        .collection(schemaName)
+        .updateOne({ _id: new ObjectId(contentsId) }, { $set: contents });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteContents({
+    projectName,
+    schemaName,
+    contentsIds,
+  }: {
+    projectName: string;
+    schemaName: string;
+    contentsIds: string[];
+  }) {
+    try {
+      await Promise.allSettled(
+        contentsIds.map(contentsId =>
+          this.client
+            .db(projectName)
+            .collection(schemaName)
+            .deleteOne({ _id: new ObjectId(contentsId) }),
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getContents({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) {
+    try {
+      return this.client
+        .db(projectName)
+        .collection(schemaName)
+        .find()
+        .toArray();
+    } catch (error) {
+      console.error(error);
       throw error;
     }
   }

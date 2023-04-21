@@ -32,6 +32,6 @@ container.bind<IUserRepository>("UserRepository").to(UserRepository);
 container
   .bind<ContentsClient>("MongoDBContentsClient")
   .to(mongodbContentsClient);
-container.bind<TokenClient>("jwtTokenClient").to(jwtTokenClient);
+container.bind<TokenClient>("JwtTokenClient").to(jwtTokenClient);
 
 export { container };
