@@ -9,6 +9,7 @@ const Config = {
   CONTENTS_DATABASE_URL: process.env.MONGODB_CONTENTS_URI!,
   APP_DB_NAME: process.env.APP_DB_NAME!,
   JWT_SECRET: process.env.JWT_SECRET_KEY!,
+  STORAGE_JWT_SECRET: process.env.STORAGE_JWT_SECRET!,
   SERVER_URL: process.env.ORIGIN_SERVER_URL!,
   SERVER_IP: process.env.ORIGIN_SERVER_IP!,
   SERVER_PORT: process.env.SERVER_PORT!,

@@ -15,6 +15,7 @@ import {
   ContentsClient,
   mongodbContentsClient,
 } from "../../infrastructure/mongodbContentsClient";
+import { TokenClient, jwtTokenClient } from "src/infrastructure/jwtTokenClient";
 
 /**
  * 의존성 등록 - identifier(ex "ProjectService" 등 string으로 입력된 곳)를 to("등록할 곳")에 등록합니다.
@@ -31,5 +32,6 @@ container.bind<IUserRepository>("UserRepository").to(UserRepository);
 container
   .bind<ContentsClient>("MongoDBContentsClient")
   .to(mongodbContentsClient);
+container.bind<TokenClient>("jwtTokenClient").to(jwtTokenClient);
 
 export { container };
