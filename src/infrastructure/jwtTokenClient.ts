@@ -48,7 +48,17 @@ export class jwtTokenClient implements TokenClient {
     return jwt.sign(payload, key, options);
   }
 
-  validateToken({ token, key }: { token: string; key: string }): Payload {
-    return jwt.verify(token, token) as Payload;
+  validateToken({
+    token,
+    key,
+  }: {
+    token: string;
+    key: string;
+  }): Payload | null {
+    try {
+      return jwt.verify(token, key) as Payload;
+    } catch {
+      return null;
+    }
   }
 }
