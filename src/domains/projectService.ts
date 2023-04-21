@@ -147,7 +147,7 @@ export class ProjectService implements IProjectService {
     };
   }) {
     try {
-      await this.contentsClient.createRepository({
+      await this.contentsClient.createStorage({
         projectName,
         jsonSchema: schema,
       });
@@ -183,7 +183,7 @@ export class ProjectService implements IProjectService {
     };
   }) {
     try {
-      await this.contentsClient.setRepositorySchema({
+      await this.contentsClient.setStorageSchema({
         projectName,
         schemaName,
         jsonSchema: schema,
@@ -222,7 +222,7 @@ export class ProjectService implements IProjectService {
     schemaName: string;
   }) {
     try {
-      await this.contentsClient.deleteRepository({
+      await this.contentsClient.deleteStorage({
         projectName,
         schemaName,
       });

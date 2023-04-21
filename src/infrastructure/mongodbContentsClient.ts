@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 
 import Config from "../config";
 export interface ContentsClient {
-  createRepository: ({
+  createStorage: ({
     jsonSchema,
     projectName,
   }: {
@@ -12,7 +12,7 @@ export interface ContentsClient {
     };
     projectName: string;
   }) => Promise<void>;
-  setRepositorySchema: ({
+  setStorageSchema: ({
     projectName,
     schemaName,
     jsonSchema,
@@ -21,7 +21,7 @@ export interface ContentsClient {
     schemaName: string;
     jsonSchema: {};
   }) => Promise<void>;
-  deleteRepository: ({
+  deleteStorage: ({
     projectName,
     schemaName,
   }: {
@@ -62,7 +62,7 @@ export class mongodbContentsClient implements ContentsClient {
     mongodbContentsClient._client = null;
   }
 
-  async createRepository({
+  async createStorage({
     jsonSchema,
     projectName,
   }: {
@@ -82,7 +82,7 @@ export class mongodbContentsClient implements ContentsClient {
     }
   }
 
-  async setRepositorySchema({
+  async setStorageSchema({
     projectName,
     schemaName,
     jsonSchema,
@@ -103,7 +103,7 @@ export class mongodbContentsClient implements ContentsClient {
     }
   }
 
-  async deleteRepository({
+  async deleteStorage({
     projectName,
     schemaName,
   }: {
