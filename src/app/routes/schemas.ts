@@ -6,6 +6,8 @@ import { validateRequest } from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
+import { TokenClient } from "src/infrastructure/jwtTokenClient";
+import Config from "../../config";
 
 const ajv = new Ajv();
 
@@ -44,6 +46,7 @@ schemasRouter.post(
     }
 
     const projectService = container.get<ProjectService>("ProjectService");
+    const tokenClient = container.get<TokenClient>("JwtTokenClient");
     const { project_name: projectName } = req.params;
     const project = await projectService.getByProjectName(projectName);
 
@@ -65,11 +68,21 @@ schemasRouter.post(
 
     await projectService.addSchema({
       projectName,
+      schemaName,
       schema,
+    });
+
+    const storageKey = tokenClient.createToken({
+      payload: { projectName },
+      key: Config.STORAGE_JWT_SECRET,
     });
 
     return res.status(201).json({
       message: "ok",
+      result: {
+        storageName: schemaName,
+        storageKey,
+      },
     });
   }),
 );
