@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Joi from "joi";
-import { omit } from "lodash";
+import { isEmpty } from "lodash";
+import { ObjectId } from "mongodb";
 
 import { asyncHandler } from "../utils/asyncHandler";
 import { validateRequest } from "../middlewares/validateRequest";
@@ -12,20 +13,20 @@ import Config from "src/config";
 export const storageRouter = Router();
 
 storageRouter.use(
-  "/:schema_name",
+  "/:schemaName",
   validateRequest(
     Joi.object({
-      schema_name: Joi.string().required(),
+      schemaName: Joi.string().required(),
     }),
     "params",
   ),
 );
 
 storageRouter.use(
-  "/:schema_name",
   asyncHandler(async (req, res, next) => {
     const storageKey = req.headers.authorization?.replace("Bearer ", "") ?? "";
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
+
     const payload = tokenClient.validateToken({
       token: storageKey,
       key: Config.STORAGE_JWT_SECRET,
@@ -44,12 +45,12 @@ storageRouter.use(
 );
 
 storageRouter.post(
-  "/:schema_name/contents",
+  "/:schemaName/contents",
   asyncHandler(async (req, res, next) => {
-    const { schema_name: schemaName } = req.params;
+    const { schemaName } = req.params;
     const { projectName } = req.app.locals;
-
     const projectService = container.get<ProjectService>("ProjectService");
+
     const contents = await projectService.createContents({
       projectName,
       schemaName,
@@ -64,24 +65,73 @@ storageRouter.post(
 );
 
 storageRouter.get(
-  "/:schema_name/contents",
+  "/:schemaName/contents",
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
-    const { page, sort, ...filter } = req.query;
-    const { schema_name: schemaName } = req.params;
+    const { schemaName } = req.params;
+    const { page, pageLength, sort, order } = req.query;
     const projectService = container.get<ProjectService>("ProjectService");
 
-    const queryFilter = !!filter.contents_id
-      ? { ...omit(filter, ["contents_id"]), contentsId: filter.contents_id }
-      : filter;
-    const contents = await projectService.queryContents({
+    const pagination = {
+      ...(page && { page: Number(page) }),
+      ...(pageLength && { pageLength: Number(pageLength) }),
+    };
+
+    let sortOptions: {
+      [key: string]: string;
+    }[] = [];
+
+    if (Array.isArray(sort)) {
+      if (Array.isArray(order)) {
+        sortOptions = sort
+          .map((sort, index) => {
+            if (typeof sort !== "string") {
+              return {};
+            }
+
+            const orderOption = (
+              typeof order[index] === "string" ? order[index] : "asc"
+            ) as string;
+
+            return { [sort]: orderOption };
+          })
+          .filter(option => !isEmpty(option));
+      } else if (typeof order === "string") {
+        sortOptions = sort
+          .map((sort, index) => {
+            if (typeof sort !== "string") {
+              return {};
+            }
+
+            return index === 0 ? { [sort]: order } : { [sort]: "asc" };
+          })
+          .filter(option => !isEmpty(option));
+      } else if (!order) {
+        sortOptions = sort
+          .map(sort => {
+            if (typeof sort !== "string") {
+              return {};
+            }
+
+            return { [sort]: "asc" };
+          })
+          .filter(option => !isEmpty(option));
+      }
+    } else if (typeof sort === "string") {
+      if (Array.isArray(order) && typeof order[0] === "string") {
+        sortOptions = [{ [sort]: order[0] }];
+      } else if (typeof order === "string") {
+        sortOptions = [{ [sort]: order }];
+      } else if (!order) {
+        sortOptions = [{ [sort]: "asc" }];
+      }
+    }
+
+    const contents = await projectService.getContents({
       projectName,
       schemaName,
-      queryOptions: {
-        sort,
-        filter: queryFilter,
-        page: page ?? 0,
-      },
+      pagination,
+      sort: sortOptions,
     });
 
     return res.status(200).json({
@@ -91,11 +141,32 @@ storageRouter.get(
   }),
 );
 
-storageRouter.put(
-  "/:schema_name/contents/:contents_id",
+storageRouter.get(
+  "/:schemaName/contents/:contentsId",
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
-    const { schema_name: schemaName, contents_id: contentsId } = req.params;
+    const { schemaName, contentsId } = req.params;
+    const projectService = container.get<ProjectService>("ProjectService");
+
+    const contents = await projectService.getContents({
+      projectName,
+      schemaName,
+      // TODO: change logic.
+      filter: { _id: new ObjectId(contentsId) },
+    });
+
+    return res.status(200).json({
+      message: "ok",
+      result: contents[0],
+    });
+  }),
+);
+
+storageRouter.put(
+  "/:schemaName/contents/:contentsId",
+  asyncHandler(async (req, res, next) => {
+    const { projectName } = req.app.locals;
+    const { schemaName, contentsId } = req.params;
     const projectService = container.get<ProjectService>("ProjectService");
 
     await projectService.updateContents({
@@ -112,11 +183,30 @@ storageRouter.put(
 );
 
 storageRouter.delete(
-  "/:schema_name/contents",
+  "/:schemaName/contents/:contentsId",
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
-    const { schema_name: schemaName } = req.params;
-    const { contents_id: contentsId } = req.query;
+    const { schemaName, contentsId } = req.params;
+    const projectService = container.get<ProjectService>("ProjectService");
+
+    await projectService.deleteContents({
+      projectName,
+      schemaName: schemaName as string,
+      contentsIds: [contentsId as string],
+    });
+
+    return res.status(200).json({
+      message: "ok",
+    });
+  }),
+);
+
+storageRouter.delete(
+  "/:schemaName/contents",
+  asyncHandler(async (req, res, next) => {
+    const { projectName } = req.app.locals;
+    const { schemaName } = req.params;
+    const { contentsId } = req.query;
     const projectService = container.get<ProjectService>("ProjectService");
 
     await projectService.deleteContents({
