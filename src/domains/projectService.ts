@@ -7,6 +7,7 @@ import { IProjectRepository } from "../repositories/projectRepository";
 
 import type { BaseProject, Project } from "../repositories/@types";
 import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
+import type { ObjectId } from "mongodb";
 
 interface IProjectService {
   createProject(options: BaseProject): Promise<void>;
@@ -80,7 +81,7 @@ interface IProjectService {
  */
 
 @injectable()
-export class ProjectService implements IProjectService {
+export class ProjectService {
   private buildService: IBuildService;
   private cmsService: ICmsService;
   private projectRepository: IProjectRepository;
@@ -184,7 +185,6 @@ export class ProjectService implements IProjectService {
     } catch (error) {
       throw new Error("Cannot create contents's storage.");
     }
-
     try {
       const project = await this.projectRepository.getSnapshot(projectName);
       const updatedSchemaList = project.schemaList.concat({
@@ -282,19 +282,19 @@ export class ProjectService implements IProjectService {
   }: {
     projectName: string;
     schemaName: string;
-    contents: { [key: string]: unknown };
+    contents: { [key: string]: string };
   }) {
     try {
-      const project = await this.projectRepository.findOne({ projectName });
+      const project = await this.projectRepository.getSnapshot(projectName);
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (!project.schemaList.includes(schemaName)) {
+      if (
+        !project.schemaList.find(schema => schema.schemaName === schemaName)
+      ) {
         throw new Error("Cannot find schema");
       }
-
-      // TODO: validate contents..?
 
       return this.contentsClient.createContents({
         projectName,
@@ -302,8 +302,7 @@ export class ProjectService implements IProjectService {
         contents,
       });
     } catch (error) {
-      console.error(error);
-      throw new Error("error");
+      throw new Error("Cannot create contents");
     }
   }
 
@@ -319,16 +318,16 @@ export class ProjectService implements IProjectService {
     contents: unknown;
   }) {
     try {
-      const project = await this.projectRepository.findOne({ projectName });
+      const project = await this.projectRepository.getSnapshot(projectName);
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (!project.schemaList.includes(schemaName)) {
+      if (
+        !project.schemaList.find(schema => schema.schemaName === schemaName)
+      ) {
         throw new Error("Cannot find schema");
       }
-
-      // TODO: validate contents..?
 
       return this.contentsClient.updateContents({
         projectName,
@@ -337,8 +336,7 @@ export class ProjectService implements IProjectService {
         contents,
       });
     } catch (error) {
-      console.error(error);
-      throw new Error("error");
+      throw new Error("Cannot update contents");
     }
   }
 
@@ -352,12 +350,14 @@ export class ProjectService implements IProjectService {
     contentsIds: string[];
   }) {
     try {
-      const project = await this.projectRepository.findOne({ projectName });
+      const project = await this.projectRepository.getSnapshot(projectName);
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (!project.schemaList.includes(schemaName)) {
+      if (
+        !project.schemaList.find(schema => schema.schemaName === schemaName)
+      ) {
         throw new Error("Cannot find schema");
       }
 
@@ -367,39 +367,74 @@ export class ProjectService implements IProjectService {
         contentsIds,
       });
     } catch (error) {
-      throw new Error("error");
+      throw new Error("Cannot delete contents");
     }
   }
 
-  async queryContents({
+  async getContents({
     projectName,
     schemaName,
-    queryOptions,
+    pagination,
+    sort,
+    filter,
   }: {
     projectName: string;
     schemaName: string;
-    queryOptions: {
-      sort?: string[];
-      filter?: { [key: string]: any };
+    pagination?: {
       page?: number;
+      pageLength?: number;
+    };
+    sort?: {
+      [key: string]: string;
+    }[];
+    filter?: {
+      [key: string]: string | number | boolean | ObjectId;
     };
   }) {
     try {
-      const project = await this.projectRepository.findOne({ projectName });
+      const project = await this.projectRepository.getSnapshot(projectName);
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (!project.schemaList.includes(schemaName)) {
+
+      const schemaInfo = project.schemaList.find(
+        schema => schema.schemaName === schemaName,
+      );
+
+      if (!schemaInfo) {
         throw new Error("Cannot find schema");
       }
-
-      return this.contentsClient.getContents({
-        projectName,
-        schemaName,
-      });
     } catch (error) {
-      throw new Error("error");
+      throw new Error("Cannot get contents");
     }
+
+    const sortQueries = sort?.map(sortOption => {
+      const sortQuery: { [key: string]: "asc" | "desc" } = {};
+
+      for (const sort in sortOption) {
+        if (sortOption.hasOwnProperty(sort)) {
+          const order = sortOption[sort];
+
+          if (order === "descending" || order === "desc") {
+            sortQuery[sort] = "desc";
+          } else {
+            sortQuery[sort] = "asc";
+          }
+
+          break;
+        }
+      }
+
+      return sortQuery;
+    }) ?? [{ _id: "asc" }];
+
+    return this.contentsClient.getContents({
+      projectName,
+      schemaName,
+      pagination,
+      sort: sortQueries,
+      filter,
+    });
   }
 }

@@ -1,5 +1,11 @@
 import { injectable } from "inversify";
-import { MongoClient, ObjectId } from "mongodb";
+import {
+  Document,
+  InsertOneResult,
+  MongoClient,
+  ObjectId,
+  WithId,
+} from "mongodb";
 
 import Config from "../config";
 export interface ContentsClient {
@@ -38,9 +44,8 @@ export interface ContentsClient {
   }: {
     projectName: string;
     schemaName: string;
-    contents: unknown;
-  }) => any;
-  // TODO: remove any
+    contents: { [key: string]: string };
+  }) => Promise<InsertOneResult<Document>>;
 
   updateContents: ({
     projectName,
@@ -67,10 +72,23 @@ export interface ContentsClient {
   getContents: ({
     projectName,
     schemaName,
+    pagination,
+    sort,
+    filter,
   }: {
     projectName: string;
     schemaName: string;
-  }) => any;
+    pagination?: {
+      page?: number;
+      pageLength?: number;
+    };
+    sort?: {
+      [key: string]: "asc" | "desc" | "ascending" | "descending";
+    }[];
+    filter?: {
+      [key: string]: string | number | boolean | ObjectId;
+    };
+  }) => Promise<WithId<Document>[]>;
 }
 
 @injectable()
@@ -167,7 +185,7 @@ export class mongodbContentsClient implements ContentsClient {
   }: {
     projectName: string;
     schemaName: string;
-    contents: unknown;
+    contents: { [key: string]: string };
   }) {
     try {
       return this.client
@@ -219,7 +237,6 @@ export class mongodbContentsClient implements ContentsClient {
         ),
       );
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -227,19 +244,53 @@ export class mongodbContentsClient implements ContentsClient {
   async getContents({
     projectName,
     schemaName,
+    pagination,
+    sort,
+    filter,
   }: {
     projectName: string;
     schemaName: string;
+    pagination?: {
+      page?: number;
+      pageLength?: number;
+    };
+    sort?: {
+      [key: string]: "asc" | "desc" | "ascending" | "descending";
+    }[];
+    filter?: {
+      [key: string]: string | number | boolean | ObjectId;
+    };
   }) {
-    try {
-      return this.client
-        .db(projectName)
-        .collection(schemaName)
-        .find()
-        .toArray();
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    const limit = pagination?.pageLength || Config.MAX_NUMBER_PER_PAGE;
+    const skip = (pagination?.page ?? 0) * limit;
+    const sortOptions = sort
+      ? sort.reduce((sortOptions, option) => {
+          const sortOrders = Object.values(option).map(order =>
+            order === "asc" || order === "ascending" ? 1 : -1,
+          );
+          const sortProps = Object.keys(option).reduce(
+            (sortOperators, prop, index) => ({
+              ...sortOperators,
+              [prop]: sortOrders[index],
+            }),
+            {},
+          );
+          return {
+            ...sortOptions,
+            ...sortProps,
+          };
+        }, {})
+      : {};
+    const filterOptions = filter ?? {};
+
+    return this.client
+      .db(projectName)
+      .collection(schemaName)
+      .find(filterOptions, {
+        limit,
+        skip,
+      })
+      .sort(sortOptions)
+      .toArray();
   }
 }

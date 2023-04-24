@@ -39,7 +39,7 @@ export class jwtTokenClient implements TokenClient {
   createToken({
     payload,
     key,
-    options = { expiresIn: "1d" },
+    options = {},
   }: {
     payload: Payload;
     key: string;
