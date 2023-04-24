@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Joi from "joi";
-import Ajv from "ajv";
+import Ajv from "ajv-draft-04";
 
 import { validateRequest } from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
