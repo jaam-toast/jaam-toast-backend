@@ -96,7 +96,8 @@ storageRouter.get(
             return { [sort]: orderOption };
           })
           .filter(option => !isEmpty(option));
-      } else if (typeof order === "string") {
+      }
+      if (typeof order === "string") {
         sortOptions = sort
           .map((sort, index) => {
             if (typeof sort !== "string") {
@@ -106,7 +107,8 @@ storageRouter.get(
             return index === 0 ? { [sort]: order } : { [sort]: "asc" };
           })
           .filter(option => !isEmpty(option));
-      } else if (!order) {
+      }
+      if (!order) {
         sortOptions = sort
           .map(sort => {
             if (typeof sort !== "string") {
@@ -117,12 +119,15 @@ storageRouter.get(
           })
           .filter(option => !isEmpty(option));
       }
-    } else if (typeof sort === "string") {
+    }
+    if (typeof sort === "string") {
       if (Array.isArray(order) && typeof order[0] === "string") {
         sortOptions = [{ [sort]: order[0] }];
-      } else if (typeof order === "string") {
+      }
+      if (typeof order === "string") {
         sortOptions = [{ [sort]: order }];
-      } else if (!order) {
+      }
+      if (!order) {
         sortOptions = [{ [sort]: "asc" }];
       }
     }
