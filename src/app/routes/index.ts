@@ -1,22 +1,13 @@
 import { Router } from "express";
 
-import loginRouter from "./login";
 import usersRouter from "./users";
+import { loginRouter } from "./login";
 import { projectsRouter } from "./projects";
 import { schemasRouter } from "./schemas";
-import { storageRouter } from "./storage";
 
-const routes = (): Router => {
-  const router = Router();
+export const router = Router();
 
-  loginRouter(router);
-  usersRouter(router);
-
-  router.use("/projects", projectsRouter);
-  router.use("/projects", schemasRouter);
-  router.use("/storage", storageRouter);
-
-  return router;
-};
-
-export default routes;
+router.use(usersRouter);
+router.use(loginRouter);
+router.use(projectsRouter);
+router.use(schemasRouter);
