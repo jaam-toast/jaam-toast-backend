@@ -6,7 +6,7 @@ import { validateRequest } from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
-import { TokenClient } from "src/infrastructure/jwtTokenClient";
+import { TokenClient } from "../../infrastructure/jwtTokenClient";
 import Config from "../../config";
 
 const ajv = new Ajv();
