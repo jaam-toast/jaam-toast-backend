@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response, RequestHandler } from "express";
 
-export const asyncHandler = <
+export const handleAsync = <
   RequestParamsType,
   RequestBodyType,
   RequestQueryType,

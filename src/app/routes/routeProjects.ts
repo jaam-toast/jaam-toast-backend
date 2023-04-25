@@ -9,7 +9,7 @@ import { BUILD_MESSAGE } from "../../config/constants";
 import { ProjectService } from "../../domains/projectService";
 import { UserService } from "../../domains/userService";
 import { container } from "../../domains/@config/di.config";
-import { asyncHandler } from "../utils/asyncHandler";
+import { handleAsync } from "../utils/handleAsync";
 import { Logger as log } from "../../utils/Logger";
 
 export const projectsRouter = Router();
@@ -52,7 +52,7 @@ projectsRouter.post(
       nodeVersion: z.string(),
     }),
   }),
-  asyncHandler(async (req, res) => {
+  handleAsync(async (req, res) => {
     const projectOptions = req.body;
     const { projectName, userId } = projectOptions;
 
@@ -81,7 +81,7 @@ projectsRouter.get(
       projectName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.params;
 
     const projectService = container.get<ProjectService>("ProjectService");
@@ -105,7 +105,7 @@ projectsRouter.put(
       projectName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res) => {
+  handleAsync(async (req, res) => {
     const { projectName } = req.params;
     const updateData = req.body;
 
@@ -124,7 +124,7 @@ projectsRouter.delete(
       projectName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res) => {
+  handleAsync(async (req, res) => {
     const { username } = req.app.locals;
     const { projectName } = req.params;
 

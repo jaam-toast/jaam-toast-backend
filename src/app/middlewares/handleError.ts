@@ -2,7 +2,7 @@ import { Logger as log } from "../../utils/Logger";
 
 import type { ErrorRequestHandler } from "express";
 
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+export const handleError: ErrorRequestHandler = (err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
@@ -12,8 +12,5 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     } - ${req.ip}`,
   );
 
-  res.status((err.status as number) || 500);
-  res.json(err);
+  res.status((err.status as number) || 500).json(err);
 };
-
-export default errorHandler;
