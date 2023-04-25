@@ -1,26 +1,16 @@
 import { Router } from "express";
-import Joi from "joi";
+import { z } from "zod";
 import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 
+import { parseRequest } from "../middlewares/parseRequest";
 import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middlewares/validateRequest";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
 import { TokenClient } from "../../infrastructure/jwtTokenClient";
 import Config from "../../config";
 
 export const storageRouter = Router();
-
-storageRouter.use(
-  "/:schemaName",
-  validateRequest(
-    Joi.object({
-      schemaName: Joi.string().required(),
-    }),
-    "params",
-  ),
-);
 
 storageRouter.use(
   asyncHandler(async (req, res, next) => {
@@ -46,6 +36,12 @@ storageRouter.use(
 
 storageRouter.post(
   "/:schemaName/contents",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+    }),
+    body: z.record(z.string()),
+  }),
   asyncHandler(async (req, res, next) => {
     const { schemaName } = req.params;
     const { projectName } = req.app.locals;
@@ -66,6 +62,17 @@ storageRouter.post(
 
 storageRouter.get(
   "/:schemaName/contents",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+    }),
+    query: z.object({
+      page: z.string(),
+      pageLength: z.string(),
+      sort: z.union([z.string(), z.array(z.string())]),
+      order: z.union([z.string(), z.array(z.string())]),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
@@ -89,9 +96,8 @@ storageRouter.get(
               return {};
             }
 
-            const orderOption = (
-              typeof order[index] === "string" ? order[index] : "asc"
-            ) as string;
+            const orderOption =
+              typeof order[index] === "string" ? order[index] : "asc";
 
             return { [sort]: orderOption };
           })
@@ -148,6 +154,12 @@ storageRouter.get(
 
 storageRouter.get(
   "/:schemaName/contents/:contentsId",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+      contentsId: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
@@ -169,6 +181,12 @@ storageRouter.get(
 
 storageRouter.put(
   "/:schemaName/contents/:contentsId",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+      contentsId: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
@@ -189,6 +207,12 @@ storageRouter.put(
 
 storageRouter.delete(
   "/:schemaName/contents/:contentsId",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+      contentsId: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
@@ -196,8 +220,8 @@ storageRouter.delete(
 
     await projectService.deleteContents({
       projectName,
-      schemaName: schemaName as string,
-      contentsIds: [contentsId as string],
+      schemaName: schemaName,
+      contentsIds: [contentsId],
     });
 
     return res.status(200).json({
@@ -208,6 +232,14 @@ storageRouter.delete(
 
 storageRouter.delete(
   "/:schemaName/contents",
+  parseRequest({
+    params: z.object({
+      schemaName: z.string(),
+    }),
+    query: z.object({
+      contentsId: z.union([z.string(), z.array(z.string())]),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
@@ -216,10 +248,8 @@ storageRouter.delete(
 
     await projectService.deleteContents({
       projectName,
-      schemaName: schemaName as string,
-      contentsIds: Array.isArray(contentsId)
-        ? (contentsId as string[])
-        : [contentsId as string],
+      schemaName: schemaName,
+      contentsIds: Array.isArray(contentsId) ? contentsId : [contentsId],
     });
 
     return res.status(200).json({

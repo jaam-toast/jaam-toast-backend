@@ -1,41 +1,32 @@
 import { Router } from "express";
-import Joi from "joi";
-import Ajv from "ajv-draft-04";
+import { z } from "zod";
+import Ajv from "ajv";
 
-import { validateRequest } from "../middlewares/validateRequest";
+import { parseRequest } from "../middlewares/parseRequest";
 import { asyncHandler } from "../utils/asyncHandler";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
-import { TokenClient } from "../../infrastructure/jwtTokenClient";
-import Config from "../../config";
 
 const ajv = new Ajv();
 
 export const schemasRouter = Router();
 
-schemasRouter.use(
-  "/:project_name",
-  validateRequest(
-    Joi.object({
-      project_name: Joi.string().required(),
-    }),
-    "params",
-  ),
-);
-
 schemasRouter.post(
-  "/:project_name/schemas",
-  validateRequest(
-    Joi.object({
-      schema_name: Joi.string().required(),
-      schema: Joi.object({
-        title: Joi.string().required(),
+  "/projects/:projectName/schemas",
+  parseRequest({
+    body: z.object({
+      schemaName: z.string(),
+      schema: z.object({
+        title: z.string(),
       }),
     }),
-    "body",
-  ),
+    params: z.object({
+      projectName: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
-    const { schema_name: schemaName, schema } = req.body;
+    const { schemaName, schema } = req.body;
+    const { projectName } = req.params;
 
     try {
       ajv.compile(schema);
@@ -46,8 +37,6 @@ schemasRouter.post(
     }
 
     const projectService = container.get<ProjectService>("ProjectService");
-    const tokenClient = container.get<TokenClient>("JwtTokenClient");
-    const { project_name: projectName } = req.params;
     const project = await projectService.getByProjectName(projectName);
 
     if (!project) {
@@ -72,33 +61,27 @@ schemasRouter.post(
       schema,
     });
 
-    const storageKey = tokenClient.createToken({
-      payload: { projectName },
-      key: Config.STORAGE_JWT_SECRET,
-    });
-
     return res.status(201).json({
       message: "ok",
-      result: {
-        storageName: schemaName,
-        storageKey,
-      },
     });
   }),
 );
 
 schemasRouter.put(
-  "/:project_name/schemas/:schema_name",
-  validateRequest(
-    Joi.object({
-      schema: Joi.object({
-        title: Joi.string().required(),
+  "/projects/:projectName/schemas/:schemaName",
+  parseRequest({
+    body: z.object({
+      schema: z.object({
+        title: z.string(),
       }),
     }),
-    "body",
-  ),
+    params: z.object({
+      projectName: z.string(),
+      schemaName: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
-    const { schema_name: schemaName } = req.params;
+    const { schemaName, projectName } = req.params;
     const { schema } = req.body;
 
     try {
@@ -110,7 +93,6 @@ schemasRouter.put(
     }
 
     const projectService = container.get<ProjectService>("ProjectService");
-    const { project_name: projectName } = req.params;
     const project = await projectService.getByProjectName(projectName);
 
     if (!project) {
@@ -142,10 +124,16 @@ schemasRouter.put(
 );
 
 schemasRouter.delete(
-  "/:project_name/schemas/:schema_name",
+  "/projects/:projectName/schemas/:schemaName",
+  parseRequest({
+    params: z.object({
+      projectName: z.string(),
+      schemaName: z.string(),
+    }),
+  }),
   asyncHandler(async (req, res, next) => {
     const projectService = container.get<ProjectService>("ProjectService");
-    const { project_name: projectName, schema_name: schemaName } = req.params;
+    const { projectName, schemaName } = req.params;
     const project = await projectService.getByProjectName(projectName);
 
     if (!project) {

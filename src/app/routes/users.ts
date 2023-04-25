@@ -1,8 +1,8 @@
 import { Router } from "express";
-import Joi from "joi";
+import { z } from "zod";
 
+import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
-import { validateRequest } from "../middlewares/validateRequest";
 import { asyncHandler } from "../utils/asyncHandler";
 import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
@@ -13,25 +13,21 @@ const usersRouter = (app: Router) => {
   app.use("/users", verifyAccessToken, route);
 
   route.get(
-    "/:user_id/orgs",
-    validateRequest(
-      Joi.object({
-        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+    "/:userId/orgs",
+    parseRequest({
+      params: z.object({
+        userId: z.string().regex(/^[a-f\d]{24}$/i),
       }),
-      "params",
-    ),
-    validateRequest(
-      Joi.object({
-        githubAccessToken: Joi.string().required(),
+      query: z.object({
+        githubAccessToken: z.string(),
       }),
-      "query",
-    ),
-    asyncHandler(async (req, res, next) => {
+    }),
+    asyncHandler(async (req, res) => {
       const { githubAccessToken } = req.query;
 
       const userService = container.get<UserService>("UserService");
       const orgsData = await userService.getUserGithubOrgs({
-        githubAccessToken: githubAccessToken as string,
+        githubAccessToken,
       });
 
       return res.json({
@@ -42,25 +38,21 @@ const usersRouter = (app: Router) => {
   );
 
   route.get(
-    "/:user_id/repos",
-    validateRequest(
-      Joi.object({
-        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
+    "/:userId/repos",
+    parseRequest({
+      params: z.object({
+        userId: z.string().regex(/^[a-f\d]{24}$/i),
       }),
-      "params",
-    ),
-    validateRequest(
-      Joi.object({
-        githubAccessToken: Joi.string().required(),
+      query: z.object({
+        githubAccessToken: z.string(),
       }),
-      "query",
-    ),
+    }),
     asyncHandler(async (req, res) => {
       const { githubAccessToken } = req.query;
 
       const userService = container.get<UserService>("UserService");
       const sortedUserReposList = await userService.getUserGithubRepos({
-        githubAccessToken: githubAccessToken as string,
+        githubAccessToken,
       });
 
       return res.json({
@@ -71,17 +63,14 @@ const usersRouter = (app: Router) => {
   );
 
   route.get(
-    "/:user_id/projects",
-    validateRequest(
-      Joi.object({
-        user_id: Joi.string()
-          .regex(/^[a-f\d]{24}$/i)
-          .required(),
+    "/:userId/projects",
+    parseRequest({
+      params: z.object({
+        userId: z.string().regex(/^[a-f\d]{24}$/i),
       }),
-      "params",
-    ),
+    }),
     asyncHandler(async (req, res) => {
-      const { user_id: userId } = req.params;
+      const { userId } = req.params;
 
       const userService = container.get<UserService>("UserService");
       const userProjects = await userService.getUserProjects({ userId });
@@ -94,27 +83,23 @@ const usersRouter = (app: Router) => {
   );
 
   route.get(
-    "/:user_id/orgs/:org/repos",
-    validateRequest(
-      Joi.object({
-        user_id: Joi.string().regex(/^[a-f\d]{24}$/i),
-        org: Joi.string().required(),
+    "/:userId/orgs/:org/repos",
+    parseRequest({
+      params: z.object({
+        userId: z.string().regex(/^[a-f\d]{24}$/i),
+        org: z.string(),
       }),
-      "params",
-    ),
-    validateRequest(
-      Joi.object({
-        githubAccessToken: Joi.string().required(),
+      query: z.object({
+        githubAccessToken: z.string(),
       }),
-      "query",
-    ),
+    }),
     asyncHandler(async (req, res, next) => {
       const { githubAccessToken } = req.query;
       const { org } = req.params;
 
       const userService = container.get<UserService>("UserService");
       const organizationReposList = await userService.getUserGithubOrgsRepos({
-        githubAccessToken: githubAccessToken as string,
+        githubAccessToken,
         org,
       });
 
