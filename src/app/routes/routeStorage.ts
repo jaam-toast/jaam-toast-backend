@@ -4,7 +4,7 @@ import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 
 import { parseRequest } from "../middlewares/parseRequest";
-import { asyncHandler } from "../utils/asyncHandler";
+import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
 import { TokenClient } from "../../infrastructure/jwtTokenClient";
@@ -13,7 +13,8 @@ import Config from "../../config";
 export const storageRouter = Router();
 
 storageRouter.use(
-  asyncHandler(async (req, res, next) => {
+  "/storage",
+  handleAsync(async (req, res, next) => {
     const storageKey = req.headers.authorization?.replace("Bearer ", "") ?? "";
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
@@ -35,14 +36,14 @@ storageRouter.use(
 );
 
 storageRouter.post(
-  "/:schemaName/contents",
+  "/storage/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
     }),
     body: z.record(z.string()),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { schemaName } = req.params;
     const { projectName } = req.app.locals;
     const projectService = container.get<ProjectService>("ProjectService");
@@ -61,7 +62,7 @@ storageRouter.post(
 );
 
 storageRouter.get(
-  "/:schemaName/contents",
+  "/storage/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -73,7 +74,7 @@ storageRouter.get(
       order: z.union([z.string(), z.array(z.string())]),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
     const { page, pageLength, sort, order } = req.query;
@@ -84,59 +85,38 @@ storageRouter.get(
       ...(pageLength && { pageLength: Number(pageLength) }),
     };
 
-    let sortOptions: {
+    const sortOptions: {
       [key: string]: string;
-    }[] = [];
+    }[] = (() => {
+      if (Array.isArray(sort)) {
+        if (Array.isArray(order)) {
+          return sort.map((sort, index) => ({
+            [sort]: typeof order[index] === "string" ? order[index] : "asc",
+          }));
+        }
+        if (typeof order === "string") {
+          return sort.map((sort, index) =>
+            index === 0 ? { [sort]: order } : { [sort]: "asc" },
+          );
+        }
+        if (!order) {
+          return sort.map(sort => ({ [sort]: "asc" }));
+        }
+      }
+      if (typeof sort === "string") {
+        if (Array.isArray(order) && typeof order[0] === "string") {
+          return [{ [sort]: order[0] }];
+        }
+        if (typeof order === "string") {
+          return [{ [sort]: order }];
+        }
+        if (!order) {
+          return [{ [sort]: "asc" }];
+        }
+      }
 
-    if (Array.isArray(sort)) {
-      if (Array.isArray(order)) {
-        sortOptions = sort
-          .map((sort, index) => {
-            if (typeof sort !== "string") {
-              return {};
-            }
-
-            const orderOption =
-              typeof order[index] === "string" ? order[index] : "asc";
-
-            return { [sort]: orderOption };
-          })
-          .filter(option => !isEmpty(option));
-      }
-      if (typeof order === "string") {
-        sortOptions = sort
-          .map((sort, index) => {
-            if (typeof sort !== "string") {
-              return {};
-            }
-
-            return index === 0 ? { [sort]: order } : { [sort]: "asc" };
-          })
-          .filter(option => !isEmpty(option));
-      }
-      if (!order) {
-        sortOptions = sort
-          .map(sort => {
-            if (typeof sort !== "string") {
-              return {};
-            }
-
-            return { [sort]: "asc" };
-          })
-          .filter(option => !isEmpty(option));
-      }
-    }
-    if (typeof sort === "string") {
-      if (Array.isArray(order) && typeof order[0] === "string") {
-        sortOptions = [{ [sort]: order[0] }];
-      }
-      if (typeof order === "string") {
-        sortOptions = [{ [sort]: order }];
-      }
-      if (!order) {
-        sortOptions = [{ [sort]: "asc" }];
-      }
-    }
+      return [];
+    })();
 
     const contents = await projectService.getContents({
       projectName,
@@ -153,14 +133,14 @@ storageRouter.get(
 );
 
 storageRouter.get(
-  "/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentsId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
       contentsId: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
     const projectService = container.get<ProjectService>("ProjectService");
@@ -180,14 +160,14 @@ storageRouter.get(
 );
 
 storageRouter.put(
-  "/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentsId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
       contentsId: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
     const projectService = container.get<ProjectService>("ProjectService");
@@ -206,14 +186,14 @@ storageRouter.put(
 );
 
 storageRouter.delete(
-  "/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentsId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
       contentsId: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName, contentsId } = req.params;
     const projectService = container.get<ProjectService>("ProjectService");
@@ -231,7 +211,7 @@ storageRouter.delete(
 );
 
 storageRouter.delete(
-  "/:schemaName/contents",
+  "/storage/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -240,7 +220,7 @@ storageRouter.delete(
       contentsId: z.union([z.string(), z.array(z.string())]),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
     const { contentsId } = req.query;

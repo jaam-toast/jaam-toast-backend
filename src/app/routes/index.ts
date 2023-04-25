@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import usersRouter from "./users";
-import { loginRouter } from "./login";
-import { projectsRouter } from "./projects";
-import { schemasRouter } from "./schemas";
+import usersRouter from "./routeUsers";
+import { loginRouter } from "./routeLogin";
+import { projectsRouter } from "./routeProjects";
+import { schemasRouter } from "./routeSchemas";
 
 export const router = Router();
 

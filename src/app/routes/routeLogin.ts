@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import createError from "http-errors";
 
 import { parseRequest } from "../middlewares/parseRequest";
-import { asyncHandler } from "../utils/asyncHandler";
+import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
 import { OauthClient } from "../../infrastructure/github";
@@ -20,7 +20,7 @@ loginRouter.get(
       code: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { username, userGithubUri, userImage } = req.app.locals;
     const { code } = req.query;
     const oauthClient = new OauthClient();

@@ -3,7 +3,7 @@ import { z } from "zod";
 import Ajv from "ajv";
 
 import { parseRequest } from "../middlewares/parseRequest";
-import { asyncHandler } from "../utils/asyncHandler";
+import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
 
@@ -24,7 +24,7 @@ schemasRouter.post(
       projectName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { schemaName, schema } = req.body;
     const { projectName } = req.params;
 
@@ -80,7 +80,7 @@ schemasRouter.put(
       schemaName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const { schemaName, projectName } = req.params;
     const { schema } = req.body;
 
@@ -131,7 +131,7 @@ schemasRouter.delete(
       schemaName: z.string(),
     }),
   }),
-  asyncHandler(async (req, res, next) => {
+  handleAsync(async (req, res, next) => {
     const projectService = container.get<ProjectService>("ProjectService");
     const { projectName, schemaName } = req.params;
     const project = await projectService.getByProjectName(projectName);

@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import requestLogger from "./middlewares/morganMiddleware";
-import errorHandler from "./middlewares/errorHandler";
-import routes from "./routes";
+import { logRequest } from "./middlewares/logRequest";
+import { handleError } from "./middlewares/handleError";
+import { router } from "./routes";
 
 import type { Express } from "express";
 
@@ -22,15 +22,15 @@ export const createApp = async (): Promise<Express> => {
   app.use(express.urlencoded({ extended: false }));
   app.use(cors());
   app.use(helmet());
-  app.use(requestLogger);
+  app.use(logRequest);
 
-  app.use("/api", routes());
+  app.use("/api", router);
 
   app.use((req, res, next) => {
     res.sendStatus(404);
   });
 
-  app.use(errorHandler);
+  app.use(handleError);
 
   return app;
 };
