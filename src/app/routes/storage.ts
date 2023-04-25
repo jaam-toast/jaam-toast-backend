@@ -5,10 +5,10 @@ import { ObjectId } from "mongodb";
 
 import { asyncHandler } from "../utils/asyncHandler";
 import { validateRequest } from "../middlewares/validateRequest";
-import { container } from "src/domains/@config/di.config";
-import { ProjectService } from "src/domains/projectService";
-import { TokenClient } from "src/infrastructure/jwtTokenClient";
-import Config from "src/config";
+import { container } from "../../domains/@config/di.config";
+import { ProjectService } from "../../domains/projectService";
+import { TokenClient } from "../../infrastructure/jwtTokenClient";
+import Config from "../../config";
 
 export const storageRouter = Router();
 
