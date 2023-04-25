@@ -1,6 +1,6 @@
 {
   "name": "jaam-toast-backend",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "private": true,
   "engines": {
     "node": ">=16.15.0 <=18.12.0"
