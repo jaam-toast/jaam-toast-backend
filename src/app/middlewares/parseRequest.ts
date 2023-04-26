@@ -1,24 +1,28 @@
-import { ZodError, ZodSchema } from "zod";
+import { ZodError, ZodSchema, z } from "zod";
 import createError from "http-errors";
 
 import type { RequestHandler } from "express";
 
 export function parseRequest<
-  RequestParamsType = unknown,
-  RequestBodyType = unknown,
-  RequestQueryType = unknown,
+  RequestParamsType extends ZodSchema = z.ZodUnknown,
+  RequestBodyType extends ZodSchema = z.ZodUnknown,
+  RequestQueryType extends ZodSchema = z.ZodUnknown,
 >(schema: {
-  params?: ZodSchema<RequestParamsType>;
-  body?: ZodSchema<RequestBodyType>;
-  query?: ZodSchema<RequestQueryType>;
-}): RequestHandler<RequestParamsType, any, RequestBodyType, RequestQueryType> {
+  params?: RequestParamsType;
+  body?: RequestBodyType;
+  query?: RequestQueryType;
+}): RequestHandler<
+  z.output<RequestParamsType>,
+  any,
+  z.output<RequestBodyType>,
+  z.output<RequestQueryType>
+> {
   return (req, res, next) => {
     try {
       if (schema.body) {
         schema.body.parseAsync(req.body);
       }
     } catch (error) {
-      // TODO: error message
       if (error instanceof ZodError) {
         next(createError(400, "Request body validation failed."));
       }
@@ -29,7 +33,6 @@ export function parseRequest<
         schema.params.parseAsync(req.params);
       }
     } catch (error) {
-      // TODO: error message
       if (error instanceof ZodError) {
         next(createError(400, "Request path Variables validation failed."));
       }
@@ -40,7 +43,6 @@ export function parseRequest<
         schema.query.parseAsync(req.query);
       }
     } catch (error) {
-      // TODO: error message
       if (error instanceof ZodError) {
         next(createError(400, "Request Query params validation failed."));
       }
