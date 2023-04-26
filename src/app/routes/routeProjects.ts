@@ -41,15 +41,15 @@ projectsRouter.post(
         z.literal("Vue"),
         z.literal("VuePress"),
       ]),
-      installCommand: z.string(),
-      buildCommand: z.string(),
+      installCommand: z.string().default("npm install"),
+      buildCommand: z.string().default("npm run build"),
       envList: z.array(
         z.object({
           key: z.string(),
           value: z.string(),
         }),
       ),
-      nodeVersion: z.string(),
+      nodeVersion: z.string().default("12.18.0"),
     }),
   }),
   handleAsync(async (req, res) => {
