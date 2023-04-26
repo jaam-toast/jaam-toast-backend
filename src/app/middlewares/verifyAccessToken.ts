@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 import Config from "../../config";
 
-import type { User } from "../../repositories/@types";
+import type { User } from "../../types/database";
 import type { RequestHandler } from "express";
 
 export const verifyAccessToken: RequestHandler = (req, res, next) => {

@@ -4,10 +4,6 @@ import "reflect-metadata";
 import { ProjectService } from "../projectService";
 import { BuildService, IBuildService } from "../buildService";
 import { CmsService, ICmsService } from "../cmsService";
-import {
-  IUserRepository,
-  UserRepository,
-} from "../../repositories/userRepository";
 import { UserService } from "../userService";
 import {
   ContentsClient,
@@ -25,7 +21,6 @@ container.bind<ProjectService>("ProjectService").to(ProjectService);
 container.bind<IBuildService>("BuildService").to(BuildService);
 container.bind<ICmsService>("CmsService").to(CmsService);
 container.bind<UserService>("UserService").to(UserService);
-container.bind<IUserRepository>("UserRepository").to(UserRepository);
 container
   .bind<ContentsClient>("MongoDBContentsClient")
   .to(mongodbContentsClient);

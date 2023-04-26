@@ -1,14 +1,15 @@
 import { injectable, inject } from "inversify";
 import { Document } from "mongodb";
 
-import { IUserRepository } from "../../repositories/userRepository";
 import {
   getUserOrganizations,
   getUserOrganizationsRepos,
   getUserRepositories,
 } from "./getUserRepositories";
+import Config from "../../config";
 
-import type { User } from "../../repositories/@types";
+import type { User } from "../../types/database";
+import type { DatabaseClient } from "../../infrastructure/mongodbDatabaseClient";
 
 interface IUserService {
   login(userData: User): Promise<Document | null>;
@@ -55,7 +56,7 @@ interface IUserService {
     userId: string;
     projectName: string;
   }): Promise<void>;
-  deleteUser(): void;
+  deleteUser(deleteUserOptions: { userId: string }): void;
   deleteProject({
     username,
     projectName,
@@ -67,12 +68,58 @@ interface IUserService {
 
 @injectable()
 export class UserService implements IUserService {
-  private userRepository: IUserRepository;
+  private databaseClient: DatabaseClient;
 
   public constructor(
-    @inject("UserRepository") userRepository: IUserRepository,
+    @inject("MongoDBDatabaseClient") mongodbDatabaseClient: DatabaseClient,
   ) {
-    this.userRepository = userRepository;
+    this.databaseClient = mongodbDatabaseClient;
+  }
+
+  private createUserData({ user }: { user: User }) {
+    return this.databaseClient.create<User>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "users",
+      document: user,
+    });
+  }
+
+  private readUserData({
+    userId,
+    filter,
+  }: {
+    userId?: string;
+    filter?: Partial<User>;
+  }) {
+    return this.databaseClient.read<User>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "users",
+      ...(userId && { id: userId }),
+      ...filter,
+    });
+  }
+
+  private updateUserData({
+    userId,
+    user,
+  }: {
+    userId: string;
+    user: Partial<User>;
+  }) {
+    return this.databaseClient.update<User>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "users",
+      id: userId,
+      document: user,
+    });
+  }
+
+  private deleteUserData({ userId }: { userId: string }) {
+    return this.databaseClient.delete({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "users",
+      id: userId,
+    });
   }
 
   public async login({
@@ -81,59 +128,60 @@ export class UserService implements IUserService {
     userImage,
     githubAccessToken,
   }: User) {
-    let userData = await this.userRepository.findOne({ userGithubUri });
+    const [userData] = await this.readUserData({
+      filter: { userGithubUri },
+    });
 
     if (!userData) {
-      userData = await this.userRepository.create({
-        username,
-        userGithubUri,
-        userImage,
-        githubAccessToken,
+      const [userId] = await this.createUserData({
+        user: {
+          username,
+          userGithubUri,
+          userImage,
+          githubAccessToken,
+        },
       });
+      const [newUserData] = await this.readUserData({ userId });
+
+      return newUserData;
     }
 
     return userData;
   }
 
   public async getUserProjects({ userId }: { userId: string }) {
-    const projects = await this.userRepository.findByIdAndGetProjects(userId);
+    const [user] = await this.readUserData({ userId });
 
-    return projects;
+    return user?.projects ?? [];
   }
 
-  public async getUserGithubRepos({
+  public getUserGithubRepos({
     githubAccessToken,
   }: {
     githubAccessToken: string;
   }) {
-    const repos = await getUserRepositories({ githubAccessToken });
-
-    return repos;
+    return getUserRepositories({ githubAccessToken });
   }
 
-  public async getUserGithubOrgs({
+  public getUserGithubOrgs({
     githubAccessToken,
   }: {
     githubAccessToken: string;
   }) {
-    const orgsData = await getUserOrganizations({ githubAccessToken });
-
-    return orgsData;
+    return getUserOrganizations({ githubAccessToken });
   }
 
-  public async getUserGithubOrgsRepos({
+  public getUserGithubOrgsRepos({
     githubAccessToken,
     org,
   }: {
     githubAccessToken: string;
     org: string;
   }) {
-    const orgsData = await getUserOrganizationsRepos({
+    return getUserOrganizationsRepos({
       githubAccessToken,
       org,
     });
-
-    return orgsData;
   }
 
   public async addProject({
@@ -143,10 +191,20 @@ export class UserService implements IUserService {
     userId: string;
     projectName: string;
   }) {
-    await this.userRepository.findByIdAndUpdateProject(userId, projectName);
+    const [user] = await this.readUserData({ userId });
+    const existedProjects = user?.projects ?? [];
+
+    return this.updateUserData({
+      userId,
+      user: { projects: [...existedProjects, projectName] },
+    });
   }
 
-  public async deleteUser() {}
+  public deleteUser({ userId }: { userId: string }) {
+    return this.deleteUserData({
+      userId,
+    });
+  }
 
   public async deleteProject({
     username,
@@ -155,9 +213,20 @@ export class UserService implements IUserService {
     username: string;
     projectName: string;
   }) {
-    await this.userRepository.findOneAndDeleteProject(
-      { username },
-      projectName,
+    const [user] = await this.readUserData({ filter: { username } });
+
+    if (!user?._id) {
+      return;
+    }
+
+    const existedProjects = user?.projects ?? [];
+    const newProjects = existedProjects.filter(
+      project => project !== projectName,
     );
+
+    return this.updateUserData({
+      userId: user._id.toString(),
+      user: { projects: newProjects },
+    });
   }
 }
