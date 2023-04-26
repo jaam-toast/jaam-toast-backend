@@ -5,9 +5,9 @@ import { IBuildService } from "./buildService";
 import { ICmsService } from "./cmsService";
 import Config from "../config";
 
-import type { BaseProject, Project } from "../repositories/@types";
+import type { BaseProject, Project } from "../types/database";
 import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
-import type { DatabaseClient } from "src/infrastructure/mongodbDataBaseClient";
+import type { DatabaseClient } from "../infrastructure/mongodbDatabaseClient";
 import type { ObjectId } from "mongodb";
 
 interface IProjectService {

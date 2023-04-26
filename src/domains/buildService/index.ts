@@ -9,7 +9,7 @@ import Config from "../../config";
 import { BUILD_MESSAGE } from "../../config/constants";
 
 import { ClientFrameworkInput } from "../@types";
-import type { BaseProject } from "../../repositories/@types";
+import type { BaseProject } from "../../types/database";
 
 export interface IBuildService {
   createBuild(options: BaseProject): Promise<{

@@ -1,4 +1,4 @@
-import { Framework } from "../../repositories/@types";
+import { Framework } from "../../types/database";
 
 export const FrameWorkPresets: Record<
   Framework,
