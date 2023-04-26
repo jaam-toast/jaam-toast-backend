@@ -9,7 +9,10 @@ import {
   ContentsClient,
   mongodbContentsClient,
 } from "../../infrastructure/mongodbContentsClient";
-import { TokenClient, jwtTokenClient } from "src/infrastructure/jwtTokenClient";
+import {
+  TokenClient,
+  jwtTokenClient,
+} from "../../infrastructure/jwtTokenClient";
 
 /**
  * 의존성 등록 - identifier(ex "ProjectService" 등 string으로 입력된 곳)를 to("등록할 곳")에 등록합니다.
