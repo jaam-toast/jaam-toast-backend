@@ -4,38 +4,32 @@ import { MongoClient, ObjectId } from "mongodb";
 import Config from "../config";
 
 export interface DatabaseClient {
-  create: <Document extends { [key: string]: unknown }>({
-    collectionName,
-    documents,
-  }: {
+  create: <Document extends { [key: string]: unknown }>(createOption: {
+    dbName: string;
     collectionName: string;
-    documents: Document | Document[];
+    document: Document | Document[];
   }) => Promise<string[]>;
 
-  read: <Document extends { [key: string]: unknown }>({
-    collectionName,
-    documentId,
-  }: {
+  read: <Document extends { [key: string]: unknown }>(readOption: {
+    dbName: string;
     collectionName: string;
-    documentId: string | string[];
+    id?: string | string[];
+    filter?: { [key: string]: string };
   }) => Promise<(Document | null)[]>;
 
-  update: <Document extends { [key: string]: unknown }>({
-    collectionName,
-    documentId,
-    document,
-  }: {
+  update: <Document extends { [key: string]: unknown }>(updateOption: {
+    dbName: string;
     collectionName: string;
-    documentId: string;
-    document: Document;
-  }) => Promise<string>;
+    id?: string | string[];
+    filter?: { [key: string]: string };
+    document: Partial<Document>;
+  }) => Promise<void>;
 
-  delete: ({
-    collectionName,
-    documentIds,
-  }: {
+  delete: (deleteOption: {
+    dbName: string;
     collectionName: string;
-    documentIds: string | string[];
+    id?: string | string[];
+    filter?: { [key: string]: string };
   }) => Promise<void>;
 }
 
@@ -73,69 +67,84 @@ export class mongodbDatabaseClient implements DatabaseClient {
 
   async create<Document extends { [key: string]: unknown }>({
     collectionName,
-    documents,
+    document,
+    dbName,
   }: {
+    dbName: string;
     collectionName: string;
-    documents: Document | Document[];
+    document: Document | Document[];
   }) {
-    if (!Array.isArray(documents)) {
-      try {
+    try {
+      if (!Array.isArray(document)) {
         const { insertedId } = await this.client
-          .db(Config.APP_DB_NAME)
+          .db(dbName)
           .collection(collectionName)
-          .insertOne(documents);
+          .insertOne(document);
         const documentId = insertedId.toString();
 
         return [documentId];
-      } catch (error) {
-        throw error;
       }
-    }
 
-    try {
       const { insertedIds } = await this.client
-        .db(Config.APP_DB_NAME)
+        .db(dbName)
         .collection(collectionName)
-        .insertMany(documents);
-      const documentIds = Object.values(insertedIds).map(insertedId =>
+        .insertMany(document);
+      const documentId = Object.values(insertedIds).map(insertedId =>
         insertedId.toString(),
       );
 
-      return documentIds;
+      return documentId;
     } catch (error) {
       throw error;
     }
   }
 
   async read<Document extends { [key: string]: unknown }>({
+    dbName,
     collectionName,
-    documentId,
+    id,
+    filter,
   }: {
+    dbName: string;
     collectionName: string;
-    documentId: string | string[];
+    id?: string | string[];
+    filter?: { [key: string]: string };
   }): Promise<(Document | null)[]> {
-    if (!Array.isArray(documentId)) {
-      try {
-        const document = await this.client
-          .db(Config.APP_DB_NAME)
-          .collection(collectionName)
-          .findOne<Document>({ _id: new ObjectId(documentId) });
-
-        return [document];
-      } catch (error) {
-        throw error;
-      }
+    if (!!id && !!filter) {
+      throw new Error("Choose the one database option.");
     }
 
     try {
-      const documents = await Promise.all(
-        documentId.map(documentId =>
-          this.client
-            .db(Config.APP_DB_NAME)
-            .collection(collectionName)
-            .findOne<Document>({ _id: new ObjectId(documentId) }),
-        ),
-      );
+      if (Array.isArray(id)) {
+        const documents = await Promise.all(
+          id.map(documentId =>
+            this.client
+              .db(dbName)
+              .collection(collectionName)
+              .findOne<Document>({ _id: new ObjectId(documentId) }),
+          ),
+        );
+
+        return documents;
+      }
+
+      if (typeof id === "string") {
+        const document = !!id
+          ? await this.client
+              .db(dbName)
+              .collection(collectionName)
+              .findOne<Document>({ _id: new ObjectId(id) })
+          : null;
+
+        return [document];
+      }
+
+      const queryFilter = filter ?? {};
+      const documents = await this.client
+        .db(dbName)
+        .collection(collectionName)
+        .find<Document>(queryFilter)
+        .toArray();
 
       return documents;
     } catch (error) {
@@ -144,58 +153,104 @@ export class mongodbDatabaseClient implements DatabaseClient {
   }
 
   async update<Document extends { [key: string]: unknown }>({
+    dbName,
     collectionName,
-    documentId,
+    id,
+    filter,
     document,
   }: {
+    dbName: string;
     collectionName: string;
-    documentId: string;
-    document: Document;
+    id?: string | string[];
+    filter?: { [key: string]: string };
+    document: Partial<Document>;
   }) {
-    try {
-      const { upsertedId } = await this.client
-        .db(Config.APP_DB_NAME)
-        .collection(collectionName)
-        .updateOne({ _id: new ObjectId(documentId) }, { $set: document });
-      const updatedDocumentId = upsertedId.toString();
+    if ((!!id && !!filter) || (!id && !filter)) {
+      throw new Error("Choose the one database option.");
+    }
 
-      return updatedDocumentId;
+    try {
+      if (typeof id === "string") {
+        await this.client
+          .db(dbName)
+          .collection(collectionName)
+          .updateOne({ _id: new ObjectId(id) }, { $set: document });
+
+        return;
+      }
+
+      if (Array.isArray(id)) {
+        await Promise.allSettled(
+          id.map(id =>
+            this.client
+              .db(dbName)
+              .collection(collectionName)
+              .updateOne({ _id: new ObjectId(id) }, { $set: document }),
+          ),
+        );
+
+        return;
+      }
+
+      if (!!filter) {
+        this.client
+          .db(dbName)
+          .collection(collectionName)
+          .updateMany(filter, { $set: document });
+
+        return;
+      }
     } catch (error) {
       throw error;
     }
   }
 
   async delete({
+    dbName,
     collectionName,
-    documentIds,
+    id,
+    filter,
   }: {
+    dbName: string;
     collectionName: string;
-    documentIds: string | string[];
+    id?: string | string[];
+    filter?: { [key: string]: string };
   }) {
-    if (!Array.isArray(documentIds)) {
-      try {
-        await this.client
-          .db(Config.APP_DB_NAME)
-          .collection(collectionName)
-          .deleteOne({ _id: new ObjectId(documentIds) });
-
-        return;
-      } catch (error) {
-        throw error;
-      }
+    if ((!!id && !!filter) || (!id && !filter)) {
+      throw new Error("Choose the one database option.");
     }
 
     try {
-      await Promise.allSettled(
-        documentIds.map(documentId =>
-          this.client
-            .db(Config.APP_DB_NAME)
-            .collection(collectionName)
-            .deleteOne({ _id: new ObjectId(documentId) }),
-        ),
-      );
+      if (Array.isArray(id)) {
+        await Promise.allSettled(
+          id.map(documentId =>
+            this.client
+              .db(dbName)
+              .collection(collectionName)
+              .deleteOne({ _id: new ObjectId(documentId) }),
+          ),
+        );
 
-      return;
+        return;
+      }
+
+      if (typeof id === "string") {
+        await this.client
+          .db(dbName)
+          .collection(collectionName)
+          .deleteOne({ _id: new ObjectId(id) });
+
+        return;
+      }
+
+      if (!!filter) {
+        await this.client
+          .db(dbName)
+          .collection(collectionName)
+          .deleteMany(filter);
+
+        return;
+      }
     } catch (error) {
       throw error;
     }

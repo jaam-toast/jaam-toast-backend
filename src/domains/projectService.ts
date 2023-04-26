@@ -3,10 +3,11 @@ import * as _ from "lodash";
 
 import { IBuildService } from "./buildService";
 import { ICmsService } from "./cmsService";
-import { IProjectRepository } from "../repositories/projectRepository";
+import Config from "../config";
 
 import type { BaseProject, Project } from "../repositories/@types";
 import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
+import type { DatabaseClient } from "src/infrastructure/mongodbDataBaseClient";
 import type { ObjectId } from "mongodb";
 
 interface IProjectService {
@@ -18,11 +19,7 @@ interface IProjectService {
 
   deleteProject({ projectName }: { projectName: string }): Promise<void>;
 
-  addSchema({
-    projectName,
-    schemaName,
-    schema,
-  }: {
+  addSchema(addSchemaOptions: {
     projectName: string;
     schemaName: string;
     schema: {
@@ -30,11 +27,7 @@ interface IProjectService {
     };
   }): Promise<void>;
 
-  updateSchema({
-    projectName,
-    schemaName,
-    schema,
-  }: {
+  updateSchema(updateSchemaOptions: {
     projectName: string;
     schemaName: string;
     schema: {
@@ -42,31 +35,18 @@ interface IProjectService {
     };
   }): Promise<void>;
 
-  deleteSchema({
-    projectName,
-    schemaName,
-  }: {
+  deleteSchema(deleteSchema: {
     projectName: string;
     schemaName: string;
   }): Promise<void>;
 
-  createContents({
-    projectName,
-    schemaName,
-    contentsId,
-    contents,
-  }: {
+  createContents(createContentsOptions: {
     projectName: string;
     schemaName: string;
-    contentsId: string;
-    contents: { [key: string]: unknown };
+    contents: { [key: string]: string };
   }): Promise<void>;
 
-  deleteContents({
-    projectName,
-    schemaName,
-    contentsIds,
-  }: {
+  deleteContents(deleteContentsOptions: {
     projectName: string;
     schemaName: string;
     contentsIds: string[];
@@ -81,11 +61,11 @@ interface IProjectService {
  */
 
 @injectable()
-export class ProjectService {
+export class ProjectService implements IProjectService {
   private buildService: IBuildService;
   private cmsService: ICmsService;
-  private projectRepository: IProjectRepository;
   private contentsClient: ContentsClient;
+  private databaseClient: DatabaseClient;
   /**
    *
    * @param buildService: 의존성 주입
@@ -94,13 +74,52 @@ export class ProjectService {
   public constructor(
     @inject("BuildService") buildService: IBuildService,
     @inject("CmsService") cmsService: ICmsService,
-    @inject("ProjectRepository") projectRepository: IProjectRepository,
+    @inject("MongoDBDatabaseClient") mongodbDatabaseClient: DatabaseClient,
     @inject("MongoDBContentsClient") mongodbContentsClient: ContentsClient,
   ) {
     this.buildService = buildService;
     this.cmsService = cmsService;
-    this.projectRepository = projectRepository;
     this.contentsClient = mongodbContentsClient;
+    this.databaseClient = mongodbDatabaseClient;
+  }
+
+  private createProjectData({ project }: { project: BaseProject }) {
+    return this.databaseClient.create<BaseProject>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "projects",
+      document: project,
+    });
+  }
+
+  private readProjectData({ projectName }: { projectName: string }) {
+    return this.databaseClient.read<Project>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "projects",
+      filter: { projectName },
+    });
+  }
+
+  private updateProjectData({
+    projectName,
+    project,
+  }: {
+    projectName: string;
+    project: Partial<Project>;
+  }) {
+    return this.databaseClient.update<Project>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "projects",
+      filter: { projectName },
+      document: project,
+    });
+  }
+
+  private deleteProjectData({ projectName }: { projectName: string }) {
+    return this.databaseClient.delete({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "projects",
+      filter: { projectName },
+    });
   }
 
   public async createProject(options: BaseProject) {
@@ -115,7 +134,7 @@ export class ProjectService {
         envList,
       } = options;
 
-      await this.projectRepository.create(options);
+      await this.createProjectData({ project: options });
 
       const [{ buildDomain, buildOriginalDomain }, { cmsDomain, cmsToken }] =
         await Promise.all([
@@ -133,28 +152,38 @@ export class ProjectService {
           }),
         ]);
 
-      await this.updateProject({
+      await this.updateProjectData({
         projectName,
-        buildDomain,
-        buildOriginalDomain,
-        cmsDomain,
-        cmsToken,
+        project: {
+          projectName,
+          buildDomain,
+          buildOriginalDomain,
+          cmsDomain,
+          cmsToken,
+        },
       });
     } catch (error) {
       throw error;
     }
   }
 
-  public async updateProject(options: Partial<Project>) {
-    await this.projectRepository.findOneAndUpdate(
-      options.projectName as string,
-      _.omit(options, ["projectName"]),
-    );
+  public async updateProject({
+    projectName,
+    ...updateOptions
+  }: Partial<Project>) {
+    if (!projectName) {
+      return;
+    }
+
+    await this.updateProjectData({
+      projectName,
+      project: updateOptions,
+    });
   }
 
   public async getByProjectName(projectName: string): Promise<Project | null> {
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
 
       return project;
     } catch (error) {
@@ -163,7 +192,7 @@ export class ProjectService {
   }
 
   public async deleteProject({ projectName }: { projectName: string }) {
-    await this.projectRepository.findOneAndDelete({ projectName });
+    await this.deleteProjectData({ projectName });
   }
 
   public async addSchema({
@@ -186,15 +215,22 @@ export class ProjectService {
       throw new Error("Cannot create contents's storage.");
     }
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
+
+      if (!project) {
+        throw new Error();
+      }
+
       const updatedSchemaList = project.schemaList.concat({
         schemaName,
         schema,
       });
 
-      await this.projectRepository.updateSnapshot(projectName, {
-        ...project,
-        schemaList: updatedSchemaList,
+      await this.updateProjectData({
+        projectName,
+        project: {
+          schemaList: updatedSchemaList,
+        },
       });
     } catch (error) {
       throw new Error("Cannot update user info.");
@@ -223,7 +259,12 @@ export class ProjectService {
     }
 
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
+
+      if (!project) {
+        throw new Error();
+      }
+
       const updatedSchemaList = project.schemaList.map(projectSchema => {
         if (projectSchema.schemaName !== schemaName) {
           return projectSchema;
@@ -235,9 +276,11 @@ export class ProjectService {
         };
       });
 
-      await this.projectRepository.updateSnapshot(projectName, {
-        ...project,
-        schemaList: updatedSchemaList,
+      await this.updateProjectData({
+        projectName,
+        project: {
+          schemaList: updatedSchemaList,
+        },
       });
     } catch (error) {
       throw new Error("Cannot update user info.");
@@ -261,21 +304,28 @@ export class ProjectService {
     }
 
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
+
+      if (!project) {
+        throw new Error();
+      }
+
       const updatedSchemaList = project.schemaList.filter(
         projectSchema => projectSchema.schemaName !== schemaName,
       );
 
-      await this.projectRepository.updateSnapshot(projectName, {
-        ...project,
-        schemaList: updatedSchemaList,
+      await this.updateProjectData({
+        projectName,
+        project: {
+          schemaList: updatedSchemaList,
+        },
       });
     } catch (error) {
       throw new Error("Cannot update user info.");
     }
   }
 
-  async createContents({
+  public async createContents({
     projectName,
     schemaName,
     contents,
@@ -285,7 +335,7 @@ export class ProjectService {
     contents: { [key: string]: string };
   }) {
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
 
       if (!project) {
         throw new Error("Cannot find project");
@@ -296,7 +346,7 @@ export class ProjectService {
         throw new Error("Cannot find schema");
       }
 
-      return this.contentsClient.createContents({
+      await this.contentsClient.createContents({
         projectName,
         schemaName,
         contents,
@@ -306,7 +356,7 @@ export class ProjectService {
     }
   }
 
-  async updateContents({
+  public async updateContents({
     projectName,
     schemaName,
     contentsId,
@@ -318,7 +368,7 @@ export class ProjectService {
     contents: unknown;
   }) {
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
 
       if (!project) {
         throw new Error("Cannot find project");
@@ -340,7 +390,7 @@ export class ProjectService {
     }
   }
 
-  async deleteContents({
+  public async deleteContents({
     projectName,
     schemaName,
     contentsIds,
@@ -350,7 +400,7 @@ export class ProjectService {
     contentsIds: string[];
   }) {
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
 
       if (!project) {
         throw new Error("Cannot find project");
@@ -371,7 +421,7 @@ export class ProjectService {
     }
   }
 
-  async getContents({
+  public async getContents({
     projectName,
     schemaName,
     pagination,
@@ -392,7 +442,7 @@ export class ProjectService {
     };
   }) {
     try {
-      const project = await this.projectRepository.getSnapshot(projectName);
+      const [project] = await this.readProjectData({ projectName });
 
       if (!project) {
         throw new Error("Cannot find project");
