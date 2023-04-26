@@ -1,13 +1,10 @@
-import mongoose from "mongoose";
-
 import { mongodbContentsClient } from "./mongodbContentsClient";
 import { Logger as log } from "../utils/Logger";
+import { mongodbDatabaseClient } from "./mongodbDatabaseClient";
 
 export async function connectDB(databaseUrl: string) {
   try {
-    mongoose.set("strictQuery", false);
-
-    await mongoose.connect(databaseUrl);
+    await mongodbDatabaseClient.connect();
     await mongodbContentsClient.connect();
 
     log.debug("🌱 MongoDB connected!");

@@ -1,8 +1,8 @@
 import {
   ChangeStreamInsertDocument,
   ChangeStreamUpdateDocument,
+  ObjectId,
 } from "mongodb";
-import { Types } from "mongoose";
 import { Env } from ".";
 
 export type StreamType =
@@ -10,16 +10,16 @@ export type StreamType =
   | ChangeStreamUpdateDocument<Project>;
 
 export type User = {
-  _id?: Types.ObjectId;
+  _id?: ObjectId;
   username: string;
   userGithubUri: string;
   userImage?: string;
   githubAccessToken?: string;
-  projects?: Types.ObjectId[];
+  projects?: ObjectId[];
 };
 
 export type Project = {
-  _id?: Types.ObjectId;
+  _id?: ObjectId;
   space: string;
   repoName: string;
   repoCloneUrl: string;
@@ -33,7 +33,7 @@ export type Project = {
   webhookId: number;
   lastCommitMessage: string;
   lastCommitHash: string;
-  deployments?: Types.ObjectId[];
+  deployments?: ObjectId[];
   instanceId?: string;
   recordId?: string;
   deployedUrl?: string;
@@ -42,7 +42,7 @@ export type Project = {
 };
 
 export type Deployment = {
-  _id?: Types.ObjectId;
+  _id?: ObjectId;
   buildingLog?: (string | undefined)[] | undefined;
   deployStatus?: string;
   lastCommitMessage?: string;
@@ -50,14 +50,14 @@ export type Deployment = {
   projectUpdatedAt?: string;
 };
 
-export type IdParameter = Types.ObjectId | string;
+export type IdParameter = ObjectId | string;
 
 export type UserOptions = {
   username?: string;
   userGithubUri?: string;
   userImage?: string;
   githubAccessToken?: string;
-  projects?: Types.ObjectId[];
+  projects?: ObjectId[];
 };
 
 export type ProjectOptions = {
@@ -71,7 +71,7 @@ export type ProjectOptions = {
   buildCommand?: string;
   buildType?: string;
   envList?: Env[];
-  deployments?: Types.ObjectId[];
+  deployments?: ObjectId[];
   webhookId?: number;
   lastCommitMessage?: string;
   lastCommitHash?: string;
