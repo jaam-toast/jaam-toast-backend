@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { ObjectId } from "mongodb";
 
 export type Framework =
   | "CreateReactApp"
@@ -61,13 +61,13 @@ export type OptionalProject = {
   status?: ProjectStatus.pending | ProjectStatus.success | ProjectStatus.fail;
 };
 
-export type Project = { _id?: Types.ObjectId | string } & BaseProject &
+export type Project = { _id?: ObjectId | string } & BaseProject &
   OptionalProject;
 
-export type IdParameter = Types.ObjectId | string;
+export type IdParameter = ObjectId | string;
 
 export type User = {
-  _id?: Types.ObjectId | string;
+  _id?: ObjectId | string;
   username: string;
   userGithubUri: string;
   userImage?: string;
