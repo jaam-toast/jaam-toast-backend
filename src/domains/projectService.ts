@@ -9,6 +9,7 @@ import Config from "../config";
 import type { BaseProject, Project } from "../types/database";
 import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
 import type { DatabaseClient } from "../infrastructure/mongodbDatabaseClient";
+import type { Schema, SchemaClient } from "src/infrastructure/ajvSchemaClient";
 import type { ObjectId } from "mongodb";
 
 interface IProjectService {
@@ -67,6 +68,7 @@ export class ProjectService implements IProjectService {
   private cmsService: ICmsService;
   private contentsClient: ContentsClient;
   private databaseClient: DatabaseClient;
+  private schemaClient: SchemaClient;
   /**
    *
    * @param buildService: 의존성 주입
@@ -77,11 +79,13 @@ export class ProjectService implements IProjectService {
     @inject("CmsService") cmsService: ICmsService,
     @inject("MongoDBDatabaseClient") mongodbDatabaseClient: DatabaseClient,
     @inject("MongoDBContentsClient") mongodbContentsClient: ContentsClient,
+    @inject("AjvSchemaClient") ajvSchemaClient: SchemaClient,
   ) {
     this.buildService = buildService;
     this.cmsService = cmsService;
     this.contentsClient = mongodbContentsClient;
     this.databaseClient = mongodbDatabaseClient;
+    this.schemaClient = ajvSchemaClient;
   }
 
   private createProjectData({ project }: { project: BaseProject }) {
@@ -123,19 +127,29 @@ export class ProjectService implements IProjectService {
     });
   }
 
-  public async createProject(options: BaseProject) {
+  public async createProject({
+    repoName,
+    repoCloneUrl,
+    projectName,
+    framework,
+    installCommand,
+    buildCommand,
+    envList,
+    storageKey,
+  }: BaseProject) {
     try {
-      const {
-        repoName,
-        repoCloneUrl,
-        projectName,
-        framework,
-        installCommand,
-        buildCommand,
-        envList,
-      } = options;
-
-      await this.createProjectData({ project: options });
+      await this.createProjectData({
+        project: {
+          repoName,
+          repoCloneUrl,
+          projectName,
+          framework,
+          installCommand,
+          buildCommand,
+          envList,
+          storageKey,
+        },
+      });
 
       const [{ buildDomain, buildOriginalDomain }, { cmsDomain, cmsToken }] =
         await Promise.all([
@@ -147,6 +161,7 @@ export class ProjectService implements IProjectService {
             installCommand,
             buildCommand,
             envList,
+            storageKey,
           }),
           this.cmsService.createApi({
             projectName,
@@ -203,10 +218,18 @@ export class ProjectService implements IProjectService {
   }: {
     projectName: string;
     schemaName: string;
-    schema: {
-      title: string;
-    };
+    schema: Schema;
   }) {
+    const isValidated = this.schemaClient.validateSchema({
+      schema,
+    });
+
+    if (!isValidated) {
+      throw new Error(
+        "The schema field is not of JSON Schema or failed validation.",
+      );
+    }
+
     try {
       await this.contentsClient.createStorage({
         projectName,
@@ -215,6 +238,7 @@ export class ProjectService implements IProjectService {
     } catch (error) {
       throw new Error("Cannot create contents's storage.");
     }
+
     try {
       const [project] = await this.readProjectData({ projectName });
 
@@ -245,18 +269,16 @@ export class ProjectService implements IProjectService {
   }: {
     projectName: string;
     schemaName: string;
-    schema: {
-      title: string;
-    };
+    schema: Schema;
   }) {
-    try {
-      await this.contentsClient.setStorageSchema({
-        projectName,
-        schemaName,
-        jsonSchema: schema,
-      });
-    } catch (error) {
-      throw new Error("Cannot update contents's storage.");
+    const isValidated = this.schemaClient.validateSchema({
+      schema,
+    });
+
+    if (!isValidated) {
+      throw new Error(
+        "The schema field is not of JSON Schema or failed validation.",
+      );
     }
 
     try {
@@ -351,6 +373,11 @@ export class ProjectService implements IProjectService {
         throw new Error("Cannot find schema");
       }
 
+      this.schemaClient.validateData({
+        schema: schemaData.schema,
+        data: contents,
+      });
+
       await this.contentsClient.createContents({
         projectName,
         schemaName,
@@ -391,6 +418,11 @@ export class ProjectService implements IProjectService {
       if (!schemaData) {
         throw new Error("Cannot find schema");
       }
+
+      this.schemaClient.validateData({
+        schema: schemaData.schema,
+        data: contents,
+      });
 
       return this.contentsClient.updateContents({
         projectName,
