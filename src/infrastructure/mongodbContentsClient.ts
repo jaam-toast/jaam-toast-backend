@@ -9,73 +9,38 @@ import {
 
 import Config from "../config";
 export interface ContentsClient {
-  createStorage: ({
-    jsonSchema,
-    projectName,
-  }: {
+  createStorage: (createStorageOptions: {
     jsonSchema: {
       title: string;
     };
     projectName: string;
   }) => Promise<void>;
 
-  setStorageSchema: ({
-    projectName,
-    schemaName,
-    jsonSchema,
-  }: {
-    projectName: string;
-    schemaName: string;
-    jsonSchema: {};
-  }) => Promise<void>;
-
-  deleteStorage: ({
-    projectName,
-    schemaName,
-  }: {
+  deleteStorage: (deleteStorageOptions: {
     projectName: string;
     schemaName: string;
   }) => Promise<void>;
 
-  createContents: ({
-    projectName,
-    schemaName,
-    contents,
-  }: {
+  createContents: (createContentsOptions: {
     projectName: string;
     schemaName: string;
     contents: { [key: string]: string };
   }) => Promise<InsertOneResult<Document>>;
 
-  updateContents: ({
-    projectName,
-    schemaName,
-    contentsId,
-    contents,
-  }: {
+  updateContents: (updateContentsOptions: {
     projectName: string;
     schemaName: string;
     contentsId: string;
     contents: unknown;
   }) => Promise<void>;
 
-  deleteContents: ({
-    projectName,
-    schemaName,
-    contentsIds,
-  }: {
+  deleteContents: (deleteContentsOptions: {
     projectName: string;
     schemaName: string;
     contentsIds: string[];
   }) => Promise<void>;
 
-  getContents: ({
-    projectName,
-    schemaName,
-    pagination,
-    sort,
-    filter,
-  }: {
+  getContents: (getContentsOptions: {
     projectName: string;
     schemaName: string;
     pagination?: {
@@ -133,32 +98,7 @@ export class mongodbContentsClient implements ContentsClient {
     projectName: string;
   }) {
     try {
-      await this.client.db(projectName).createCollection(jsonSchema.title, {
-        validator: {
-          $jsonSchema: jsonSchema,
-        },
-      });
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async setStorageSchema({
-    projectName,
-    schemaName,
-    jsonSchema,
-  }: {
-    projectName: string;
-    schemaName: string;
-    jsonSchema: {};
-  }) {
-    try {
-      await this.client.db(projectName).command({
-        collMod: schemaName,
-        validator: {
-          $jsonSchema: jsonSchema,
-        },
-      });
+      await this.client.db(projectName).createCollection(jsonSchema.title);
     } catch (error) {
       throw error;
     }
