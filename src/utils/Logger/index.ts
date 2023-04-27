@@ -127,7 +127,7 @@ export class Logger extends Observer {
 
   /* logging methods */
   static build(...messages: LogMessage[]) {
-    if (Config.CLIENT_OPTIONS.debug) {
+    if (Config.LOGGER_OPTIONS.debug) {
       Logger.console(LogType.Deployment, ...messages);
     }
 
