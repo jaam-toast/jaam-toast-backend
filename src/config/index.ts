@@ -29,7 +29,7 @@ const Config = {
   MAX_NUMBER_PER_PAGE: 20,
 
   LOGGER_OPTIONS: {
-    debug: true,
+    debug: !!parseInt(process.env.DEBUG!),
   },
   // LOG_FILTERS: {
   //   verbose: " ",
