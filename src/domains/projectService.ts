@@ -128,6 +128,7 @@ export class ProjectService implements IProjectService {
   }
 
   public async createProject({
+    space,
     repoName,
     repoCloneUrl,
     projectName,
@@ -140,6 +141,7 @@ export class ProjectService implements IProjectService {
     try {
       await this.createProjectData({
         project: {
+          space,
           repoName,
           repoCloneUrl,
           projectName,
@@ -176,6 +178,7 @@ export class ProjectService implements IProjectService {
           buildOriginalDomain,
           cmsDomain,
           cmsToken,
+          schemaList: [],
         },
       });
     } catch (error) {
@@ -504,7 +507,7 @@ export class ProjectService implements IProjectService {
         throw new Error("Cannot find schema");
       }
     } catch (error) {
-      throw new Error("Cannot get contents");
+      throw error;
     }
 
     const sortQueries = sort?.map(sortOption => {

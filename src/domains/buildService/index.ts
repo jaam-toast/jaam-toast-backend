@@ -8,9 +8,7 @@ import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-import { ClientFrameworkInput } from "../@types";
 import type { BaseProject } from "../../types/database";
-
 export interface IBuildService {
   createBuild(options: BaseProject): Promise<{
     buildDomain: string;
@@ -49,7 +47,7 @@ export class BuildService implements IBuildService {
       const buildResourceLocation = await createBuildResource({
         repoName,
         repoCloneUrl,
-        framework: ClientFrameworkInput[framework],
+        framework,
         installCommand,
         buildCommand,
       });

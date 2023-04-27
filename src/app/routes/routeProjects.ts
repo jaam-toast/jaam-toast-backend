@@ -14,9 +14,25 @@ import { handleAsync } from "../utils/handleAsync";
 import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
 
+const CLIENT_FRAMEWORK_INFO = {
+  "Create React App": "CreateReactApp",
+  "React Static": "ReactStatic",
+  "Next.js (Static HTML Export)": "NextJs",
+  "Nuxt.js": "NuxtJs",
+  "Angular (Angular CLI)": "Angular",
+  Astro: "Astro",
+  Gatsby: "Gatsby",
+  GitBook: "GitBook",
+  Jekyll: "Jekyll",
+  Remix: "Remix",
+  Svelte: "Svelte",
+  Vue: "Vue",
+  VuePress: "VuePress",
+} as const;
+
 export const projectsRouter = Router();
 
-projectsRouter.use(verifyAccessToken);
+projectsRouter.use("/projects", verifyAccessToken);
 
 projectsRouter.post(
   "/projects",
@@ -29,11 +45,11 @@ projectsRouter.post(
       projectName: z.string(),
       projectUpdatedAt: z.string(),
       framework: z.union([
-        z.literal("CreateReactApp"),
-        z.literal("ReactStatic"),
-        z.literal("NextJs"),
-        z.literal("NuxtJs"),
-        z.literal("Angular"),
+        z.literal("Create React App"),
+        z.literal("React Static"),
+        z.literal("Next.js (Static HTML Export)"),
+        z.literal("Nuxt.js"),
+        z.literal("Angular (Angular CLI)"),
         z.literal("Astro"),
         z.literal("Gatsby"),
         z.literal("GitBook"),
@@ -80,6 +96,7 @@ projectsRouter.post(
       await projectService.createProject({
         ...createProjectOptions,
         storageKey,
+        framework: CLIENT_FRAMEWORK_INFO[createProjectOptions.framework],
       });
       await userService.addProject({ userId, projectName });
     } catch (error) {
@@ -105,9 +122,17 @@ projectsRouter.get(
       return next(createError(400, "Project data does not exist."));
     }
 
+    const [framework] =
+      Object.entries(CLIENT_FRAMEWORK_INFO).find(
+        ([clientValue, serverValue]) => serverValue === project.framework,
+      ) ?? [];
+
     return res.json({
       message: "ok",
-      result: project,
+      result: {
+        ...project,
+        framework,
+      },
     });
   }),
 );

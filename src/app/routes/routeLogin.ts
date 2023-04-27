@@ -72,6 +72,8 @@ loginRouter.get(
       name: userData?.username,
       githubUri: userData?.userGithubUri,
       image: userData?.userImage,
+      accessToken,
+      githubAccessToken,
     });
 
     const secure = Config.NODE_ENV === "production";
