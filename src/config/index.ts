@@ -28,7 +28,7 @@ const Config = {
   STORAGE_JWT_SECRET: process.env.STORAGE_JWT_SECRET!,
   MAX_NUMBER_PER_PAGE: 20,
 
-  CLIENT_OPTIONS: {
+  LOGGER_OPTIONS: {
     debug: true,
   },
   // LOG_FILTERS: {

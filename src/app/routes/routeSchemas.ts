@@ -10,10 +10,26 @@ export const schemasRouter = Router();
 
 const schemaProperty = z.object({
   type: z.string(),
-  minLength: z.number().optional(),
-  maxLength: z.number().optional(),
-  minimum: z.number().optional(),
-  maximum: z.number().optional(),
+  minLength: z
+    .string()
+    .refine(val => !!Number(val))
+    .transform(val => Number(val))
+    .optional(),
+  maxLength: z
+    .string()
+    .refine(val => !!Number(val))
+    .transform(val => Number(val))
+    .optional(),
+  minimum: z
+    .string()
+    .refine(val => !!Number(val))
+    .transform(val => Number(val))
+    .optional(),
+  maximum: z
+    .string()
+    .refine(val => !!Number(val))
+    .transform(val => Number(val))
+    .optional(),
   description: z.string().optional(),
   format: z.string().optional(),
 });

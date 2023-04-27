@@ -66,17 +66,19 @@ storageRouter.get(
     params: z.object({
       schemaName: z.string(),
     }),
-    query: z.object({
-      page: z.string(),
-      pageLength: z.string(),
-      sort: z.union([z.string(), z.array(z.string())]),
-      order: z.union([z.string(), z.array(z.string())]),
-    }),
+    query: z
+      .object({
+        page: z.string().optional(),
+        pageLength: z.string().optional(),
+        sort: z.union([z.string(), z.array(z.string())]).optional(),
+        order: z.union([z.string(), z.array(z.string())]).optional(),
+      })
+      .optional(),
   }),
   handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
-    const { page, pageLength, sort, order } = req.query;
+    const { page, pageLength, sort, order } = req?.query ?? {};
     const projectService = container.get<ProjectService>("ProjectService");
 
     const pagination = {
