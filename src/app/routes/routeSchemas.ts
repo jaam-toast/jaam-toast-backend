@@ -8,6 +8,16 @@ import { ProjectService } from "../../domains/projectService";
 
 export const schemasRouter = Router();
 
+const schemaProperty = z.object({
+  type: z.string(),
+  minLength: z.number().optional(),
+  maxLength: z.number().optional(),
+  minimum: z.number().optional(),
+  maximum: z.number().optional(),
+  description: z.string().optional(),
+  format: z.string().optional(),
+});
+
 schemasRouter.post(
   "/projects/:projectName/schemas",
   parseRequest({
@@ -15,6 +25,10 @@ schemasRouter.post(
       schemaName: z.string(),
       schema: z.object({
         title: z.string(),
+        description: z.string().optional(),
+        type: z.literal("object"),
+        properties: z.record(schemaProperty),
+        required: z.array(z.string()).optional(),
       }),
     }),
     params: z.object({
@@ -61,6 +75,10 @@ schemasRouter.put(
     body: z.object({
       schema: z.object({
         title: z.string(),
+        description: z.string().optional(),
+        type: z.literal("object"),
+        properties: z.record(schemaProperty),
+        required: z.array(z.string()).optional(),
       }),
     }),
     params: z.object({
