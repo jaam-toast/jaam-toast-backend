@@ -2,7 +2,6 @@ import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
 
 import Config from "../config";
-import { isEmpty } from "lodash";
 
 export interface DatabaseClient {
   create: <Document extends { [key: string]: unknown }>(createOption: {
@@ -109,17 +108,14 @@ export class mongodbDatabaseClient implements DatabaseClient {
     dbName: string;
     collectionName: string;
     id?: string | string[];
-    // TODO.. type
-    // filter?: { [key: string]: string };
-    filter?: any;
+    filter?: { [key: string]: string };
   }): Promise<(Document | null)[]> {
-    if (!!id && !isEmpty(filter)) {
+    if (!!id && !!filter) {
       throw new Error("Choose the one database option.");
     }
 
     try {
       if (Array.isArray(id)) {
-        console.log("hi", id);
         const documents = await Promise.all(
           id.map(documentId =>
             this.client
@@ -152,7 +148,6 @@ export class mongodbDatabaseClient implements DatabaseClient {
 
       return documents;
     } catch (error) {
-      console.log("error", error);
       throw error;
     }
   }
