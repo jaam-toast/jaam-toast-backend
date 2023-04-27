@@ -51,7 +51,6 @@ loginRouter.get(
     }
 
     const userService = container.get<UserService>("UserService");
-
     const userData = await userService.login({
       username: githubData.login,
       userGithubUri: githubData.url,
@@ -64,26 +63,31 @@ loginRouter.get(
       userGithubUri: userData?.userGithubUri,
       userImage: userData?.userImage,
     };
-
     const accessToken = jwt.sign(userPayload, Config.JWT_SECRET, {
       expiresIn: "1d",
     });
 
-    // TODO - cookie 수정
-    const { referer } = req.headers;
     const loginData = JSON.stringify({
       id: userData?._id,
       name: userData?.username,
       githubUri: userData?.userGithubUri,
       image: userData?.userImage,
-      githubAccessToken,
-      accessToken,
     });
 
+    const secure = Config.NODE_ENV === "production";
+    const cookieOptions = {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+      secure,
+    } as const;
+
+    const { referer } = req.headers;
+
     return res
-      .cookie("loginData", loginData, {
-        maxAge: 24 * 60 * 60 * 1000,
-      })
+      .cookie("githubAccessToken", githubAccessToken, cookieOptions)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("loginData", loginData, cookieOptions)
       .redirect(referer ?? Config.CLIENT_URL);
   }),
 );
