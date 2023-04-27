@@ -39,6 +39,7 @@ export type BaseProject = {
   installCommand: string;
   buildCommand: string;
   envList: Env[];
+  storageKey: string;
 };
 
 export type OptionalProject = {

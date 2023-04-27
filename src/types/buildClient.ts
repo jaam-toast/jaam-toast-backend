@@ -1,4 +1,4 @@
-import { CreateProjectDefaultOptions } from "./db";
+import { CreateProjectDefaultOptions } from "./collection";
 
 type BuildClientParams = {
   projectId: string;

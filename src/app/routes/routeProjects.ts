@@ -8,9 +8,11 @@ import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { BUILD_MESSAGE } from "../../config/constants";
 import { ProjectService } from "../../domains/projectService";
 import { UserService } from "../../domains/userService";
+import { TokenClient } from "../../infrastructure/jwtTokenClient";
 import { container } from "../../domains/@config/di.config";
 import { handleAsync } from "../utils/handleAsync";
 import { Logger as log } from "../../utils/Logger";
+import Config from "../../config";
 
 export const projectsRouter = Router();
 
@@ -56,9 +58,18 @@ projectsRouter.post(
     const projectOptions = req.body;
     const { projectName, userId } = projectOptions;
 
+    const tokenClient = container.get<TokenClient>("JwtTokenClient");
+    const storageKey = tokenClient.createToken({
+      payload: { projectName },
+      key: Config.STORAGE_JWT_SECRET,
+    });
+
     res.status(201).json({
       message: "ok",
-      result: projectName,
+      result: {
+        projectName,
+        storageKey,
+      },
     });
 
     const projectService = container.get<ProjectService>("ProjectService");
@@ -66,7 +77,10 @@ projectsRouter.post(
     const createProjectOptions = omit(projectOptions, ["userId"]);
 
     try {
-      await projectService.createProject(createProjectOptions);
+      await projectService.createProject({
+        ...createProjectOptions,
+        storageKey,
+      });
       await userService.addProject({ userId, projectName });
     } catch (error) {
       log.serverError(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
