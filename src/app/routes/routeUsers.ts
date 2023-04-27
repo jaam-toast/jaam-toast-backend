@@ -7,7 +7,7 @@ import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../domains/@config/di.config";
 import { UserService } from "../../domains/userService";
 
-const usersRouter = Router();
+export const usersRouter = Router();
 
 usersRouter.use("/users", verifyAccessToken);
 
@@ -108,5 +108,3 @@ usersRouter.get(
     });
   }),
 );
-
-export default usersRouter;
