@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { z } from "zod";
-import { isEmpty } from "lodash";
 import { ObjectId } from "mongodb";
 
 import { parseRequest } from "../middlewares/parseRequest";
@@ -166,6 +165,7 @@ storageRouter.put(
       schemaName: z.string(),
       contentsId: z.string(),
     }),
+    body: z.record(z.unknown()),
   }),
   handleAsync(async (req, res, next) => {
     const { projectName } = req.app.locals;

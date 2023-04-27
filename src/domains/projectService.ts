@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
 import * as _ from "lodash";
+import { formatISO } from "date-fns";
 
 import { IBuildService } from "./buildService";
 import { ICmsService } from "./cmsService";
@@ -336,20 +337,28 @@ export class ProjectService implements IProjectService {
   }) {
     try {
       const [project] = await this.readProjectData({ projectName });
+      const createdAt = formatISO(new Date());
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (
-        !project.schemaList.find(schema => schema.schemaName === schemaName)
-      ) {
+
+      const schemaData = project.schemaList.find(
+        schema => schema.schemaName === schemaName,
+      );
+
+      if (!schemaData) {
         throw new Error("Cannot find schema");
       }
 
       await this.contentsClient.createContents({
         projectName,
         schemaName,
-        contents,
+        contents: {
+          ...contents,
+          _createdAt: createdAt,
+          _updatedAt: createdAt,
+        },
       });
     } catch (error) {
       throw new Error("Cannot create contents");
@@ -365,17 +374,21 @@ export class ProjectService implements IProjectService {
     projectName: string;
     schemaName: string;
     contentsId: string;
-    contents: unknown;
+    contents: { [key: string]: unknown };
   }) {
     try {
       const [project] = await this.readProjectData({ projectName });
+      const updatedAt = formatISO(new Date());
 
       if (!project) {
         throw new Error("Cannot find project");
       }
-      if (
-        !project.schemaList.find(schema => schema.schemaName === schemaName)
-      ) {
+
+      const schemaData = project.schemaList.find(
+        schema => schema.schemaName === schemaName,
+      );
+
+      if (!schemaData) {
         throw new Error("Cannot find schema");
       }
 
@@ -383,7 +396,10 @@ export class ProjectService implements IProjectService {
         projectName,
         schemaName,
         contentsId,
-        contents,
+        contents: {
+          ...contents,
+          _updatedAt: updatedAt,
+        },
       });
     } catch (error) {
       throw new Error("Cannot update contents");
