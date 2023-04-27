@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { Schema } from "src/infrastructure/ajvSchemaClient";
 
 export type Framework =
   | "CreateReactApp"
@@ -50,7 +51,7 @@ export type OptionalProject = {
 
   schemaList: {
     schemaName: string;
-    schema: {};
+    schema: Schema;
   }[];
   contentList?: string[];
   assetStorageUrl?: string;
