@@ -12,7 +12,7 @@ import {
 import {
   DatabaseClient,
   mongodbDatabaseClient,
-} from "src/infrastructure/mongodbDatabaseClient";
+} from "../../infrastructure/mongodbDatabaseClient";
 import {
   TokenClient,
   jwtTokenClient,
