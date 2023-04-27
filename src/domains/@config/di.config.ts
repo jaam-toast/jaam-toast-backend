@@ -10,6 +10,10 @@ import {
   mongodbContentsClient,
 } from "../../infrastructure/mongodbContentsClient";
 import {
+  DatabaseClient,
+  mongodbDatabaseClient,
+} from "src/infrastructure/mongodbDatabaseClient";
+import {
   TokenClient,
   jwtTokenClient,
 } from "../../infrastructure/jwtTokenClient";
@@ -27,6 +31,9 @@ container.bind<UserService>("UserService").to(UserService);
 container
   .bind<ContentsClient>("MongoDBContentsClient")
   .to(mongodbContentsClient);
+container
+  .bind<DatabaseClient>("MongoDBDatabaseClient")
+  .to(mongodbDatabaseClient);
 container.bind<TokenClient>("JwtTokenClient").to(jwtTokenClient);
 
 export { container };
