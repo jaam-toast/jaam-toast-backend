@@ -1,13 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
-import Ajv from "ajv";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../domains/@config/di.config";
 import { ProjectService } from "../../domains/projectService";
-
-const ajv = new Ajv();
 
 export const schemasRouter = Router();
 
@@ -27,15 +24,6 @@ schemasRouter.post(
   handleAsync(async (req, res, next) => {
     const { schemaName, schema } = req.body;
     const { projectName } = req.params;
-
-    try {
-      ajv.compile(schema);
-    } catch (error) {
-      return res.status(400).json({
-        message: "The schema field is not of JSON Schema or failed validation.",
-      });
-    }
-
     const projectService = container.get<ProjectService>("ProjectService");
     const project = await projectService.getByProjectName(projectName);
 
@@ -83,15 +71,6 @@ schemasRouter.put(
   handleAsync(async (req, res, next) => {
     const { schemaName, projectName } = req.params;
     const { schema } = req.body;
-
-    try {
-      ajv.compile(schema);
-    } catch (error) {
-      return res.status(400).json({
-        message: "The schema field is not of JSON Schema or failed validation.",
-      });
-    }
-
     const projectService = container.get<ProjectService>("ProjectService");
     const project = await projectService.getByProjectName(projectName);
 
