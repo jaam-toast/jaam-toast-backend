@@ -5,6 +5,8 @@ process.env.NODE_ENV = process.env.NODE_ENV || "development";
 dotenv.config();
 
 const Config = {
+  NODE_ENV: process.env.NODE_ENV!,
+
   DATABASE_URL: process.env.MONGODB_URI!,
   APP_DB_NAME: process.env.APP_DB_NAME!,
   JWT_SECRET: process.env.JWT_SECRET_KEY!,
