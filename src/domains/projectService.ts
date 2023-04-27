@@ -9,7 +9,7 @@ import Config from "../config";
 import type { BaseProject, Project } from "../types/database";
 import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
 import type { DatabaseClient } from "../infrastructure/mongodbDatabaseClient";
-import type { Schema, SchemaClient } from "src/infrastructure/ajvSchemaClient";
+import type { Schema, SchemaClient } from "../infrastructure/ajvSchemaClient";
 import type { ObjectId } from "mongodb";
 
 interface IProjectService {

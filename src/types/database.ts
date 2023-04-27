@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Schema } from "src/infrastructure/ajvSchemaClient";
+import { Schema } from "../infrastructure/ajvSchemaClient";
 
 export type Framework =
   | "CreateReactApp"
