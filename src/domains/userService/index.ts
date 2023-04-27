@@ -91,11 +91,21 @@ export class UserService implements IUserService {
     userId?: string;
     filter?: Partial<User>;
   }) {
+    // TODO TYPE
     return this.databaseClient.read<User>({
       dbName: Config.APP_DB_NAME,
       collectionName: "users",
       ...(userId && { id: userId }),
-      ...filter,
+      ...(filter && { filter }),
+    });
+  }
+
+  private readUserProjectData({ projectIds }: { projectIds?: string[] }) {
+    // TODO TYPE
+    return this.databaseClient.read<User>({
+      dbName: Config.APP_DB_NAME,
+      collectionName: "projects",
+      filter: { _id: { $in: projectIds } },
     });
   }
 
@@ -152,7 +162,16 @@ export class UserService implements IUserService {
   public async getUserProjects({ userId }: { userId: string }) {
     const [user] = await this.readUserData({ userId });
 
-    return user?.projects ?? [];
+    if (!user?.projects) {
+      return [];
+    }
+
+    const projectList = await this.readUserProjectData({
+      projectIds: user?.projects,
+    });
+
+    // return user?.projects ?? [];
+    return projectList;
   }
 
   public getUserGithubRepos({

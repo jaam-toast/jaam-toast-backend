@@ -21,8 +21,14 @@ loginRouter.get(
     }),
   }),
   handleAsync(async (req, res, next) => {
-    const { username, userGithubUri, userImage } = req.app.locals;
     const { code } = req.query;
+
+    if (!code) {
+      return next(
+        createError(401, "Authentication failed. Cannot find 'code'."),
+      );
+    }
+
     const oauthClient = new OauthClient();
     const githubAccessToken = await oauthClient.getToken(code);
 
@@ -47,9 +53,9 @@ loginRouter.get(
     const userService = container.get<UserService>("UserService");
 
     const userData = await userService.login({
-      username,
-      userGithubUri,
-      userImage,
+      username: githubData.login,
+      userGithubUri: githubData.url,
+      userImage: githubData.avatar_url,
       githubAccessToken,
     });
 
