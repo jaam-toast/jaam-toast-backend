@@ -6,7 +6,7 @@ import {
   ObjectId,
   WithId,
 } from "mongodb";
-import { ContentsClient } from "src/config/di.config";
+import { ContentsClient } from "../config/di.config";
 
 import Config from "../config";
 

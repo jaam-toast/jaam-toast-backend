@@ -10,7 +10,7 @@ import type {
   SchemaClient,
   DatabaseClient,
   ContentsClient,
-} from "src/config/di.config";
+} from "../config/di.config";
 import type { Project } from "../types/project";
 import type { Schema } from "../types/schema";
 
@@ -98,6 +98,7 @@ export class ProjectService {
           buildCommand,
           envList,
           storageKey,
+          schemaList: [],
         },
       });
 
@@ -112,6 +113,7 @@ export class ProjectService {
             buildCommand,
             envList,
             storageKey,
+            schemaList: [],
           }),
           this.cmsService.createApi({
             projectName,
