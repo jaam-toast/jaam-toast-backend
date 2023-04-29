@@ -1,21 +1,8 @@
 import fs from "fs/promises";
 import chalk from "chalk";
 
-import Config from "../../config";
+import Config from "../../@config";
 import Observer from "../BaseObserber";
-import getFormattedKoreaTime from "./utils/getFormattedKoreaTime";
-
-/*
- * how to use
- *
- * import log from "@src/services/Logger";
- *
- * log.build(logType, message, [...message]);
- *   ㄴ> Logs from project deployment
- *
- * log.debug(logType, message, [...message]);
- *   ㄴ> server log (ex: connect server, morgan log, etc..)
- */
 
 export enum LogType {
   Server,
@@ -26,10 +13,27 @@ export enum LogType {
 
 export type LogMessage = string;
 
+/**
+ * ### How to use Logger
+ *
+ * - log를 하는 목적에 따라 메소드를 사용할 수 있습니다.
+ * - ex) build(client로 build 정보를 보낼 때), debug(서버에 기록) 등
+ *
+ * ```typescript
+ * import { Logger as log} from "@src/services/Logger";
+ *
+ * // Logs from project deployment
+ * log.build(logType, message, [...message]);
+ *
+ * //server log (ex: connect server, morgan log, etc..)
+ * log.debug(logType, message, [...message]);
+ *
+ * ```
+ */
 export class Logger extends Observer {
   /* logging handlers */
   private static console(logType: LogType, ...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
+    const messageHead = `[${new Date().toISOString()}]`;
 
     switch (logType) {
       case LogType.Server: {
@@ -91,7 +95,7 @@ export class Logger extends Observer {
   }
 
   private static async writefile(logType: LogType, ...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
+    const messageHead = `[${new Date().toISOString()}]`;
 
     switch (logType) {
       case LogType.Server:
@@ -123,12 +127,10 @@ export class Logger extends Observer {
   }
 
   private static notify(messageType: string, ...messages: LogMessage[]) {
-    const messageHead = `[${getFormattedKoreaTime(new Date())}]`;
-
     for (const message of messages) {
       messageType === "error"
-        ? Logger.send(`${messageHead} [ERROR] ${message}`)
-        : Logger.send(`${messageHead} ${message}`);
+        ? Logger.send(`[ERROR] ${message}`)
+        : Logger.send(message);
     }
   }
 
@@ -153,17 +155,8 @@ export class Logger extends Observer {
     Logger.console(LogType.Server, ...messages);
   }
 
-  static error(...messages: LogMessage[]) {
-    Logger.writefile(LogType.Error, ...messages);
-    Logger.console(LogType.Error, ...messages);
-  }
-
   static serverError(...messages: LogMessage[]) {
     Logger.writefile(LogType.Error, ...messages);
     Logger.console(LogType.Error, ...messages);
-  }
-
-  static request(...messages: LogMessage[]) {
-    Logger.console(LogType.Request, ...messages);
   }
 }
