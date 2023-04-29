@@ -1,4 +1,4 @@
-import Config from "../../config";
+import Config from "../../@config";
 import { Route53 } from "../../infrastructure/aws";
 
 export async function deleteDomain({ subdomain }: { subdomain: string }) {

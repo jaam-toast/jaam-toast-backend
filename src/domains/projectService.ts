@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import * as _ from "lodash";
 import { formatISO } from "date-fns";
 
-import Config from "../config";
+import Config from "../@config";
 
 import type { CmsService } from "./cmsService";
 import type { BuildService } from "./buildService";
@@ -10,9 +10,9 @@ import type {
   SchemaClient,
   DatabaseClient,
   ContentsClient,
-} from "../config/di.config";
-import type { Project } from "../types/project";
-import type { Schema } from "../types/schema";
+} from "../@config/di.config";
+import type { Project } from "../@types/project";
+import type { Schema } from "../@types/schema";
 
 @injectable()
 export class ProjectService {

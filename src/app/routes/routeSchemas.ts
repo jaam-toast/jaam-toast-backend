@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../config/di.config";
+import { container } from "../../@config/di.config";
 
 import type { ProjectService } from "../../domains/projectService";
 

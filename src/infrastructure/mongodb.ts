@@ -1,6 +1,6 @@
 import { MongodbContentsClient } from "./mongodbContentsClient";
 import { MongodbDatabaseClient } from "./mongodbDatabaseClient";
-import { Logger as log } from "../utils/Logger";
+import { Logger as log } from "../@utils/Logger";
 
 export async function connectDB(databaseUrl: string) {
   try {

@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import Ajv from "ajv";
 
-import type { SchemaClient } from "../config/di.config";
-import type { Schema } from "../types/schema";
+import type { SchemaClient } from "../@config/di.config";
+import type { Schema } from "../@types/schema";
 
 @injectable()
 export class AjvSchemaClient implements SchemaClient {

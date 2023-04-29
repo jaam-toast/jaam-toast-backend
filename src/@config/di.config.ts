@@ -10,8 +10,8 @@ import { MongodbDatabaseClient } from "../infrastructure/mongodbDatabaseClient";
 import { JwtTokenClient } from "../infrastructure/jwtTokenClient";
 import { AjvSchemaClient } from "../infrastructure/ajvSchemaClient";
 
-import type { Schema } from "../types/schema";
-import type { Contents } from "../types/contents";
+import type { Schema } from "../@types/schema";
+import type { Contents } from "../@types/contents";
 
 /**
  * - 의존성 등록

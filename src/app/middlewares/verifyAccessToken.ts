@@ -1,9 +1,9 @@
 import createError from "http-errors";
 import jwt from "jsonwebtoken";
 
-import Config from "../../config";
+import Config from "../../@config";
 
-import type { User } from "../../types/user";
+import type { User } from "../../@types/user";
 import type { RequestHandler } from "express";
 
 export const verifyAccessToken: RequestHandler = (req, res, next) => {

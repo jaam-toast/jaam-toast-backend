@@ -4,11 +4,11 @@ import { connectDomain } from "./connectDomain";
 import { createBuildProject } from "./createBuildProject";
 import { createBuildResource } from "./createBuildResource";
 import { deleteBuildProject } from "./deleteBuildProject";
-import { Logger as log } from "../../utils/Logger";
-import Config from "../../config";
-import { BUILD_MESSAGE } from "../../config/constants";
+import { Logger as log } from "../../@utils/Logger";
+import Config from "../../@config";
+import { BUILD_MESSAGE } from "../../@config/constants";
 
-import type { Project } from "../../types/project";
+import type { Project } from "../../@types/project";
 
 @injectable()
 export class BuildService {

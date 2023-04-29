@@ -1,7 +1,7 @@
 import { Route53 } from "../../infrastructure/aws";
-import { Logger as log } from "../../utils/Logger";
-import Config from "../../config";
-import { CMS_MESSAGE } from "../../config/constants";
+import { Logger as log } from "../../@utils/Logger";
+import Config from "../../@config";
+import { CMS_MESSAGE } from "../../@config/constants";
 
 export async function createDomain({
   subdomain,

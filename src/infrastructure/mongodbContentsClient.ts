@@ -1,10 +1,10 @@
 import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
-import { ContentsClient } from "../config/di.config";
+import { ContentsClient } from "../@config/di.config";
 
-import Config from "../config";
+import Config from "../@config";
 
-import type { Contents } from "src/types/contents";
+import type { Contents } from "src/@types/contents";
 
 @injectable()
 export class MongodbContentsClient implements ContentsClient {

@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 
-import { Logger as log } from "../../utils/Logger";
-import { BUILD_MESSAGE } from "../../config/constants";
+import { Logger as log } from "../../@utils/Logger";
+import { BUILD_MESSAGE } from "../../@config/constants";
 
-import type { Framework } from "../../types/project";
+import type { Framework } from "../../@types/project";
 
 const PRAMEWORK_PRESET: Record<
   Framework,
