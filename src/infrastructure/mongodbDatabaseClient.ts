@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
-import { DatabaseClient } from "src/config/di.config";
+import { DatabaseClient } from "../config/di.config";
 
 import Config from "../config";
 
