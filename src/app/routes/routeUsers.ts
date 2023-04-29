@@ -4,7 +4,7 @@ import { z } from "zod";
 import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../config/di.config";
+import { container } from "../../@config/di.config";
 
 import type { UserService } from "../../domains/userService";
 

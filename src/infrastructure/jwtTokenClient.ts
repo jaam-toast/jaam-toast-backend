@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import jwt from "jsonwebtoken";
 
-import type { Payload, TokenClient } from "../config/di.config";
+import type { Payload, TokenClient } from "../@config/di.config";
 
 @injectable()
 export class JwtTokenClient implements TokenClient {

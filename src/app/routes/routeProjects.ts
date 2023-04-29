@@ -5,15 +5,15 @@ import createError from "http-errors";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
-import { BUILD_MESSAGE } from "../../config/constants";
+import { BUILD_MESSAGE } from "../../@config/constants";
 import { ProjectService } from "../../domains/projectService";
 import { UserService } from "../../domains/userService";
-import { container } from "../../config/di.config";
+import { container } from "../../@config/di.config";
 import { handleAsync } from "../utils/handleAsync";
-import { Logger as log } from "../../utils/Logger";
-import Config from "../../config";
+import { Logger as log } from "../../@utils/Logger";
+import Config from "../../@config";
 
-import type { TokenClient } from "../../config/di.config";
+import type { TokenClient } from "../../@config/di.config";
 
 const project = z.object({
   userId: z.string(),

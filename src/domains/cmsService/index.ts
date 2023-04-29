@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 import { createDomain } from "./createDomain";
 import { createToken } from "./createToken";
 import { deleteDomain } from "./deleteDomain";
-import { CMS_MESSAGE } from "../../config/constants";
+import { CMS_MESSAGE } from "../../@config/constants";
 
 @injectable()
 export class CmsService {

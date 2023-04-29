@@ -4,11 +4,11 @@ import { ObjectId } from "mongodb";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../config/di.config";
-import Config from "../../config";
+import { container } from "../../@config/di.config";
+import Config from "../../@config";
 
 import type { ProjectService } from "../../domains/projectService";
-import type { TokenClient } from "../../config/di.config";
+import type { TokenClient } from "../../@config/di.config";
 
 export const storageRouter = Router();
 

@@ -5,10 +5,10 @@ import createError from "http-errors";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../config/di.config";
+import { container } from "../../@config/di.config";
 import { OauthClient } from "../../infrastructure/github";
 import { Github } from "../../infrastructure/github";
-import Config from "../../config";
+import Config from "../../@config";
 
 import type { UserService } from "../../domains/userService";
 

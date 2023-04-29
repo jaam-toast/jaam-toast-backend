@@ -1,5 +1,5 @@
 import { CloudFlare } from "../../infrastructure/cloudFlare";
-import { BUILD_MESSAGE } from "./../../config/constants";
+import { BUILD_MESSAGE } from "../../@config/constants";
 
 export async function deleteBuildProject({
   projectName,

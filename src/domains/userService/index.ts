@@ -5,10 +5,10 @@ import {
   getUserOrganizationsRepos,
   getUserRepositories,
 } from "./getUserRepositories";
-import Config from "../../config";
+import Config from "../../@config";
 
-import type { User } from "../../types/user";
-import type { DatabaseClient } from "../../config/di.config";
+import type { User } from "../../@types/user";
+import type { DatabaseClient } from "../../@config/di.config";
 
 @injectable()
 export class UserService {
