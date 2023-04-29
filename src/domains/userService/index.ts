@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { Document } from "mongodb";
 
 import {
   getUserOrganizations,
@@ -8,66 +7,11 @@ import {
 } from "./getUserRepositories";
 import Config from "../../config";
 
-import type { User } from "../../types/database";
-import type { DatabaseClient } from "../../infrastructure/mongodbDatabaseClient";
-
-interface IUserService {
-  login(userData: User): Promise<Document | null>;
-  getUserProjects({ userId }: { userId: string }): Promise<Document | null>;
-  getUserGithubRepos({
-    githubAccessToken,
-  }: {
-    githubAccessToken: string;
-  }): Promise<
-    {
-      repoName: string;
-      repoCloneUrl: string;
-      repoUpdatedAt: string | null;
-    }[]
-  >;
-  getUserGithubOrgs({
-    githubAccessToken,
-  }: {
-    githubAccessToken: string;
-  }): Promise<
-    {
-      spaceName: string;
-      spaceUrl: string;
-      spaceImage: string;
-    }[]
-  >;
-  getUserGithubOrgsRepos({
-    githubAccessToken,
-    org,
-  }: {
-    githubAccessToken: string;
-    org: string;
-  }): Promise<
-    {
-      repoName: string;
-      repoCloneUrl: string | undefined;
-      repoUpdatedAt: string | null | undefined;
-    }[]
-  >;
-  addProject({
-    userId,
-    projectName,
-  }: {
-    userId: string;
-    projectName: string;
-  }): Promise<void>;
-  deleteUser(deleteUserOptions: { userId: string }): void;
-  deleteProject({
-    username,
-    projectName,
-  }: {
-    username: string;
-    projectName: string;
-  }): void;
-}
+import type { User } from "../../types/user";
+import type { DatabaseClient } from "../../config/di.config";
 
 @injectable()
-export class UserService implements IUserService {
+export class UserService {
   private databaseClient: DatabaseClient;
 
   public constructor(

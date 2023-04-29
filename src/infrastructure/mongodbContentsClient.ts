@@ -6,86 +6,40 @@ import {
   ObjectId,
   WithId,
 } from "mongodb";
+import { ContentsClient } from "src/config/di.config";
 
 import Config from "../config";
-export interface ContentsClient {
-  createStorage: (createStorageOptions: {
-    jsonSchema: {
-      title: string;
-    };
-    projectName: string;
-  }) => Promise<void>;
-
-  deleteStorage: (deleteStorageOptions: {
-    projectName: string;
-    schemaName: string;
-  }) => Promise<void>;
-
-  createContents: (createContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    contents: { [key: string]: string };
-  }) => Promise<InsertOneResult<Document>>;
-
-  updateContents: (updateContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    contentsId: string;
-    contents: unknown;
-  }) => Promise<void>;
-
-  deleteContents: (deleteContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    contentsIds: string[];
-  }) => Promise<void>;
-
-  getContents: (getContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    pagination?: {
-      page?: number;
-      pageLength?: number;
-    };
-    sort?: {
-      [key: string]: "asc" | "desc" | "ascending" | "descending";
-    }[];
-    filter?: {
-      [key: string]: string | number | boolean | ObjectId;
-    };
-  }) => Promise<WithId<Document>[]>;
-}
 
 @injectable()
-export class mongodbContentsClient implements ContentsClient {
+export class MongodbContentsClient implements ContentsClient {
   private static _client: MongoClient | null = null;
 
   get client(): MongoClient {
-    if (!mongodbContentsClient._client) {
+    if (!MongodbContentsClient._client) {
       throw new Error(
         "The connection to the contents database was not established.",
       );
     }
 
-    return mongodbContentsClient._client;
+    return MongodbContentsClient._client;
   }
 
   static async connect() {
-    mongodbContentsClient._client = new MongoClient(
+    MongodbContentsClient._client = new MongoClient(
       Config.CONTENTS_DATABASE_URL,
     );
 
     try {
-      await mongodbContentsClient._client.connect();
+      await MongodbContentsClient._client.connect();
     } catch (error) {
       throw error;
     }
   }
 
   static async close() {
-    await mongodbContentsClient._client?.close();
+    await MongodbContentsClient._client?.close();
 
-    mongodbContentsClient._client = null;
+    MongodbContentsClient._client = null;
   }
 
   async createStorage({
@@ -128,10 +82,12 @@ export class mongodbContentsClient implements ContentsClient {
     contents: { [key: string]: string };
   }) {
     try {
-      return this.client
+      const result = await this.client
         .db(projectName)
         .collection(schemaName)
         .insertOne(contents);
+
+      return result.insertedId.toString();
     } catch (error) {
       throw error;
     }
@@ -198,7 +154,7 @@ export class mongodbContentsClient implements ContentsClient {
       [key: string]: "asc" | "desc" | "ascending" | "descending";
     }[];
     filter?: {
-      [key: string]: string | number | boolean | ObjectId;
+      [key: string]: string | number | boolean;
     };
   }) {
     const page = pagination?.page ?? 1;

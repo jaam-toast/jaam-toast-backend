@@ -1,68 +1,39 @@
 import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
+import { DatabaseClient } from "src/config/di.config";
 
 import Config from "../config";
 
-export interface DatabaseClient {
-  create: <Document extends { [key: string]: unknown }>(createOption: {
-    dbName: string;
-    collectionName: string;
-    document: Document | Document[];
-  }) => Promise<string[]>;
-
-  read: <Document extends { [key: string]: unknown }>(readOption: {
-    dbName: string;
-    collectionName: string;
-    id?: string | string[];
-    filter?: { [key: string]: string };
-  }) => Promise<(Document | null)[]>;
-
-  update: <Document extends { [key: string]: unknown }>(updateOption: {
-    dbName: string;
-    collectionName: string;
-    id?: string | string[];
-    filter?: { [key: string]: string };
-    document: Partial<Document>;
-  }) => Promise<void>;
-
-  delete: (deleteOption: {
-    dbName: string;
-    collectionName: string;
-    id?: string | string[];
-    filter?: { [key: string]: string };
-  }) => Promise<void>;
-}
-
 @injectable()
-export class mongodbDatabaseClient implements DatabaseClient {
+export class MongodbDatabaseClient implements DatabaseClient {
   private static _client: MongoClient | null = null;
 
   get client(): MongoClient {
-    if (!mongodbDatabaseClient._client) {
+    if (!MongodbDatabaseClient._client) {
       throw new Error(
         "The connection to the contents database was not established.",
       );
     }
 
-    return mongodbDatabaseClient._client;
+    return MongodbDatabaseClient._client;
   }
 
   static async connect() {
-    mongodbDatabaseClient._client = new MongoClient(
+    MongodbDatabaseClient._client = new MongoClient(
       Config.CONTENTS_DATABASE_URL,
     );
 
     try {
-      await mongodbDatabaseClient._client.connect();
+      await MongodbDatabaseClient._client.connect();
     } catch (error) {
       throw error;
     }
   }
 
   static async close() {
-    await mongodbDatabaseClient._client?.close();
+    await MongodbDatabaseClient._client?.close();
 
-    mongodbDatabaseClient._client = null;
+    MongodbDatabaseClient._client = null;
   }
 
   async create<Document extends { [key: string]: unknown }>({
