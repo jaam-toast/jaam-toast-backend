@@ -2,17 +2,15 @@ import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { Route53 } from "../../infrastructure/aws";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-type Options = {
-  projectName: string;
-  changeDomain: string;
-  originalDomain: string;
-};
-
 export async function connectDomain({
   projectName,
   changeDomain,
   originalDomain,
-}: Options) {
+}: {
+  projectName: string;
+  changeDomain: string;
+  originalDomain: string;
+}) {
   try {
     const route53 = new Route53();
     const recordChangeInfo = await route53.createCnameRecord({

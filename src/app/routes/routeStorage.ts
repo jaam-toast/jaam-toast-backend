@@ -4,10 +4,11 @@ import { ObjectId } from "mongodb";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../domains/@config/di.config";
-import { ProjectService } from "../../domains/projectService";
-import { TokenClient } from "../../infrastructure/jwtTokenClient";
+import { container } from "../../config/di.config";
 import Config from "../../config";
+
+import type { ProjectService } from "../../domains/projectService";
+import type { TokenClient } from "../../config/di.config";
 
 export const storageRouter = Router();
 
@@ -149,8 +150,7 @@ storageRouter.get(
     const contents = await projectService.getContents({
       projectName,
       schemaName,
-      // TODO: change logic.
-      filter: { _id: new ObjectId(contentsId) },
+      filter: { projectName: contentsId },
     });
 
     return res.status(200).json({

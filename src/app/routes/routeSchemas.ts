@@ -3,50 +3,53 @@ import { z } from "zod";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../domains/@config/di.config";
-import { ProjectService } from "../../domains/projectService";
+import { container } from "../../config/di.config";
+
+import type { ProjectService } from "../../domains/projectService";
+
+export const schema = z.object({
+  schemaName: z.string(),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    type: z.literal("object"),
+    properties: z.record(
+      z.object({
+        type: z.string(),
+        minLength: z
+          .string()
+          .refine(val => !!Number(val))
+          .transform(val => Number(val))
+          .optional(),
+        maxLength: z
+          .string()
+          .refine(val => !!Number(val))
+          .transform(val => Number(val))
+          .optional(),
+        minimum: z
+          .string()
+          .refine(val => !!Number(val))
+          .transform(val => Number(val))
+          .optional(),
+        maximum: z
+          .string()
+          .refine(val => !!Number(val))
+          .transform(val => Number(val))
+          .optional(),
+        description: z.string().optional(),
+        format: z.string().optional(),
+      }),
+    ),
+    required: z.array(z.string()).optional(),
+  }),
+});
 
 export const schemasRouter = Router();
-
-const schemaProperty = z.object({
-  type: z.string(),
-  minLength: z
-    .string()
-    .refine(val => !!Number(val))
-    .transform(val => Number(val))
-    .optional(),
-  maxLength: z
-    .string()
-    .refine(val => !!Number(val))
-    .transform(val => Number(val))
-    .optional(),
-  minimum: z
-    .string()
-    .refine(val => !!Number(val))
-    .transform(val => Number(val))
-    .optional(),
-  maximum: z
-    .string()
-    .refine(val => !!Number(val))
-    .transform(val => Number(val))
-    .optional(),
-  description: z.string().optional(),
-  format: z.string().optional(),
-});
 
 schemasRouter.post(
   "/projects/:projectName/schemas",
   parseRequest({
-    body: z.object({
-      schemaName: z.string(),
-      schema: z.object({
-        title: z.string(),
-        description: z.string().optional(),
-        type: z.literal("object"),
-        properties: z.record(schemaProperty),
-        required: z.array(z.string()).optional(),
-      }),
-    }),
+    body: schema,
     params: z.object({
       projectName: z.string(),
     }),
@@ -88,15 +91,7 @@ schemasRouter.post(
 schemasRouter.put(
   "/projects/:projectName/schemas/:schemaName",
   parseRequest({
-    body: z.object({
-      schema: z.object({
-        title: z.string(),
-        description: z.string().optional(),
-        type: z.literal("object"),
-        properties: z.record(schemaProperty),
-        required: z.array(z.string()).optional(),
-      }),
-    }),
+    body: schema,
     params: z.object({
       projectName: z.string(),
       schemaName: z.string(),

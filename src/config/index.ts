@@ -31,12 +31,6 @@ const Config = {
   LOGGER_OPTIONS: {
     debug: !!parseInt(process.env.DEBUG!),
   },
-  // LOG_FILTERS: {
-  //   verbose: " ",
-  //   userDataFilter: "-epel -HTTP -fedora -Length",
-  //   cloudInitFilter:
-  //     "?cloud ?init -systemd -kernel -rsyslogd -journal -augenrules -rngd -acpid -chronyd -ec2net -auditd -audispd -dhclient -hibinit -network -ssm -cloudwatch -SHA256 -SSH -info",
-  // },
 };
 
 export default Config;

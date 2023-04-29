@@ -1,11 +1,11 @@
 import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { BUILD_MESSAGE } from "./../../config/constants";
 
-type Options = {
+export async function deleteBuildProject({
+  projectName,
+}: {
   projectName: string;
-};
-
-export async function deleteBuildProject({ projectName }: Options) {
+}) {
   try {
     const cloudFlareApi = new CloudFlare();
     const { result } = await cloudFlareApi.getProject({ projectName });

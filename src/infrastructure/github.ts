@@ -3,18 +3,7 @@ import axios, { AxiosInstance } from "axios";
 import Config from "./@config";
 import { Logger as log } from "../utils/Logger";
 
-import type { GithubToken } from "./@types/github";
-
-import type {
-  GithubUser,
-  GetGithubOrgs,
-  GetGithubRepos,
-  GetGithubOrgRepos,
-  GetGithubWebhooks,
-  PostGithubWebhooks,
-  GetGithubCommits,
-  GetGithubPullRequestCommits,
-} from "./@types/github";
+import type { Endpoints } from "@octokit/types";
 
 export class Github {
   client: AxiosInstance;
@@ -32,6 +21,12 @@ export class Github {
 
   async getUserData() {
     try {
+      type GithubUser = {
+        login: string;
+        url: string;
+        avatar_url?: string;
+      };
+
       const { data } = await this.client.get<GithubUser>("/user");
 
       return data;
@@ -43,6 +38,8 @@ export class Github {
 
   async getRepos(repoType: string) {
     try {
+      type GetGithubRepos = Endpoints["GET /user/repos"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubRepos>("/user/repos", {
         params: {
           visibility: `${repoType}`,
@@ -62,6 +59,9 @@ export class Github {
 
   async getOrgs() {
     try {
+      type GetGithubOrgs =
+        Endpoints["GET /users/{username}/orgs"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubOrgs>("/user/orgs");
 
       return data;
@@ -75,6 +75,9 @@ export class Github {
 
   async getOrgRepos(org: string) {
     try {
+      type GetGithubOrgRepos =
+        Endpoints["GET /orgs/{org}/repos"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubOrgRepos>(
         `/orgs/${org}/repos`,
         {
@@ -97,6 +100,9 @@ export class Github {
 
   async getRepoWebhook(repoOwner: string, repoName: string) {
     try {
+      type GetGithubWebhooks =
+        Endpoints["GET /repos/{owner}/{repo}/hooks"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
@@ -118,6 +124,9 @@ export class Github {
 
   async createRepoWebhook(repoOwner: string, repoName: string) {
     try {
+      type PostGithubWebhooks =
+        Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"]["data"];
+
       const { data } = await this.client.post<PostGithubWebhooks>(
         `/repos/${repoOwner}/${repoName}/hooks`,
         {
@@ -150,6 +159,9 @@ export class Github {
 
   async getCommits(repoOwner: string, repoName: string) {
     try {
+      type GetGithubCommits =
+        Endpoints["GET /repos/{owner}/{repo}/commits"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubCommits>(
         `/repos/${repoOwner}/${repoName}/commits`,
       );
@@ -167,6 +179,9 @@ export class Github {
     commitRef: string,
   ) {
     try {
+      type GetGithubPullRequestCommits =
+        Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"]["data"];
+
       const { data } = await this.client.get<GetGithubPullRequestCommits>(
         `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
       );
@@ -191,6 +206,12 @@ export class OauthClient {
   });
 
   async getToken(code: string) {
+    type GithubToken = {
+      access_token: string;
+      scope: string;
+      token_type: string;
+    };
+
     const { data } = await this.client.post<GithubToken>(
       "/login/oauth/access_token?",
       {},
