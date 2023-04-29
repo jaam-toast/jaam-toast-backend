@@ -2,81 +2,29 @@ import { inject, injectable } from "inversify";
 import * as _ from "lodash";
 import { formatISO } from "date-fns";
 
-import { IBuildService } from "./buildService";
-import { ICmsService } from "./cmsService";
 import Config from "../config";
 
-import type { BaseProject, Project } from "../types/database";
-import type { ContentsClient } from "../infrastructure/mongodbContentsClient";
-import type { DatabaseClient } from "../infrastructure/mongodbDatabaseClient";
-import type { Schema, SchemaClient } from "../infrastructure/ajvSchemaClient";
-import type { ObjectId } from "mongodb";
-
-interface IProjectService {
-  createProject(options: BaseProject): Promise<void>;
-
-  updateProject(options: Partial<Project>): Promise<void>;
-
-  getByProjectName(projectName: string): Promise<Project | null>;
-
-  deleteProject({ projectName }: { projectName: string }): Promise<void>;
-
-  addSchema(addSchemaOptions: {
-    projectName: string;
-    schemaName: string;
-    schema: {
-      title: string;
-    };
-  }): Promise<void>;
-
-  updateSchema(updateSchemaOptions: {
-    projectName: string;
-    schemaName: string;
-    schema: {
-      title: string;
-    };
-  }): Promise<void>;
-
-  deleteSchema(deleteSchema: {
-    projectName: string;
-    schemaName: string;
-  }): Promise<void>;
-
-  createContents(createContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    contents: { [key: string]: string };
-  }): Promise<void>;
-
-  deleteContents(deleteContentsOptions: {
-    projectName: string;
-    schemaName: string;
-    contentsIds: string[];
-  }): Promise<void>;
-}
-
-/**
- * Inversify.js에서는 @injectable 데코레이터와 @inject 데코레이터를 활용하여 객체를 주입하게 되어있습니다.
- * 의존성이 주입될 곳에는 @injectable 데코레이터를,
- * 생성자 주입을 할 때는 @inject 가 사용됩니다.
- * container에 등록한 class에는 모두 @injectable()을 적용해야 합니다.
- */
+import type { CmsService } from "./cmsService";
+import type { BuildService } from "./buildService";
+import type {
+  SchemaClient,
+  DatabaseClient,
+  ContentsClient,
+} from "src/config/di.config";
+import type { Project } from "../types/project";
+import type { Schema } from "../types/schema";
 
 @injectable()
-export class ProjectService implements IProjectService {
-  private buildService: IBuildService;
-  private cmsService: ICmsService;
+export class ProjectService {
+  private buildService: BuildService;
+  private cmsService: CmsService;
   private contentsClient: ContentsClient;
   private databaseClient: DatabaseClient;
   private schemaClient: SchemaClient;
-  /**
-   *
-   * @param buildService: 의존성 주입
-   * @param cmsService: 의존성 주입
-   */
+
   public constructor(
-    @inject("BuildService") buildService: IBuildService,
-    @inject("CmsService") cmsService: ICmsService,
+    @inject("BuildService") buildService: BuildService,
+    @inject("CmsService") cmsService: CmsService,
     @inject("MongoDBDatabaseClient") mongodbDatabaseClient: DatabaseClient,
     @inject("MongoDBContentsClient") mongodbContentsClient: ContentsClient,
     @inject("AjvSchemaClient") ajvSchemaClient: SchemaClient,
@@ -88,8 +36,8 @@ export class ProjectService implements IProjectService {
     this.schemaClient = ajvSchemaClient;
   }
 
-  private createProjectData({ project }: { project: BaseProject }) {
-    return this.databaseClient.create<BaseProject>({
+  private createProjectData({ project }: { project: Project }) {
+    return this.databaseClient.create<Project>({
       dbName: Config.APP_DB_NAME,
       collectionName: "projects",
       document: project,
@@ -137,7 +85,7 @@ export class ProjectService implements IProjectService {
     buildCommand,
     envList,
     storageKey,
-  }: BaseProject) {
+  }: Project) {
     try {
       await this.createProjectData({
         project: {
@@ -178,7 +126,6 @@ export class ProjectService implements IProjectService {
           buildOriginalDomain,
           cmsDomain,
           cmsToken,
-          schemaList: [],
         },
       });
     } catch (error) {
@@ -489,7 +436,7 @@ export class ProjectService implements IProjectService {
       [key: string]: string;
     }[];
     filter?: {
-      [key: string]: string | number | boolean | ObjectId;
+      [key: string]: string | number | boolean;
     };
   }) {
     try {

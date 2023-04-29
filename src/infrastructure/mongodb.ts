@@ -1,11 +1,11 @@
-import { mongodbContentsClient } from "./mongodbContentsClient";
+import { MongodbContentsClient } from "./mongodbContentsClient";
+import { MongodbDatabaseClient } from "./mongodbDatabaseClient";
 import { Logger as log } from "../utils/Logger";
-import { mongodbDatabaseClient } from "./mongodbDatabaseClient";
 
 export async function connectDB(databaseUrl: string) {
   try {
-    await mongodbDatabaseClient.connect();
-    await mongodbContentsClient.connect();
+    await MongodbDatabaseClient.connect();
+    await MongodbContentsClient.connect();
 
     log.debug("🌱 MongoDB connected!");
   } catch (error) {

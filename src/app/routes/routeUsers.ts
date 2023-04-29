@@ -4,8 +4,9 @@ import { z } from "zod";
 import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../domains/@config/di.config";
-import { UserService } from "../../domains/userService";
+import { container } from "../../config/di.config";
+
+import type { UserService } from "../../domains/userService";
 
 export const usersRouter = Router();
 

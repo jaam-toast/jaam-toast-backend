@@ -8,19 +8,11 @@ import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-import type { BaseProject } from "../../types/database";
-export interface IBuildService {
-  createBuild(options: BaseProject): Promise<{
-    buildDomain: string;
-    buildOriginalDomain: string;
-  }>;
-  updateBuild(): Promise<void>;
-  deleteBuild({ projectName }: { projectName: string }): Promise<void>;
-}
+import type { Project } from "../../types/project";
 
 @injectable()
-export class BuildService implements IBuildService {
-  async createBuild(options: BaseProject) {
+export class BuildService {
+  async createBuild(options: Project) {
     try {
       const {
         repoName,

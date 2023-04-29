@@ -5,18 +5,8 @@ import { createToken } from "./createToken";
 import { deleteDomain } from "./deleteDomain";
 import { CMS_MESSAGE } from "../../config/constants";
 
-export interface ICmsService {
-  createApi({
-    projectName,
-  }: {
-    projectName: string;
-  }): Promise<{ cmsDomain: string; cmsToken: string }>;
-  updateApi(): Promise<void>;
-  deleteApi({ projectName }: { projectName: string }): Promise<void>;
-}
-
 @injectable()
-export class CmsService implements ICmsService {
+export class CmsService {
   async createApi({ projectName }: { projectName: string }) {
     try {
       if (!projectName) {
