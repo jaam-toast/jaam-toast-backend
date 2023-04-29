@@ -8,11 +8,45 @@ import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { BUILD_MESSAGE } from "../../config/constants";
 import { ProjectService } from "../../domains/projectService";
 import { UserService } from "../../domains/userService";
-import { TokenClient } from "../../infrastructure/jwtTokenClient";
-import { container } from "../../domains/@config/di.config";
+import { container } from "../../config/di.config";
 import { handleAsync } from "../utils/handleAsync";
 import { Logger as log } from "../../utils/Logger";
 import Config from "../../config";
+
+import type { TokenClient } from "../../config/di.config";
+
+const project = z.object({
+  userId: z.string(),
+  space: z.string(),
+  repoName: z.string(),
+  repoCloneUrl: z.string(),
+  projectName: z.string(),
+  projectUpdatedAt: z.string(),
+  framework: z.union([
+    z.literal("Create React App"),
+    z.literal("React Static"),
+    z.literal("Next.js (Static HTML Export)"),
+    z.literal("Nuxt.js"),
+    z.literal("Angular (Angular CLI)"),
+    z.literal("Astro"),
+    z.literal("Gatsby"),
+    z.literal("GitBook"),
+    z.literal("Jekyll"),
+    z.literal("Remix"),
+    z.literal("Svelte"),
+    z.literal("Vue"),
+    z.literal("VuePress"),
+  ]),
+  installCommand: z.string().default("npm install"),
+  buildCommand: z.string().default("npm run build"),
+  envList: z.array(
+    z.object({
+      key: z.string(),
+      value: z.string(),
+    }),
+  ),
+  nodeVersion: z.string().default("12.18.0"),
+});
 
 const CLIENT_FRAMEWORK_INFO = {
   "Create React App": "CreateReactApp",
@@ -37,38 +71,7 @@ projectsRouter.use("/projects", verifyAccessToken);
 projectsRouter.post(
   "/projects",
   parseRequest({
-    body: z.object({
-      userId: z.string(),
-      space: z.string(),
-      repoName: z.string(),
-      repoCloneUrl: z.string(),
-      projectName: z.string(),
-      projectUpdatedAt: z.string(),
-      framework: z.union([
-        z.literal("Create React App"),
-        z.literal("React Static"),
-        z.literal("Next.js (Static HTML Export)"),
-        z.literal("Nuxt.js"),
-        z.literal("Angular (Angular CLI)"),
-        z.literal("Astro"),
-        z.literal("Gatsby"),
-        z.literal("GitBook"),
-        z.literal("Jekyll"),
-        z.literal("Remix"),
-        z.literal("Svelte"),
-        z.literal("Vue"),
-        z.literal("VuePress"),
-      ]),
-      installCommand: z.string().default("npm install"),
-      buildCommand: z.string().default("npm run build"),
-      envList: z.array(
-        z.object({
-          key: z.string(),
-          value: z.string(),
-        }),
-      ),
-      nodeVersion: z.string().default("12.18.0"),
-    }),
+    body: project,
   }),
   handleAsync(async (req, res) => {
     const projectOptions = req.body;
@@ -97,6 +100,7 @@ projectsRouter.post(
         ...createProjectOptions,
         storageKey,
         framework: CLIENT_FRAMEWORK_INFO[createProjectOptions.framework],
+        schemaList: [],
       });
       await userService.addProject({ userId, projectName });
     } catch (error) {

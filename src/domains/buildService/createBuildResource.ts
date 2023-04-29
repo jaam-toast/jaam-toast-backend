@@ -1,12 +1,69 @@
 import { spawn } from "child_process";
 
-import { FrameWorkPresets } from "../@config/frameWorkPresets";
 import { Logger as log } from "../../utils/Logger";
-
-import { Framework } from "../../types/database";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-type Options = {
+import type { Framework } from "../../types/project";
+
+const PRAMEWORK_PRESET: Record<
+  Framework,
+  { buildCommand: string; buildDirectory: string }
+> = {
+  CreateReactApp: {
+    buildCommand: "npm run build",
+    buildDirectory: "build",
+  },
+  ReactStatic: {
+    buildCommand: "react-static build",
+    buildDirectory: "dist",
+  },
+  NextJs: {
+    buildCommand: "next build && next export",
+    buildDirectory: ".next",
+  },
+  NuxtJs: {
+    buildCommand: "nuxt generate",
+    buildDirectory: "dist",
+  },
+  Angular: {
+    buildCommand: "ng build",
+    buildDirectory: "dist",
+  },
+  Astro: {
+    buildCommand: "npm run build",
+    buildDirectory: "dist",
+  },
+  Gatsby: {
+    buildCommand: "gatsby build",
+    buildDirectory: "public",
+  },
+  GitBook: {
+    buildCommand: "gitbook build",
+    buildDirectory: "_book",
+  },
+  Jekyll: {
+    buildCommand: "jekyll build",
+    buildDirectory: "_site",
+  },
+  Remix: {
+    buildCommand: "npm run build",
+    buildDirectory: "public",
+  },
+  Svelte: {
+    buildCommand: "npm run build",
+    buildDirectory: "public",
+  },
+  Vue: {
+    buildCommand: "npm run build",
+    buildDirectory: "public",
+  },
+  VuePress: {
+    buildCommand: "vuepress build $directory",
+    buildDirectory: "$directory/.vuepress/dist",
+  },
+};
+
+type RunGitCloneOptions = {
   repoCloneUrl: string;
   repoName: string;
   framework: Framework;
@@ -14,7 +71,9 @@ type Options = {
   buildCommand: string;
 };
 
-const runGitClone = async ({ repoCloneUrl }: Pick<Options, "repoCloneUrl">) => {
+const runGitClone = async ({
+  repoCloneUrl,
+}: Pick<RunGitCloneOptions, "repoCloneUrl">) => {
   const command = [
     "rm -rf buildResource",
     "mkdir buildResource",
@@ -55,7 +114,7 @@ const runGitClone = async ({ repoCloneUrl }: Pick<Options, "repoCloneUrl">) => {
 const runDependenciesInstall = async ({
   repoName,
   installCommand,
-}: Pick<Options, "installCommand" | "repoName">) => {
+}: Pick<RunGitCloneOptions, "installCommand" | "repoName">) => {
   const childProcess = spawn(installCommand, {
     cwd: `./buildResource/${repoName}`,
     shell: true,
@@ -89,7 +148,7 @@ const runDependenciesInstall = async ({
 const runBuild = async ({
   repoName,
   buildCommand,
-}: Pick<Options, "buildCommand" | "repoName">) => {
+}: Pick<RunGitCloneOptions, "buildCommand" | "repoName">) => {
   const childProcess = spawn(buildCommand, {
     cwd: `./buildResource/${repoName}`,
     shell: true,
@@ -126,7 +185,7 @@ export async function createBuildResource({
   framework,
   installCommand,
   buildCommand,
-}: Options) {
+}: RunGitCloneOptions) {
   try {
     await runGitClone({ repoCloneUrl });
 
@@ -136,7 +195,7 @@ export async function createBuildResource({
     await runBuild({ repoName, buildCommand });
     log.build(BUILD_MESSAGE.CREATE.COMPLETE_RESOURCE_CREATE);
 
-    const buildResourceLocation = `./buildResource/${repoName}/${FrameWorkPresets[framework].buildDirectory}`;
+    const buildResourceLocation = `./buildResource/${repoName}/${PRAMEWORK_PRESET[framework].buildDirectory}`;
 
     return buildResourceLocation;
   } catch (error) {

@@ -4,15 +4,13 @@ import { Logger as log } from "../../utils/Logger";
 import { CloudFlare } from "../../infrastructure/cloudFlare";
 import { BUILD_MESSAGE } from "../../config/constants";
 
-type Options = {
-  buildResourceLocation: string;
-  projectName: string;
-};
-
 const createDeployment = async ({
   buildResourceLocation,
   projectName,
-}: Options) => {
+}: {
+  buildResourceLocation: string;
+  projectName: string;
+}) => {
   const cloudFlare = new CloudFlare();
   const command = [
     cloudFlare.makePublishPageCommand({ buildResourceLocation, projectName }),
@@ -52,7 +50,10 @@ const createDeployment = async ({
 export async function createBuildProject({
   buildResourceLocation,
   projectName,
-}: Options) {
+}: {
+  buildResourceLocation: string;
+  projectName: string;
+}) {
   try {
     log.build(BUILD_MESSAGE.CREATE.WORKING_ON_BUILD_PROJECT);
 

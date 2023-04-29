@@ -1,19 +1,17 @@
-import { Server } from "http";
-import { Socket } from "socket.io";
-
 import { Logger as log } from "../utils/Logger";
 import { BUILD_MESSAGE } from "../config/constants";
 import { SocketSingleton } from "../infrastructure/socket";
 
-type Options = {
-  server: Server;
-  clientOrigin: string;
-};
+import type { Server } from "http";
+import type { Socket } from "socket.io";
 
 export const createSocket = async ({
   server,
   clientOrigin,
-}: Options): Promise<void> => {
+}: {
+  server: Server;
+  clientOrigin: string;
+}): Promise<void> => {
   const socket = new SocketSingleton({
     server,
     clientOrigin,

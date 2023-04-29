@@ -5,11 +5,12 @@ import createError from "http-errors";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../domains/@config/di.config";
-import { UserService } from "../../domains/userService";
+import { container } from "../../config/di.config";
 import { OauthClient } from "../../infrastructure/github";
 import { Github } from "../../infrastructure/github";
 import Config from "../../config";
+
+import type { UserService } from "../../domains/userService";
 
 export const loginRouter = Router();
 
