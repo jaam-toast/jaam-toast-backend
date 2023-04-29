@@ -201,8 +201,9 @@ export class mongodbContentsClient implements ContentsClient {
       [key: string]: string | number | boolean | ObjectId;
     };
   }) {
+    const page = pagination?.page ?? 1;
     const limit = pagination?.pageLength || Config.MAX_NUMBER_PER_PAGE;
-    const skip = (pagination?.page ?? 0) * limit;
+    const skip = (page - 1) * limit;
     const sortOptions = sort
       ? sort.reduce((sortOptions, option) => {
           const sortOrders = Object.values(option).map(order =>

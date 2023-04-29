@@ -14,7 +14,7 @@ export const FrameWorkPresets: Record<
   },
   NextJs: {
     buildCommand: "next build && next export",
-    buildDirectory: "out",
+    buildDirectory: ".next",
   },
   NuxtJs: {
     buildCommand: "nuxt generate",
