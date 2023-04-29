@@ -1,14 +1,10 @@
 import { injectable } from "inversify";
-import {
-  Document,
-  InsertOneResult,
-  MongoClient,
-  ObjectId,
-  WithId,
-} from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { ContentsClient } from "../config/di.config";
 
 import Config from "../config";
+
+import type { Contents } from "src/types/contents";
 
 @injectable()
 export class MongodbContentsClient implements ContentsClient {
@@ -79,7 +75,7 @@ export class MongodbContentsClient implements ContentsClient {
   }: {
     projectName: string;
     schemaName: string;
-    contents: { [key: string]: string };
+    contents: Omit<Contents, "_id">;
   }) {
     try {
       const result = await this.client
@@ -102,7 +98,7 @@ export class MongodbContentsClient implements ContentsClient {
     projectName: string;
     schemaName: string;
     contentsId: string;
-    contents: unknown;
+    contents: Partial<Contents>;
   }) {
     try {
       await this.client
@@ -183,7 +179,7 @@ export class MongodbContentsClient implements ContentsClient {
     return this.client
       .db(projectName)
       .collection(schemaName)
-      .find(filterOptions, {
+      .find<Contents>(filterOptions, {
         limit,
         skip,
       })

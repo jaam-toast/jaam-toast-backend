@@ -66,14 +66,14 @@ export interface ContentsClient {
   createContents: (createContentsOptions: {
     projectName: string;
     schemaName: string;
-    contents: { [key: string]: string };
+    contents: Contents;
   }) => Promise<string>;
 
   updateContents: (updateContentsOptions: {
     projectName: string;
     schemaName: string;
     contentsId: string;
-    contents: unknown;
+    contents: Partial<Contents>;
   }) => Promise<void>;
 
   deleteContents: (deleteContentsOptions: {
