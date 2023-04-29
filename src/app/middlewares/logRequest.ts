@@ -1,10 +1,10 @@
 import morgan from "morgan";
-import { Logger as log } from "../../utils/Logger";
+import { Logger as log } from "../../@utils/Logger";
 
 import type { StreamOptions } from "morgan";
 
 const stream: StreamOptions = {
-  write: message => log.request(message),
+  write: message => log.debug(message),
 };
 
 const skip = () => {
