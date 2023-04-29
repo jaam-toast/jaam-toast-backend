@@ -66,7 +66,7 @@ export interface ContentsClient {
   createContents: (createContentsOptions: {
     projectName: string;
     schemaName: string;
-    contents: Contents;
+    contents: Omit<Contents, "_id">;
   }) => Promise<string>;
 
   updateContents: (updateContentsOptions: {
