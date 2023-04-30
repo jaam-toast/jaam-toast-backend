@@ -2,6 +2,7 @@ export class BaseError<ErrorName extends string> extends Error {
   name: ErrorName;
   message: string;
   cause?: string;
+  stack?: string;
 
   constructor({
     name,
@@ -18,6 +19,7 @@ export class BaseError<ErrorName extends string> extends Error {
 
     if (error instanceof Error) {
       this.cause = error.message;
+      this.stack = error.stack;
     }
   }
 }
