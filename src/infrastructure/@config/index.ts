@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
-
 const Config = {
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN!,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID!,
