@@ -77,23 +77,22 @@ projectsRouter.post(
     const projectOptions = req.body;
     const { projectName, userId } = projectOptions;
 
-    const tokenClient = container.get<TokenClient>("JwtTokenClient");
-    const storageKey = tokenClient.createToken({
-      payload: { projectName },
-      key: Config.STORAGE_JWT_SECRET,
-    });
-
     res.status(201).json({
       message: "ok",
       result: {
         projectName,
-        storageKey,
       },
     });
 
     const projectService = container.get<ProjectService>("ProjectService");
     const userService = container.get<UserService>("UserService");
+    const tokenClient = container.get<TokenClient>("JwtTokenClient");
+
     const createProjectOptions = omit(projectOptions, ["userId"]);
+    const storageKey = tokenClient.createToken({
+      payload: { projectName },
+      key: Config.STORAGE_JWT_SECRET,
+    });
 
     try {
       await projectService.createProject({
