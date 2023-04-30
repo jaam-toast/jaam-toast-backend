@@ -77,12 +77,18 @@ loginRouter.get(
       githubAccessToken,
     });
 
-    const secure = Config.NODE_ENV === "production";
+    const productionCookieOptions =
+      Config.NODE_ENV === "production"
+        ? {
+            secure: true,
+            httpOnly: true,
+          }
+        : {};
     const cookieOptions = {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: "lax",
-      secure,
+      ...productionCookieOptions,
     } as const;
 
     const { referer } = req.headers;
