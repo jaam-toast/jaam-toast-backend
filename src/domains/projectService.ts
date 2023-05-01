@@ -426,6 +426,7 @@ export class ProjectService {
     pagination,
     sort,
     filter,
+    contentsId,
   }: {
     projectName: string;
     schemaName: string;
@@ -439,6 +440,7 @@ export class ProjectService {
     filter?: {
       [key: string]: string | number | boolean;
     };
+    contentsId?: string;
   }) {
     try {
       const [project] = await this.readProjectData({ projectName });
@@ -456,6 +458,14 @@ export class ProjectService {
       }
     } catch (error) {
       throw error;
+    }
+
+    if (!!contentsId) {
+      return this.contentsClient.getContents({
+        projectName,
+        schemaName,
+        filter: { id: contentsId },
+      });
     }
 
     const sortQueries = sort?.map(sortOption => {

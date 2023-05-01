@@ -47,8 +47,8 @@ container
  * Infrastructure Layer
  */
 
-/*
-* @Contents Client - Contents를 저장할 Storage와 Contents를 생성할 수 있습니다.
+/**
+ * Contents Client: Contents를 저장할 Storage와 Contents를 생성할 수 있습니다.
 */
 export interface ContentsClient {
   createStorage: (createStorageOptions: {
@@ -95,7 +95,15 @@ export interface ContentsClient {
     filter?: {
       [key: string]: string | number | boolean;
     };
-  }) => Promise<Contents[]>;
+  }) => Promise<(Contents | null)[]>;
+
+  getContentsTotalCount: (getContentsTotalCountOptions: {
+    projectName: string;
+    schemaName: string;
+    filter?: {
+      [key: string]: string | number | boolean;
+    };
+  }) => Promise<number>;
 }
 
 container

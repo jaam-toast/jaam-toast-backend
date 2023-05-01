@@ -153,6 +153,15 @@ export class MongodbContentsClient implements ContentsClient {
       [key: string]: string | number | boolean;
     };
   }) {
+    if (!!filter?.id && typeof filter.id === "string") {
+      const contents = await this.client
+        .db(projectName)
+        .collection(schemaName)
+        .findOne<Contents>({ _id: new ObjectId(filter.id) });
+
+      return [contents];
+    }
+
     const page = pagination?.page ?? 1;
     const limit = pagination?.pageLength || Config.MAX_NUMBER_PER_PAGE;
     const skip = (page - 1) * limit;
