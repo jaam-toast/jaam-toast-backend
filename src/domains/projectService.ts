@@ -1,6 +1,5 @@
 import { inject, injectable } from "inversify";
 import * as _ from "lodash";
-import { formatISO } from "date-fns";
 
 import Config from "../@config";
 
@@ -311,7 +310,7 @@ export class ProjectService {
   }) {
     try {
       const [project] = await this.readProjectData({ projectName });
-      const createdAt = formatISO(new Date());
+      const createdAt = new Date().toISOString();
 
       if (!project) {
         throw new Error("Cannot find project");
@@ -357,7 +356,7 @@ export class ProjectService {
   }) {
     try {
       const [project] = await this.readProjectData({ projectName });
-      const updatedAt = formatISO(new Date());
+      const updatedAt = new Date().toISOString();
 
       if (!project) {
         throw new Error("Cannot find project");
@@ -485,6 +484,19 @@ export class ProjectService {
       pagination,
       sort: sortQueries,
       filter,
+    });
+  }
+
+  public async getContentsTotalCounts({
+    projectName,
+    schemaName,
+  }: {
+    projectName: string;
+    schemaName: string;
+  }) {
+    return this.contentsClient.getContentsTotalCount({
+      projectName,
+      schemaName,
     });
   }
 }

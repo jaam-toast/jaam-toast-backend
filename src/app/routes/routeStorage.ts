@@ -127,9 +127,17 @@ storageRouter.get(
       sort: sortOptions,
     });
 
+    const totalCounts = await projectService.getContentsTotalCounts({
+      projectName,
+      schemaName,
+    });
+
     return res.status(200).json({
       message: "ok",
-      result: contents,
+      result: {
+        totalCounts,
+        contents,
+      },
     });
   }),
 );
@@ -150,7 +158,6 @@ storageRouter.get(
     const contents = await projectService.getContents({
       projectName,
       schemaName,
-      filter: { projectName: contentsId },
     });
 
     return res.status(200).json({
