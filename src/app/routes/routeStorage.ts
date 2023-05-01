@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { z } from "zod";
-import { ObjectId } from "mongodb";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
@@ -155,14 +154,15 @@ storageRouter.get(
     const { schemaName, contentsId } = req.params;
     const projectService = container.get<ProjectService>("ProjectService");
 
-    const contents = await projectService.getContents({
+    const [contents] = await projectService.getContents({
       projectName,
       schemaName,
+      contentsId,
     });
 
     return res.status(200).json({
       message: "ok",
-      result: contents[0],
+      result: contents,
     });
   }),
 );
