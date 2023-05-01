@@ -10,7 +10,7 @@ import type { Contents } from "src/@types/contents";
 export class MongodbContentsClient implements ContentsClient {
   private static _client: MongoClient | null = null;
 
-  get client(): MongoClient {
+  private get client(): MongoClient {
     if (!MongodbContentsClient._client) {
       throw new Error(
         "The connection to the contents database was not established.",
@@ -20,7 +20,7 @@ export class MongodbContentsClient implements ContentsClient {
     return MongodbContentsClient._client;
   }
 
-  static async connect() {
+  public static async connect() {
     MongodbContentsClient._client = new MongoClient(
       Config.CONTENTS_DATABASE_URL,
     );
@@ -32,7 +32,7 @@ export class MongodbContentsClient implements ContentsClient {
     }
   }
 
-  static async close() {
+  public static async close() {
     await MongodbContentsClient._client?.close();
 
     MongodbContentsClient._client = null;
@@ -185,5 +185,22 @@ export class MongodbContentsClient implements ContentsClient {
       })
       .sort(sortOptions)
       .toArray();
+  }
+
+  async getContentsTotalCount({
+    projectName,
+    schemaName,
+    filter,
+  }: {
+    projectName: string;
+    schemaName: string;
+    filter?: {
+      [key: string]: string | number | boolean;
+    };
+  }) {
+    return this.client
+      .db(projectName)
+      .collection(schemaName)
+      .countDocuments({ filter });
   }
 }
