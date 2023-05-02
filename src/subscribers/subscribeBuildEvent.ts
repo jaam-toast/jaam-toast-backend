@@ -1,7 +1,7 @@
-import { container } from "src/@config/di.config";
-import { subscribeEvent } from "src/@utils/emitEvent";
+import { container } from "../@config/di.config";
+import { subscribeEvent } from "../@utils/emitEvent";
 
-import type { BuildService } from "src/domains/BuildService";
+import type { BuildService } from "../domains/BuildService";
 
 const buildService = container.get<BuildService>("BuildService");
 

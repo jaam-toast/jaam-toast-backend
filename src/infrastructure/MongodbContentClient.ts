@@ -4,7 +4,7 @@ import { ContentClient } from "../@config/di.config";
 
 import Config from "../@config";
 
-import type { Content } from "src/@types/content";
+import type { Content } from "../@types/content";
 
 @injectable()
 export class MongodbContentClient implements ContentClient {

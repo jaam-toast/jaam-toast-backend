@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import Config from "../../@config";
 import { waitFor } from "../../@utils/waitFor";
 import { emitEvent } from "../../@utils/emitEvent";
-import { UnknownError, ValidateError } from "src/@utils/defineErrors";
+import { UnknownError, ValidateError } from "../../@utils/defineErrors";
 
 import type {
   ContentClient,
@@ -11,8 +11,8 @@ import type {
   Repository,
   SchemaClient,
 } from "../../@config/di.config";
-import type { Schema } from "src/@types/schema";
-import type { Project } from "src/@types/project";
+import type { Schema } from "../../@types/schema";
+import type { Project } from "../../@types/project";
 
 @injectable()
 export class StorageService {

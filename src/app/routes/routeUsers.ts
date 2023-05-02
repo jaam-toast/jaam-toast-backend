@@ -7,7 +7,7 @@ import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { handleAsync } from "../utils/handleAsync";
 
 import type { UserService } from "../../domains/UserService";
-import type { UserRepository } from "src/domains/UserRepository";
+import type { UserRepository } from "../../domains/UserRepository";
 
 export const usersRouter = Router();
 

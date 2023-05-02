@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 
 import Config from "./@config";
 
-import type { DomainClient } from "src/@config/di.config";
+import type { DomainClient } from "../@config/di.config";
 
 const CLOUDFLARE_TIMEOUT = 1000 * 10;
 

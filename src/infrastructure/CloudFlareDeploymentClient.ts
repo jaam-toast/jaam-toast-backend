@@ -6,7 +6,7 @@ import * as log from "../@utils/log";
 import { UnknownError } from "../@utils/defineErrors";
 import { runCommand } from "../@utils/runCommand";
 
-import type { DeploymentClient } from "src/@config/di.config";
+import type { DeploymentClient } from "../@config/di.config";
 
 const CLOUDFLARE_TIMEOUT = 1000 * 10;
 

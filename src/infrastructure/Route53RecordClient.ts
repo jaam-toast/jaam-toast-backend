@@ -8,7 +8,7 @@ import {
 
 import Config from "./@config";
 
-import type { RecordClient } from "src/@config/di.config";
+import type { RecordClient } from "../@config/di.config";
 
 @injectable()
 export class Route53RecordClient implements RecordClient {

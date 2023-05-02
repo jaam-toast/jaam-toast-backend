@@ -6,9 +6,9 @@ import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../@config/di.config";
 
-import type { StorageService } from "src/domains/StorageService";
+import type { StorageService } from "../../domains/StorageService";
 import type { Repository } from "../../@config/di.config";
-import type { Project } from "src/@types/project";
+import type { Project } from "../../@types/project";
 
 export const schema = z.object({
   schemaName: z.string(),
