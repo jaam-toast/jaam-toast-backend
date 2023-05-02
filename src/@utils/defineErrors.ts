@@ -1,4 +1,4 @@
-import { BaseError } from "./BaseError";
+import { BaseError } from "../@types/baseError";
 
 export type ErrorName =
   | "ValidateError"
