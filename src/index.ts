@@ -1,16 +1,17 @@
 import "reflect-metadata";
+import "./subscribers";
 
+import Config from "./@config";
 import { createApp } from "./app/createApp";
+import { connectDatabase } from "./app/connectDatabase";
 import { createServer } from "./app/createServer";
 import { createSocket } from "./app/createSocket";
-import { connectDB } from "./infrastructure/mongodb";
-import Config from "./@config";
 
 async function startServer(): Promise<void> {
   const app = await createApp();
-
-  await connectDB(Config.DATABASE_URL);
   const server = await createServer(app);
+
+  await connectDatabase();
   await createSocket({ server, clientOrigin: Config.CLIENT_URL });
 }
 
