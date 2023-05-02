@@ -4,5 +4,5 @@ export type User = {
   userGithubUri: string;
   userImage?: string;
   githubAccessToken: string;
-  projects?: string[];
+  projects: string[];
 };
