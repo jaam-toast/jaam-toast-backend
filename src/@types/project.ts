@@ -15,7 +15,7 @@ export type Project = {
   envList: Env[];
   storageKey: string;
 
-  buildDomain?: string;
+  buildDomain?: string[];
   buildOriginalDomain?: string;
   cmsDomain?: string;
   cmsToken?: string;
