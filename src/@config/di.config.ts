@@ -1,17 +1,26 @@
 import { Container } from "inversify";
 import "reflect-metadata";
 
-import { ProjectService } from "../domains/projectService";
-import { BuildService } from "../domains/buildService";
-import { CmsService } from "../domains/cmsService";
-import { UserService } from "../domains/userService";
-import { MongodbContentsClient } from "../infrastructure/mongodbContentsClient";
-import { MongodbDatabaseClient } from "../infrastructure/mongodbDatabaseClient";
-import { JwtTokenClient } from "../infrastructure/jwtTokenClient";
-import { AjvSchemaClient } from "../infrastructure/ajvSchemaClient";
+import { ProjectRepository } from "../domains/ProjectRepository";
+import { UserRepository } from "../domains/UserRepository";
+import { StorageService } from "../domains/StorageService";
+import { ContentService } from "../domains/ContentsService";
+import { BuildService } from "../domains/BuildService";
+import { UserService } from "../domains/UserService";
+import { CloudFlareDeploymentClient } from "../infrastructure/CloudFlareDeploymentClient";
+import { CloudFlareDomainClient } from "../infrastructure/CloudFlareDomainClient";
+import { MongodbContentClient } from "../infrastructure/MongodbContentClient";
+import { MongodbDatabaseClient } from "../infrastructure/MongodbDatabaseClient";
+import { JwtTokenClient } from "../infrastructure/JwtTokenClient";
+import { AjvSchemaClient } from "../infrastructure/AjvSchemaClient";
+import { Route53RecordClient } from "../infrastructure/Route53RecordClient";
+import { SocketClient } from "../infrastructure/SocketClient";
+import { GithubClient } from "../infrastructure/GithubClient";
 
 import type { Schema } from "../@types/schema";
-import type { Contents } from "../@types/contents";
+import type { Content } from "../@types/content";
+import type { Project } from "../@types/project";
+import type { User } from "../@types/user";
 
 /**
  * - 의존성 등록
@@ -28,29 +37,100 @@ export const container = new Container();
  * Domain Layer
  */
 container
-  .bind<ProjectService>("ProjectService")
-  .to(ProjectService);
-
-container
   .bind<BuildService>("BuildService")
   .to(BuildService);
 
 container
-  .bind<CmsService>("CmsService")
-  .to(CmsService);
+  .bind<StorageService>("StorageService")
+  .to(StorageService);
+
+container
+  .bind<ContentService>("ContentService")
+  .to(ContentService)
 
 container
   .bind<UserService>("UserService")
   .to(UserService);
 
 /**
+ * Repository
+ */
+export interface Repository<Document> {
+  createDocument: (createDocumentOptions: {
+    document: Document;
+  }) => Promise<string[]>;
+
+  readDocument: (readDocumentOptions: {
+    documentId?: string;
+    filter?: { [key: string]: string | number | boolean };
+  }) => Promise<(Document | null)[]>;
+
+  updateDocument: (updateDocumentOptions: {
+    documentId: string;
+    document: Partial<Document>;
+  }) => Promise<void>;
+
+  deleteDocument: (deleteDocumentOptions: {
+    documentId: string;
+  }) => Promise<void>;
+}
+
+container
+  .bind<Repository<Project>>("ProjectRepository")
+  .to(ProjectRepository);
+
+container
+  .bind<Repository<User>>("UserRepository")
+  .to(UserRepository);
+
+/**
  * Infrastructure Layer
  */
 
+// Build Client
+export interface DeploymentClient {
+  createDeployment: ({
+    projectName,
+    resourcePath,
+  }: {
+    projectName: string;
+    resourcePath: string;
+  }) => Promise<string>;
+
+  getDeploymentStauts: (getDeploymentStautsOptions: {
+    projectName: string;
+  }) => Promise<boolean>;
+
+  deleteDeployment: (deleteDeploymentOptions: {
+    projectName: string;
+  }) => Promise<void>;
+}
+
+container
+  .bind<DeploymentClient>("CloudFlareDeploymentClient")
+  .to(CloudFlareDeploymentClient);
+
+// Domain Client
+export interface DomainClient {
+  addDomain: (addDomainOptions: {
+    projectName: string;
+    domain: string;
+  }) => Promise<void>;
+
+  removeDomain: (removeDomainOptions: {
+    projectName: string;
+    domain: string;
+  }) => Promise<void>;
+}
+
+container
+  .bind<DomainClient>("CloudFlareDomainClient")
+  .to(CloudFlareDomainClient);
+
 /**
- * Contents Client: Contents를 저장할 Storage와 Contents를 생성할 수 있습니다.
+ * Content Client: Content를 저장할 Storage와 Content를 생성할 수 있습니다.
 */
-export interface ContentsClient {
+export interface ContentClient {
   createStorage: (createStorageOptions: {
     jsonSchema: {
       title: string;
@@ -63,26 +143,26 @@ export interface ContentsClient {
     schemaName: string;
   }) => Promise<void>;
 
-  createContents: (createContentsOptions: {
+  createContent: (createContentOptions: {
     projectName: string;
     schemaName: string;
-    contents: Omit<Contents, "_id">;
+    content: Omit<Content, "_id">;
   }) => Promise<string>;
 
-  updateContents: (updateContentsOptions: {
+  updateContent: (updateContentOptions: {
     projectName: string;
     schemaName: string;
-    contentsId: string;
-    contents: Partial<Contents>;
+    contentId: string;
+    content: Partial<Content>;
   }) => Promise<void>;
 
-  deleteContents: (deleteContentsOptions: {
+  deleteContent: (deleteContentOptions: {
     projectName: string;
     schemaName: string;
-    contentsIds: string[];
+    contentIds: string[];
   }) => Promise<void>;
 
-  getContents: (getContentsOptions: {
+  queryContents: (getContentOptions: {
     projectName: string;
     schemaName: string;
     pagination?: {
@@ -95,7 +175,7 @@ export interface ContentsClient {
     filter?: {
       [key: string]: string | number | boolean;
     };
-  }) => Promise<(Contents | null)[]>;
+  }) => Promise<(Content | null)[]>;
 
   getContentsTotalCount: (getContentsTotalCountOptions: {
     projectName: string;
@@ -107,11 +187,11 @@ export interface ContentsClient {
 }
 
 container
-  .bind<ContentsClient>("MongoDBContentsClient")
-  .to(MongodbContentsClient);
+  .bind<ContentClient>("MongodbContentClient")
+  .to(MongodbContentClient);
 
-/*
- * @Database Client - Database와 관련된 동작들(create, read, update, delete)을 수행합니다.
+/**
+ * Database Client: Database와 관련된 동작들(create, read, update, delete)을 수행합니다.
 */
 export interface DatabaseClient {
   create: <Document extends { [key: string]: unknown }>(createOptions: {
@@ -124,7 +204,7 @@ export interface DatabaseClient {
     dbName: string;
     collectionName: string;
     id?: string | string[];
-    filter?: { [key: string]: string };
+    filter?: { [key: string]: string | number | boolean };
   }) => Promise<(Document | null)[]>;
 
   update: <Document extends { [key: string]: unknown }>(updateOptions: {
@@ -144,11 +224,11 @@ export interface DatabaseClient {
 }
 
 container
-  .bind<DatabaseClient>("MongoDBDatabaseClient")
+  .bind<DatabaseClient>("MongodbDatabaseClient")
   .to(MongodbDatabaseClient);
 
-/*
- * @Token Client - Token을 생성하고 검증합니다.
+/**
+ * Token Client: Token을 생성하고 검증합니다.
 */
 export interface TokenClient {
   createToken: ({
@@ -187,8 +267,8 @@ container
   .bind<TokenClient>("JwtTokenClient")
   .to(JwtTokenClient);
 
-/*
- * @Schema Client - Schema 형식을 검증하고, Schema에 맞게 data를 검증합니다.
+/**
+ * Schema Client: Schema 형식을 검증하고, Schema에 맞게 data를 검증합니다.
 */
 export interface SchemaClient {
   validateSchema: (validateSchemaOptions: {
@@ -204,3 +284,48 @@ export interface SchemaClient {
 container
   .bind<SchemaClient>("AjvSchemaClient")
   .to(AjvSchemaClient);
+
+/**
+ * A Record / CNAME을 생성, 삭제하고 status를 가져올 수 있습니다.
+*/
+export interface RecordClient {
+  createARecord: (createARecordOptions: {
+    recordName: string;
+  }) => Promise<string>;
+
+  deleteARecord: (deleteARecordOptions: {
+    recordName: string;
+  }) => Promise<void>;
+
+  createCNAME: (createCNAMEOptions: {
+    recordName: string;
+    recordValue: string;
+  }) => Promise<string>;
+
+  deleteCNAME: (deleteCNAMEOptions: {
+    recordName: string;
+    recordValue: string;
+  }) => Promise<void>;
+
+  getRecordStatus: (getRecordStatusOptions: {
+    recordId: string;
+  }) => Promise<boolean>;
+}
+
+container
+  .bind<RecordClient>("Route53RecordClient")
+  .to(Route53RecordClient);
+
+/**
+ * Socket Client
+*/
+container
+  .bind<SocketClient>("SocketClient")
+  .to(SocketClient);
+
+/**
+ * Github Client
+*/
+container
+  .bind<GithubClient>("GithubClient")
+  .to(GithubClient);
