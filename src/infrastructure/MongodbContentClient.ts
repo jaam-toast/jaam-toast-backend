@@ -1,41 +1,41 @@
 import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
-import { ContentsClient } from "../@config/di.config";
+import { ContentClient } from "../@config/di.config";
 
 import Config from "../@config";
 
-import type { Contents } from "src/@types/contents";
+import type { Content } from "src/@types/content";
 
 @injectable()
-export class MongodbContentsClient implements ContentsClient {
+export class MongodbContentClient implements ContentClient {
   private static _client: MongoClient | null = null;
 
   private get client(): MongoClient {
-    if (!MongodbContentsClient._client) {
+    if (!MongodbContentClient._client) {
       throw new Error(
-        "The connection to the contents database was not established.",
+        "The connection to the content database was not established.",
       );
     }
 
-    return MongodbContentsClient._client;
+    return MongodbContentClient._client;
   }
 
   public static async connect() {
-    MongodbContentsClient._client = new MongoClient(
+    MongodbContentClient._client = new MongoClient(
       Config.CONTENTS_DATABASE_URL,
     );
 
     try {
-      await MongodbContentsClient._client.connect();
+      await MongodbContentClient._client.connect();
     } catch (error) {
       throw error;
     }
   }
 
   public static async close() {
-    await MongodbContentsClient._client?.close();
+    await MongodbContentClient._client?.close();
 
-    MongodbContentsClient._client = null;
+    MongodbContentClient._client = null;
   }
 
   async createStorage({
@@ -68,20 +68,20 @@ export class MongodbContentsClient implements ContentsClient {
     }
   }
 
-  async createContents({
+  async createContent({
     projectName,
     schemaName,
-    contents,
+    content,
   }: {
     projectName: string;
     schemaName: string;
-    contents: Omit<Contents, "_id">;
+    content: Omit<Content, "_id">;
   }) {
     try {
       const result = await this.client
         .db(projectName)
         .collection(schemaName)
-        .insertOne(contents);
+        .insertOne(content);
 
       return result.insertedId.toString();
     } catch (error) {
@@ -89,43 +89,43 @@ export class MongodbContentsClient implements ContentsClient {
     }
   }
 
-  async updateContents({
+  async updateContent({
     projectName,
     schemaName,
-    contentsId,
-    contents,
+    contentId,
+    content,
   }: {
     projectName: string;
     schemaName: string;
-    contentsId: string;
-    contents: Partial<Contents>;
+    contentId: string;
+    content: Partial<Content>;
   }) {
     try {
       await this.client
         .db(projectName)
         .collection(schemaName)
-        .updateOne({ _id: new ObjectId(contentsId) }, { $set: contents });
+        .findOneAndUpdate({ _id: new ObjectId(contentId) }, { $set: content });
     } catch (error) {
       throw error;
     }
   }
 
-  async deleteContents({
+  async deleteContent({
     projectName,
     schemaName,
-    contentsIds,
+    contentIds,
   }: {
     projectName: string;
     schemaName: string;
-    contentsIds: string[];
+    contentIds: string[];
   }) {
     try {
       await Promise.allSettled(
-        contentsIds.map(contentsId =>
+        contentIds.map(contentId =>
           this.client
             .db(projectName)
             .collection(schemaName)
-            .deleteOne({ _id: new ObjectId(contentsId) }),
+            .deleteOne({ _id: new ObjectId(contentId) }),
         ),
       );
     } catch (error) {
@@ -133,7 +133,7 @@ export class MongodbContentsClient implements ContentsClient {
     }
   }
 
-  async getContents({
+  async queryContents({
     projectName,
     schemaName,
     pagination,
@@ -154,12 +154,12 @@ export class MongodbContentsClient implements ContentsClient {
     };
   }) {
     if (!!filter?.id && typeof filter.id === "string") {
-      const contents = await this.client
+      const content = await this.client
         .db(projectName)
         .collection(schemaName)
-        .findOne<Contents>({ _id: new ObjectId(filter.id) });
+        .findOne<Content>({ _id: new ObjectId(filter.id) });
 
-      return [contents];
+      return [content];
     }
 
     const page = pagination?.page ?? 1;
@@ -188,7 +188,7 @@ export class MongodbContentsClient implements ContentsClient {
     return this.client
       .db(projectName)
       .collection(schemaName)
-      .find<Contents>(filterOptions, {
+      .find<Content>(filterOptions, {
         limit,
         skip,
       })
