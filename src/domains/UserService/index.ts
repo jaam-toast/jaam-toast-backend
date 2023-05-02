@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import type { User } from "../../@types/user";
 import type { Repository } from "../../@config/di.config";
-import type { GithubClient } from "src/infrastructure/GithubClient";
+import type { GithubClient } from "../../infrastructure/GithubClient";
 
 @injectable()
 export class UserService {

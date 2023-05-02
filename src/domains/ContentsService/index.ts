@@ -4,9 +4,9 @@ import type {
   ContentClient,
   Repository,
   SchemaClient,
-} from "src/@config/di.config";
-import type { Project } from "src/@types/project";
-import { NotFoundError, ValidateError } from "src/@utils/defineErrors";
+} from "../../@config/di.config";
+import type { Project } from "../../@types/project";
+import { NotFoundError, ValidateError } from "../../@utils/defineErrors";
 
 @injectable()
 export class ContentService {

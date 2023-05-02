@@ -16,7 +16,7 @@ export type Project = {
   storageKey: string;
 
   buildDomain?: string[];
-  buildOriginalDomain?: string;
+  originalBuildDomain?: string;
   cmsDomain?: string;
   cmsToken?: string;
 

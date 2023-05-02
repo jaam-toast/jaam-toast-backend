@@ -1,4 +1,4 @@
-import { container } from "src/@config/di.config";
+import { container } from "../@config/di.config";
 import { SocketClient } from "../infrastructure/SocketClient";
 import * as log from "../@utils/log";
 

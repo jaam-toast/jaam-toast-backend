@@ -16,7 +16,7 @@ import type {
   DomainClient,
   RecordClient,
 } from "../../@config/di.config";
-import type { SocketClient } from "src/infrastructure/SocketClient";
+import type { SocketClient } from "../../infrastructure/SocketClient";
 
 const RESOURCES_PATH = "./resources";
 

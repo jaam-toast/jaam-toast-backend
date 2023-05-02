@@ -9,7 +9,7 @@ import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
 
 import type { TokenClient } from "../../@config/di.config";
-import type { ContentService } from "src/domains/ContentsService";
+import type { ContentService } from "../../domains/ContentsService";
 
 export const storageRouter = Router();
 

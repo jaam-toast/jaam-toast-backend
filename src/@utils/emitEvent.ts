@@ -1,4 +1,4 @@
-import { BaseError } from "src/@types/baseError";
+import { BaseError } from "../@types/baseError";
 import * as log from "./log";
 
 import type { Events } from "./defineEvents";
