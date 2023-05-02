@@ -1,5 +1,6 @@
 import { injectable } from "inversify";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 import type { SchemaClient } from "../@config/di.config";
 import type { Schema } from "../@types/schema";
@@ -8,6 +9,7 @@ import type { Schema } from "../@types/schema";
 export class AjvSchemaClient implements SchemaClient {
   validateSchema({ schema }: { schema: Schema }) {
     const ajv = new Ajv();
+    addFormats(ajv);
 
     try {
       ajv.compile(schema);
@@ -20,6 +22,7 @@ export class AjvSchemaClient implements SchemaClient {
 
   validateData({ schema, data }: { schema: Schema; data: unknown }) {
     const ajv = new Ajv();
+    addFormats(ajv);
 
     try {
       const validate = ajv.compile(schema);
