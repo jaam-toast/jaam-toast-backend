@@ -1,19 +1,34 @@
 import { Router } from "express";
-import { z } from "zod";
-import { omit } from "lodash";
 import createError from "http-errors";
+import { z } from "zod";
 
+import Config from "../../@config";
+import { container } from "../../@config/di.config";
+import { ProjectStatus } from "../../@types/project";
 import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
-import { BUILD_MESSAGE } from "../../@config/constants";
-import { ProjectService } from "../../domains/projectService";
-import { UserService } from "../../domains/userService";
-import { container } from "../../@config/di.config";
 import { handleAsync } from "../utils/handleAsync";
-import { Logger as log } from "../../@utils/Logger";
-import Config from "../../@config";
+import { emitEvent } from "../../@utils/emitEvent";
 
+import type { Project } from "../../@types/project";
+import type { Repository } from "../../@config/di.config";
 import type { TokenClient } from "../../@config/di.config";
+
+const CLIENT_FRAMEWORK_INFO = {
+  "Create React App": "CreateReactApp",
+  "React Static": "ReactStatic",
+  "Next.js (Static HTML Export)": "NextJs",
+  "Nuxt.js": "NuxtJs",
+  "Angular (Angular CLI)": "Angular",
+  Astro: "Astro",
+  Gatsby: "Gatsby",
+  GitBook: "GitBook",
+  Jekyll: "Jekyll",
+  Remix: "Remix",
+  Svelte: "Svelte",
+  Vue: "Vue",
+  VuePress: "VuePress",
+} as const;
 
 const project = z.object({
   userId: z.string(),
@@ -21,7 +36,6 @@ const project = z.object({
   repoName: z.string(),
   repoCloneUrl: z.string(),
   projectName: z.string(),
-  projectUpdatedAt: z.string(),
   framework: z.union([
     z.literal("Create React App"),
     z.literal("React Static"),
@@ -48,22 +62,6 @@ const project = z.object({
   nodeVersion: z.string().default("12.18.0"),
 });
 
-const CLIENT_FRAMEWORK_INFO = {
-  "Create React App": "CreateReactApp",
-  "React Static": "ReactStatic",
-  "Next.js (Static HTML Export)": "NextJs",
-  "Nuxt.js": "NuxtJs",
-  "Angular (Angular CLI)": "Angular",
-  Astro: "Astro",
-  Gatsby: "Gatsby",
-  GitBook: "GitBook",
-  Jekyll: "Jekyll",
-  Remix: "Remix",
-  Svelte: "Svelte",
-  Vue: "Vue",
-  VuePress: "VuePress",
-} as const;
-
 export const projectsRouter = Router();
 
 projectsRouter.use("/projects", verifyAccessToken);
@@ -73,38 +71,40 @@ projectsRouter.post(
   parseRequest({
     body: project,
   }),
-  handleAsync(async (req, res) => {
-    const projectOptions = req.body;
-    const { projectName, userId } = projectOptions;
+  handleAsync(async (req, res, next) => {
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
+    const tokenClient = container.get<TokenClient>("JwtTokenClient");
+
+    const { projectName, framework } = req.body;
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
+
+    if (!!project) {
+      return next(createError(400, "Project is already exist."));
+    }
 
     res.status(201).json({
       message: "ok",
-      result: {
-        projectName,
-      },
     });
 
-    const projectService = container.get<ProjectService>("ProjectService");
-    const userService = container.get<UserService>("UserService");
-    const tokenClient = container.get<TokenClient>("JwtTokenClient");
-
-    const createProjectOptions = omit(projectOptions, ["userId"]);
     const storageKey = tokenClient.createToken({
       payload: { projectName },
       key: Config.STORAGE_JWT_SECRET,
     });
 
-    try {
-      await projectService.createProject({
-        ...createProjectOptions,
-        storageKey,
-        framework: CLIENT_FRAMEWORK_INFO[createProjectOptions.framework],
-        schemaList: [],
-      });
-      await userService.addProject({ userId, projectName });
-    } catch (error) {
-      log.serverError(BUILD_MESSAGE.CREATE_ERROR.FAIL_PROJECT_CREATION);
-    }
+    emitEvent("CREATE_PROJECT", {
+      ...req.body,
+      status: ProjectStatus.pending,
+      framework: CLIENT_FRAMEWORK_INFO[framework],
+      schemaList: [],
+      storageKey,
+    });
+
+    emitEvent("CREATE_STORAGE", {
+      projectName,
+    });
   }),
 );
 
@@ -116,13 +116,16 @@ projectsRouter.get(
     }),
   }),
   handleAsync(async (req, res, next) => {
-    const { projectName } = req.params;
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
 
-    const projectService = container.get<ProjectService>("ProjectService");
-    const project = await projectService.getByProjectName(projectName);
+    const { projectName } = req.params;
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
 
     if (!project) {
-      return next(createError(400, "Project data does not exist."));
+      return next(createError(404, "Project data does not exist."));
     }
 
     const [framework] =
@@ -167,14 +170,8 @@ projectsRouter.delete(
     }),
   }),
   handleAsync(async (req, res) => {
-    const { username } = req.app.locals;
+    const { userId } = req.app.locals;
     const { projectName } = req.params;
-
-    const projectService = container.get<ProjectService>("ProjectService");
-    const userService = container.get<UserService>("UserService");
-
-    await projectService.deleteProject({ projectName });
-    await userService.deleteProject({ username, projectName });
 
     return res.status(204).json({
       message: "ok",
