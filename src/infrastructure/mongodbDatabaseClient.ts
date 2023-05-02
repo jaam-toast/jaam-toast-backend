@@ -11,7 +11,7 @@ export class MongodbDatabaseClient implements DatabaseClient {
   get client(): MongoClient {
     if (!MongodbDatabaseClient._client) {
       throw new Error(
-        "The connection to the contents database was not established.",
+        "The connection to the content database was not established.",
       );
     }
 
@@ -79,7 +79,7 @@ export class MongodbDatabaseClient implements DatabaseClient {
     dbName: string;
     collectionName: string;
     id?: string | string[];
-    filter?: { [key: string]: string };
+    filter?: { [key: string]: string | number | boolean };
   }): Promise<(Document | null)[]> {
     if (!!id && !!filter) {
       throw new Error("Choose the one database option.");
