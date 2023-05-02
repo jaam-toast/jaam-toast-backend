@@ -9,3 +9,5 @@ logs/*
 .DS_Store
 
 .yarn/
+
+resources

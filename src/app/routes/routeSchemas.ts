@@ -1,11 +1,14 @@
 import { Router } from "express";
+import createError from "http-errors";
 import { z } from "zod";
 
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
 import { container } from "../../@config/di.config";
 
-import type { ProjectService } from "../../domains/projectService";
+import type { StorageService } from "src/domains/StorageService";
+import type { Repository } from "../../@config/di.config";
+import type { Project } from "src/@types/project";
 
 export const schema = z.object({
   schemaName: z.string(),
@@ -16,26 +19,10 @@ export const schema = z.object({
     properties: z.record(
       z.object({
         type: z.string(),
-        minLength: z
-          .string()
-          .refine(val => !!Number(val))
-          .transform(val => Number(val))
-          .optional(),
-        maxLength: z
-          .string()
-          .refine(val => !!Number(val))
-          .transform(val => Number(val))
-          .optional(),
-        minimum: z
-          .string()
-          .refine(val => !!Number(val))
-          .transform(val => Number(val))
-          .optional(),
-        maximum: z
-          .string()
-          .refine(val => !!Number(val))
-          .transform(val => Number(val))
-          .optional(),
+        minLength: z.number().optional(),
+        maxLength: z.number().optional(),
+        minimum: z.number().optional(),
+        maximum: z.number().optional(),
         description: z.string().optional(),
         format: z.string().optional(),
       }),
@@ -55,15 +42,18 @@ schemasRouter.post(
     }),
   }),
   handleAsync(async (req, res, next) => {
+    const storageService = container.get<StorageService>("StorageService");
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
+
     const { schemaName, schema } = req.body;
     const { projectName } = req.params;
-    const projectService = container.get<ProjectService>("ProjectService");
-    const project = await projectService.getByProjectName(projectName);
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
 
     if (!project) {
-      return res.status(400).json({
-        message: "Cannot find project.",
-      });
+      return next(createError(404, "Cannot find project."));
     }
 
     const isSchemaExist = !!project.schemaList.find(
@@ -71,12 +61,10 @@ schemasRouter.post(
     );
 
     if (isSchemaExist) {
-      return res.status(400).json({
-        message: "Schema is already exist.",
-      });
+      return next(createError(400, "Schema is already exist."));
     }
 
-    await projectService.addSchema({
+    await storageService.addSchema({
       projectName,
       schemaName,
       schema,
@@ -98,15 +86,18 @@ schemasRouter.put(
     }),
   }),
   handleAsync(async (req, res, next) => {
+    const storageService = container.get<StorageService>("StorageService");
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
+
     const { schemaName, projectName } = req.params;
     const { schema } = req.body;
-    const projectService = container.get<ProjectService>("ProjectService");
-    const project = await projectService.getByProjectName(projectName);
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
 
     if (!project) {
-      return res.status(400).json({
-        message: "Cannot find project.",
-      });
+      return next(createError(404, "Cannot find project."));
     }
 
     const isSchemaExist = !!project.schemaList.find(
@@ -114,12 +105,10 @@ schemasRouter.put(
     );
 
     if (!isSchemaExist) {
-      return res.status(400).json({
-        message: "Cannot find schema.",
-      });
+      return next(createError(404, "Cannot find schema."));
     }
 
-    await projectService.updateSchema({
+    await storageService.updateSchema({
       projectName,
       schemaName: schema.title,
       schema,
@@ -140,14 +129,17 @@ schemasRouter.delete(
     }),
   }),
   handleAsync(async (req, res, next) => {
-    const projectService = container.get<ProjectService>("ProjectService");
+    const storageService = container.get<StorageService>("StorageService");
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
+
     const { projectName, schemaName } = req.params;
-    const project = await projectService.getByProjectName(projectName);
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
 
     if (!project) {
-      return res.status(400).json({
-        message: "Cannot find project.",
-      });
+      return next(createError(404, "Cannot find project."));
     }
 
     const isSchemaExist = !!project.schemaList.find(
@@ -155,12 +147,10 @@ schemasRouter.delete(
     );
 
     if (!isSchemaExist) {
-      return res.status(400).json({
-        message: "Cannot find schema.",
-      });
+      return next(createError(404, "Cannot find schema."));
     }
 
-    await projectService.deleteSchema({
+    await storageService.deleteSchema({
       projectName,
       schemaName,
     });

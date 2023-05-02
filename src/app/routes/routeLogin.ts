@@ -1,16 +1,14 @@
 import { Router } from "express";
 import { z } from "zod";
-import jwt from "jsonwebtoken";
 import createError from "http-errors";
 
+import Config from "../../@config";
+import { container, TokenClient } from "../../@config/di.config";
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../@config/di.config";
-import { OauthClient } from "../../infrastructure/github";
-import { Github } from "../../infrastructure/github";
-import Config from "../../@config";
 
-import type { UserService } from "../../domains/userService";
+import type { UserService } from "../../domains/UserService";
+import type { GithubClient } from "../../infrastructure/GithubClient";
 
 export const loginRouter = Router();
 
@@ -22,6 +20,10 @@ loginRouter.get(
     }),
   }),
   handleAsync(async (req, res, next) => {
+    const githubClient = container.get<GithubClient>("GithubClient");
+    const userService = container.get<UserService>("UserService");
+    const tokenClient = container.get<TokenClient>("JwtTokenClient");
+
     const { code } = req.query;
 
     if (!code) {
@@ -30,8 +32,7 @@ loginRouter.get(
       );
     }
 
-    const oauthClient = new OauthClient();
-    const githubAccessToken = await oauthClient.getToken(code);
+    const githubAccessToken = await githubClient.getToken({ code });
 
     if (!githubAccessToken) {
       return next(
@@ -42,8 +43,9 @@ loginRouter.get(
       );
     }
 
-    const github = new Github(githubAccessToken);
-    const githubData = await github.getUserData();
+    const githubData = await githubClient.getUserData({
+      accessToken: githubAccessToken,
+    });
 
     if (!githubData) {
       return next(
@@ -51,21 +53,21 @@ loginRouter.get(
       );
     }
 
-    const userService = container.get<UserService>("UserService");
     const userData = await userService.login({
       username: githubData.login,
       userGithubUri: githubData.url,
-      userImage: githubData.avatar_url,
+      userImage: githubData.avatar_url ?? "",
       githubAccessToken,
     });
 
-    const userPayload = {
-      username: userData?.username,
-      userGithubUri: userData?.userGithubUri,
-      userImage: userData?.userImage,
-    };
-    const accessToken = jwt.sign(userPayload, Config.JWT_SECRET, {
-      expiresIn: "1d",
+    const accessToken = tokenClient.createToken({
+      payload: {
+        username: githubData.login,
+        userGithubUri: githubData.url,
+        userImage: githubData.avatar_url ?? "",
+      },
+      key: Config.JWT_SECRET,
+      options: { expiresIn: "1d" },
     });
 
     const loginData = JSON.stringify({
@@ -80,8 +82,8 @@ loginRouter.get(
     const productionCookieOptions =
       Config.NODE_ENV === "production"
         ? {
-            secure: true,
             httpOnly: true,
+            secure: true,
           }
         : {};
     const cookieOptions = {

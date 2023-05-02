@@ -1,31 +1,31 @@
 import { Router } from "express";
+import createError from "http-errors";
 import { z } from "zod";
+import { omit } from "lodash";
 
+import Config from "../../@config";
+import { container } from "../../@config/di.config";
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../@config/di.config";
-import Config from "../../@config";
 
-import type { ProjectService } from "../../domains/projectService";
 import type { TokenClient } from "../../@config/di.config";
+import type { ContentService } from "src/domains/ContentsService";
 
 export const storageRouter = Router();
 
 storageRouter.use(
   "/storage",
   handleAsync(async (req, res, next) => {
-    const storageKey = req.headers.authorization?.replace("Bearer ", "") ?? "";
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
+    const storageKey = req.headers.authorization?.replace("Bearer ", "") ?? "";
     const payload = tokenClient.validateToken({
       token: storageKey,
       key: Config.STORAGE_JWT_SECRET,
     });
 
     if (!payload) {
-      return res.status(401).json({
-        message: "not authorized",
-      });
+      return next(createError(401, "not authorized"));
     }
 
     req.app.locals.projectName = payload.projectName;
@@ -40,22 +40,23 @@ storageRouter.post(
     params: z.object({
       schemaName: z.string(),
     }),
-    body: z.record(z.string()),
+    body: z.record(z.unknown()),
   }),
   handleAsync(async (req, res, next) => {
+    const contentService = container.get<ContentService>("ContentService");
+
     const { schemaName } = req.params;
     const { projectName } = req.app.locals;
-    const projectService = container.get<ProjectService>("ProjectService");
 
-    const contents = await projectService.createContents({
+    const content = await contentService.createContent({
       projectName,
       schemaName,
-      contents: req.body,
+      content: req.body,
     });
 
     return res.status(201).json({
       message: "ok",
-      result: contents,
+      result: content,
     });
   }),
 );
@@ -76,10 +77,11 @@ storageRouter.get(
       .optional(),
   }),
   handleAsync(async (req, res, next) => {
+    const contentService = container.get<ContentService>("ContentService");
+
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
     const { page, pageLength, sort, order } = req?.query ?? {};
-    const projectService = container.get<ProjectService>("ProjectService");
 
     const pagination = {
       ...(page && { page: Number(page) }),
@@ -119,14 +121,14 @@ storageRouter.get(
       return [];
     })();
 
-    const contents = await projectService.getContents({
+    const contents = await contentService.queryContents({
       projectName,
       schemaName,
       pagination,
       sort: sortOptions,
     });
 
-    const totalCounts = await projectService.getContentsTotalCounts({
+    const totalCounts = await contentService.getContentsTotalCounts({
       projectName,
       schemaName,
     });
@@ -142,50 +144,51 @@ storageRouter.get(
 );
 
 storageRouter.get(
-  "/storage/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
-      contentsId: z.string(),
+      contentId: z.string(),
     }),
   }),
-  handleAsync(async (req, res, next) => {
-    const { projectName } = req.app.locals;
-    const { schemaName, contentsId } = req.params;
-    const projectService = container.get<ProjectService>("ProjectService");
+  handleAsync(async (req, res) => {
+    const contentService = container.get<ContentService>("ContentService");
 
-    const [contents] = await projectService.getContents({
+    const { projectName } = req.app.locals;
+    const { schemaName, contentId } = req.params;
+    const [content] = await contentService.queryContents({
       projectName,
       schemaName,
-      contentsId,
+      contentId,
     });
 
     return res.status(200).json({
       message: "ok",
-      result: contents,
+      result: content,
     });
   }),
 );
 
 storageRouter.put(
-  "/storage/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
-      contentsId: z.string(),
+      contentId: z.string(),
     }),
     body: z.record(z.unknown()),
   }),
   handleAsync(async (req, res, next) => {
-    const { projectName } = req.app.locals;
-    const { schemaName, contentsId } = req.params;
-    const projectService = container.get<ProjectService>("ProjectService");
+    const contentService = container.get<ContentService>("ContentService");
 
-    await projectService.updateContents({
+    const { projectName } = req.app.locals;
+    const { schemaName, contentId } = req.params;
+
+    await contentService.updateContent({
       projectName,
       schemaName,
-      contentsId,
-      contents: req.body,
+      contentId,
+      content: omit(req.body, ["_id"]),
     });
 
     return res.status(200).json({
@@ -195,22 +198,23 @@ storageRouter.put(
 );
 
 storageRouter.delete(
-  "/storage/:schemaName/contents/:contentsId",
+  "/storage/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
-      contentsId: z.string(),
+      contentId: z.string(),
     }),
   }),
   handleAsync(async (req, res, next) => {
-    const { projectName } = req.app.locals;
-    const { schemaName, contentsId } = req.params;
-    const projectService = container.get<ProjectService>("ProjectService");
+    const contentService = container.get<ContentService>("ContentService");
 
-    await projectService.deleteContents({
+    const { projectName } = req.app.locals;
+    const { schemaName, contentId } = req.params;
+
+    await contentService.deleteContent({
       projectName,
       schemaName: schemaName,
-      contentsIds: [contentsId],
+      contentIds: [contentId],
     });
 
     return res.status(200).json({
@@ -226,19 +230,20 @@ storageRouter.delete(
       schemaName: z.string(),
     }),
     query: z.object({
-      contentsId: z.union([z.string(), z.array(z.string())]),
+      contentId: z.union([z.string(), z.array(z.string())]),
     }),
   }),
-  handleAsync(async (req, res, next) => {
+  handleAsync(async (req, res) => {
+    const contentService = container.get<ContentService>("ContentService");
+
     const { projectName } = req.app.locals;
     const { schemaName } = req.params;
-    const { contentsId } = req.query;
-    const projectService = container.get<ProjectService>("ProjectService");
+    const { contentId } = req.query;
 
-    await projectService.deleteContents({
+    await contentService.deleteContent({
       projectName,
       schemaName: schemaName,
-      contentsIds: Array.isArray(contentsId) ? contentsId : [contentsId],
+      contentIds: Array.isArray(contentId) ? contentId : [contentId],
     });
 
     return res.status(200).json({

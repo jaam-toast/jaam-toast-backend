@@ -1,16 +1,39 @@
 import { Router } from "express";
 import { z } from "zod";
 
+import { container } from "../../@config/di.config";
 import { parseRequest } from "../middlewares/parseRequest";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { handleAsync } from "../utils/handleAsync";
-import { container } from "../../@config/di.config";
 
-import type { UserService } from "../../domains/userService";
+import type { UserService } from "../../domains/UserService";
+import type { UserRepository } from "src/domains/UserRepository";
 
 export const usersRouter = Router();
 
 usersRouter.use("/users", verifyAccessToken);
+
+usersRouter.get(
+  "/users/:userId",
+  parseRequest({
+    params: z.object({
+      userId: z.string().regex(/^[a-f\d]{24}$/i),
+    }),
+  }),
+  handleAsync(async (req, res) => {
+    const userRepository = container.get<UserRepository>("UserRepository");
+
+    const { userId } = req.params;
+    const [user] = await userRepository.readDocument({
+      documentId: userId,
+    });
+
+    return res.json({
+      message: "ok",
+      result: user,
+    });
+  }),
+);
 
 usersRouter.get(
   "/users/:userId/orgs",
@@ -23,10 +46,10 @@ usersRouter.get(
     }),
   }),
   handleAsync(async (req, res) => {
-    const { githubAccessToken } = req.query;
-
     const userService = container.get<UserService>("UserService");
-    const orgsData = await userService.getUserGithubOrgs({
+
+    const { githubAccessToken } = req.query;
+    const orgsData = await userService.getUserOrganizations({
       githubAccessToken,
     });
 
@@ -48,10 +71,10 @@ usersRouter.get(
     }),
   }),
   handleAsync(async (req, res) => {
-    const { githubAccessToken } = req.query;
-
     const userService = container.get<UserService>("UserService");
-    const sortedUserReposList = await userService.getUserGithubRepos({
+
+    const { githubAccessToken } = req.query;
+    const sortedUserReposList = await userService.getUserRepositories({
       githubAccessToken,
     });
 
@@ -70,14 +93,16 @@ usersRouter.get(
     }),
   }),
   handleAsync(async (req, res) => {
-    const { userId } = req.params;
+    const userRepository = container.get<UserRepository>("UserRepository");
 
-    const userService = container.get<UserService>("UserService");
-    const userProjects = await userService.getUserProjects({ userId });
+    const { userId } = req.params;
+    const [user] = await userRepository.readDocument({
+      documentId: userId,
+    });
 
     return res.json({
       message: "ok",
-      result: userProjects,
+      result: user?.projects ?? [],
     });
   }),
 );
@@ -94,11 +119,11 @@ usersRouter.get(
     }),
   }),
   handleAsync(async (req, res, next) => {
+    const userService = container.get<UserService>("UserService");
+
     const { githubAccessToken } = req.query;
     const { org } = req.params;
-
-    const userService = container.get<UserService>("UserService");
-    const organizationReposList = await userService.getUserGithubOrgsRepos({
+    const organizationReposList = await userService.getUserOrganizationsRepos({
       githubAccessToken,
       org,
     });
