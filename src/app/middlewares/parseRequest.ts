@@ -20,31 +20,35 @@ export function parseRequest<
   return (req, res, next) => {
     try {
       if (schema.body) {
-        schema.body.parseAsync(req.body);
+        schema.body.parse(req.body);
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        next(createError(400, "Request body validation failed."));
+        return next(createError(400, "Request body validation failed."));
       }
     }
 
     try {
       if (schema.params) {
-        schema.params.parseAsync(req.params);
+        schema.params.parse(req.params);
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        next(createError(400, "Request path Variables validation failed."));
+        return next(
+          createError(400, "Request path Variables validation failed."),
+        );
       }
     }
 
     try {
       if (schema.query) {
-        schema.query.parseAsync(req.query);
+        schema.query.parse(req.query);
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        next(createError(400, "Request Query params validation failed."));
+        return next(
+          createError(400, "Request Query params validation failed."),
+        );
       }
     }
 
