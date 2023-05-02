@@ -1,4 +1,4 @@
-import { Logger as log } from "../../@utils/Logger";
+import * as log from "../../@utils/log";
 
 import type { ErrorRequestHandler } from "express";
 
