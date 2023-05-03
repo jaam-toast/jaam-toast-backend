@@ -58,58 +58,47 @@ export class UserService {
     });
   }
 
-  public async getUserRepositories({
-    githubAccessToken,
-  }: {
-    githubAccessToken: string;
-  }) {
+  public async getSpaces({ githubAccessToken }: { githubAccessToken: string }) {
     try {
-      const repositories = await this.githubClient.getRepos({
+      const { installations } = await this.githubClient.getUserInstallations({
         accessToken: githubAccessToken,
       });
 
-      return repositories.map(repo => ({
-        repoName: repo.full_name,
-        repoCloneUrl: repo.clone_url,
-        repoUpdatedAt: repo.updated_at,
-      }));
+      return installations
+        ? installations.map(({ id, account }) => ({
+            installId: id,
+            spaceName: account.login,
+            spaceUrl: account.repos_url,
+            spaceImage: account.avatar_url,
+          }))
+        : [];
     } catch (error) {
       throw error;
     }
   }
 
-  public async getUserOrganizations({
+  public async getSpaceRepos({
     githubAccessToken,
+    spaceId,
   }: {
     githubAccessToken: string;
+    spaceId: string;
   }) {
-    const orgs = await this.githubClient.getOrgs({
-      accessToken: githubAccessToken,
-    });
+    try {
+      const { repositories } = await this.githubClient.getInstallationRepos({
+        accessToken: githubAccessToken,
+        spaceId,
+      });
 
-    return orgs.map(org => ({
-      spaceName: org.login,
-      spaceUrl: org.repos_url,
-      spaceImage: org.avatar_url,
-    }));
-  }
-
-  public async getUserOrganizationsRepos({
-    githubAccessToken,
-    org,
-  }: {
-    githubAccessToken: string;
-    org: string;
-  }) {
-    const repositories = await this.githubClient.getOrgRepos({
-      org,
-      accessToken: githubAccessToken,
-    });
-
-    return repositories.map(repo => ({
-      repoName: repo.full_name,
-      repoCloneUrl: repo.clone_url,
-      repoUpdatedAt: repo.updated_at,
-    }));
+      return repositories
+        ? repositories.map(repo => ({
+            repoName: repo.full_name,
+            repoCloneUrl: repo.clone_url,
+            repoUpdatedAt: repo.updated_at,
+          }))
+        : [];
+    } catch (error) {
+      throw error;
+    }
   }
 }

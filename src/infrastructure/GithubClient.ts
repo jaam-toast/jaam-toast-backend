@@ -37,12 +37,74 @@ export class GithubClient {
         params: {
           client_id: Config.GITHUB_CLIENT_ID,
           client_secret: Config.GITHUB_CLIENT_SECRET,
+          redirect_uri: Config.GITHUB_REDIRECT_URL,
           code,
         },
       },
     );
 
     return data.access_token;
+  }
+
+  async getUserInstallations({ accessToken }: { accessToken: string }) {
+    type GithubInstallation = {
+      installations?: {
+        id: number;
+        account: {
+          id: number;
+          login: string;
+          avatar_url: string;
+          repos_url: string;
+          url: string;
+          type: string;
+        };
+        repository_selection: "selected";
+      }[];
+      total_count: number;
+    };
+
+    const { data } = await this.dataClient.get<GithubInstallation>(
+      "/user/installations",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    return data;
+  }
+
+  async getInstallationRepos({
+    accessToken,
+    spaceId,
+  }: {
+    accessToken: string;
+    spaceId: string;
+  }) {
+    try {
+      type GetInstallationRepos = {
+        total_count: number;
+        repositories: {
+          full_name: string;
+          clone_url: string;
+          updated_at: string;
+        }[];
+      };
+
+      const { data } = await this.dataClient.get<GetInstallationRepos>(
+        `/user/installations/${spaceId}/repositories`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserData({ accessToken }: { accessToken: string }) {
@@ -58,211 +120,6 @@ export class GithubClient {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getRepos({ accessToken }: { accessToken: string }) {
-    try {
-      type GetGithubRepos = Endpoints["GET /user/repos"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubRepos>(
-        "/user/repos",
-        {
-          params: {
-            visibility: "public",
-            affiliation: "owner",
-            sort: "updated",
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getOrgs({ accessToken }: { accessToken: string }) {
-    try {
-      type GetGithubOrgs =
-        Endpoints["GET /users/{username}/orgs"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubOrgs>("/user/orgs", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getOrgRepos({
-    accessToken,
-    org,
-  }: {
-    accessToken: string;
-    org: string;
-  }) {
-    try {
-      type GetGithubOrgRepos =
-        Endpoints["GET /orgs/{org}/repos"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubOrgRepos>(
-        `/orgs/${org}/repos`,
-        {
-          params: {
-            visibility: "public",
-            affiliation: "organization_member",
-            sort: "updated",
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getRepoWebhook({
-    accessToken,
-    repoOwner,
-    repoName,
-  }: {
-    accessToken: string;
-    repoOwner: string;
-    repoName: string;
-  }) {
-    try {
-      type GetGithubWebhooks =
-        Endpoints["GET /repos/{owner}/{repo}/hooks"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubWebhooks>(
-        `/repos/${repoOwner}/${repoName}/hooks`,
-        {
-          params: {
-            owner: `${repoOwner}`,
-            repo: `${repoName}`,
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async createRepoWebhook({
-    accessToken,
-    repoOwner,
-    repoName,
-  }: {
-    accessToken: string;
-    repoOwner: string;
-    repoName: string;
-  }) {
-    try {
-      type PostGithubWebhooks =
-        Endpoints["POST /repos/{owner}/{repo}/hooks"]["response"]["data"];
-
-      const { data } = await this.dataClient.post<PostGithubWebhooks>(
-        `/repos/${repoOwner}/${repoName}/hooks`,
-        {
-          name: "web",
-          active: true,
-          events: ["push"],
-          config: {
-            url: `${Config.GITHUB_WEBHOOK_PAYLOAD_URL}`,
-            content_type: "json",
-            insecure_ssl: "0",
-            secret: `${Config.GITHUB_WEBHOOK_SECRET_KEY}`,
-          },
-        },
-        {
-          params: {
-            owner: repoOwner,
-            repo: repoName,
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getCommits({
-    accessToken,
-    repoOwner,
-    repoName,
-  }: {
-    accessToken: string;
-    repoOwner: string;
-    repoName: string;
-  }) {
-    try {
-      type GetGithubCommits =
-        Endpoints["GET /repos/{owner}/{repo}/commits"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubCommits>(
-        `/repos/${repoOwner}/${repoName}/commits`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getHeadCommitMessage({
-    accessToken,
-    repoOwner,
-    repoName,
-    commitRef,
-  }: {
-    accessToken: string;
-    repoOwner: string;
-    repoName: string;
-    commitRef: string;
-  }) {
-    try {
-      type GetGithubPullRequestCommits =
-        Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"]["response"]["data"];
-
-      const { data } = await this.dataClient.get<GetGithubPullRequestCommits>(
-        `/repos/${repoOwner}/${repoName}/commits/${commitRef}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
 
       return data;
     } catch (error) {

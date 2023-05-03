@@ -36,7 +36,7 @@ usersRouter.get(
 );
 
 usersRouter.get(
-  "/users/:userId/orgs",
+  "/users/:userId/spaces",
   parseRequest({
     params: z.object({
       userId: z.string().regex(/^[a-f\d]{24}$/i),
@@ -49,22 +49,23 @@ usersRouter.get(
     const userService = container.get<UserService>("UserService");
 
     const { githubAccessToken } = req.query;
-    const orgsData = await userService.getUserOrganizations({
+    const spaces = await userService.getSpaces({
       githubAccessToken,
     });
 
     return res.json({
       message: "ok",
-      result: orgsData,
+      result: spaces,
     });
   }),
 );
 
 usersRouter.get(
-  "/users/:userId/repos",
+  "/users/:userId/spaces/:spaceId/repos",
   parseRequest({
     params: z.object({
       userId: z.string().regex(/^[a-f\d]{24}$/i),
+      spaceId: z.string(),
     }),
     query: z.object({
       githubAccessToken: z.string(),
@@ -74,13 +75,15 @@ usersRouter.get(
     const userService = container.get<UserService>("UserService");
 
     const { githubAccessToken } = req.query;
-    const sortedUserReposList = await userService.getUserRepositories({
+    const { spaceId } = req.params;
+    const repos = await userService.getSpaceRepos({
       githubAccessToken,
+      spaceId,
     });
 
     return res.json({
       message: "ok",
-      result: sortedUserReposList,
+      result: repos,
     });
   }),
 );
@@ -103,34 +106,6 @@ usersRouter.get(
     return res.json({
       message: "ok",
       result: user?.projects ?? [],
-    });
-  }),
-);
-
-usersRouter.get(
-  "/users/:userId/orgs/:org/repos",
-  parseRequest({
-    params: z.object({
-      userId: z.string().regex(/^[a-f\d]{24}$/i),
-      org: z.string(),
-    }),
-    query: z.object({
-      githubAccessToken: z.string(),
-    }),
-  }),
-  handleAsync(async (req, res, next) => {
-    const userService = container.get<UserService>("UserService");
-
-    const { githubAccessToken } = req.query;
-    const { org } = req.params;
-    const organizationReposList = await userService.getUserOrganizationsRepos({
-      githubAccessToken,
-      org,
-    });
-
-    return res.json({
-      message: "ok",
-      result: organizationReposList,
     });
   }),
 );
