@@ -128,6 +128,41 @@ export class Route53RecordClient implements RecordClient {
     }
   }
 
+  async upsertCNAME({
+    recordName,
+    recordValue,
+  }: {
+    recordName: string;
+    recordValue: string;
+  }) {
+    try {
+      const command = new ChangeResourceRecordSetsCommand({
+        HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
+        ChangeBatch: {
+          Comment: `Upsert a record CNAME`,
+          Changes: [
+            {
+              Action: "UPSERT",
+              ResourceRecordSet: {
+                Name: recordName,
+                Type: RRType.CNAME,
+                TTL: 300,
+                ResourceRecords: [{ Value: recordValue }],
+              },
+            },
+          ],
+        },
+      });
+      const { ChangeInfo } = await this.client.send(command);
+
+      if (!ChangeInfo?.Id) {
+        throw new Error("Failed to upsert record");
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async deleteCNAME({
     recordName,
     recordValue,
@@ -142,7 +177,7 @@ export class Route53RecordClient implements RecordClient {
           Comment: `Delete a record CNAME`,
           Changes: [
             {
-              Action: "DELTE",
+              Action: "DELETE",
               ResourceRecordSet: {
                 Name: recordName,
                 Type: RRType.CNAME,
