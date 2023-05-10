@@ -1,38 +1,4 @@
-import { Schema } from "./schema";
-
-export type Project = {
-  _id?: string;
-  space?: string;
-  repoName: string;
-  repoCloneUrl: string;
-  projectName: string;
-  projectUpdatedAt?: string;
-
-  framework: Framework;
-  nodeVersion?: string;
-  installCommand: string;
-  buildCommand: string;
-  envList: Env[];
-  storageKey: string;
-
-  buildDomain?: string[];
-  originalBuildDomain?: string;
-  cmsDomain?: string;
-  cmsToken?: string;
-
-  schemaList: {
-    schemaName: string;
-    schema: Schema;
-  }[];
-  contentList?: string[];
-  assetStorageUrl?: string;
-
-  webhookId?: number;
-  lastCommitMessage?: string;
-  lastCommitHash?: string;
-
-  status?: ProjectStatus;
-};
+import type { Schema } from "./schema";
 
 export type Framework =
   | "CreateReactApp"
@@ -55,7 +21,45 @@ export type Env = {
 };
 
 export enum ProjectStatus {
-  pending = "pending",
-  success = "success",
-  fail = "fail",
+  Pending = "PENDING",
+  Ready = "READY",
+  Fail = "FAIL",
 }
+
+export type WebhookEvents =
+  | "DEPLOYMENT_UPDATED"
+  | "CONTENT_CREATED"
+  | "CONTENT_UPDATED"
+  | "CONTENT_DELETED";
+
+export type Webhook = {
+  name: string;
+  url: string;
+  events: WebhookEvents[];
+};
+
+export type Project = {
+  _id: string;
+  projectName: string;
+  status: ProjectStatus;
+  projectUpdatedAt: string;
+
+  space: string;
+  repoName: string;
+  repoCloneUrl: string;
+  framework: Framework;
+  nodeVersion: string;
+  installCommand: string;
+  buildCommand: string;
+  envList: Env[];
+
+  storageKey: string;
+  schemaList: {
+    schemaName: string;
+    schema: Schema;
+  }[];
+  webhookList: Webhook[];
+  buildDomain?: string[];
+  cmsDomain?: string;
+  assetStorageUrl?: string;
+};

@@ -57,7 +57,7 @@ container
  */
 export interface Repository<Document> {
   createDocument: (createDocumentOptions: {
-    document: Document;
+    document: Omit<Document, "_id">;
   }) => Promise<string[]>;
 
   readDocument: (readDocumentOptions: {
@@ -90,19 +90,19 @@ container
 // Build Client
 export interface DeploymentClient {
   createDeployment: ({
-    projectName,
+    deploymentName,
     resourcePath,
   }: {
-    projectName: string;
+    deploymentName: string;
     resourcePath: string;
   }) => Promise<string>;
 
   getDeploymentStauts: (getDeploymentStautsOptions: {
-    projectName: string;
+    deploymentName: string;
   }) => Promise<boolean>;
 
   deleteDeployment: (deleteDeploymentOptions: {
-    projectName: string;
+    deploymentName: string;
   }) => Promise<void>;
 }
 

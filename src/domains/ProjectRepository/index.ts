@@ -15,8 +15,8 @@ export class ProjectRepository implements Repository<Project> {
     this.databaseClient = mongodbDatabaseClient;
   }
 
-  public createDocument({ document }: { document: Project }) {
-    return this.databaseClient.create<Project>({
+  public createDocument({ document }: { document: Omit<Project, "_id"> }) {
+    return this.databaseClient.create<Omit<Project, "_id">>({
       dbName: Config.APP_DB_NAME,
       collectionName: "projects",
       document,
