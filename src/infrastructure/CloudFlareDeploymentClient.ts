@@ -22,10 +22,10 @@ export class CloudFlareDeploymentClient implements DeploymentClient {
   });
 
   async createDeployment({
-    projectName,
+    deploymentName,
     resourcePath,
   }: {
-    projectName: string;
+    deploymentName: string;
     resourcePath: string;
   }) {
     try {
@@ -40,7 +40,7 @@ export class CloudFlareDeploymentClient implements DeploymentClient {
         success: boolean;
       }>("/", {
         latest_deployment: null,
-        name: projectName,
+        name: deploymentName,
         production_branch: "main",
       });
 
@@ -52,7 +52,7 @@ export class CloudFlareDeploymentClient implements DeploymentClient {
 
       await runCommand({
         command: [
-          `CLOUDFLARE_ACCOUNT_ID=${Config.CLOUDFLARE_ACCOUNT_ID} CLOUDFLARE_API_TOKEN=${Config.CLOUDFLARE_API_TOKEN} npx wrangler pages publish ${resourcePath} --project-name ${projectName} --branch main`,
+          `CLOUDFLARE_ACCOUNT_ID=${Config.CLOUDFLARE_ACCOUNT_ID} CLOUDFLARE_API_TOKEN=${Config.CLOUDFLARE_API_TOKEN} npx wrangler pages publish ${resourcePath} --project-name ${deploymentName} --branch main`,
           "rm -rf buildResource",
         ],
         onStdout: log.debug,
@@ -70,9 +70,9 @@ export class CloudFlareDeploymentClient implements DeploymentClient {
     }
   }
 
-  async deleteDeployment({ projectName }: { projectName: string }) {
+  async deleteDeployment({ deploymentName }: { deploymentName: string }) {
     try {
-      const { data } = await this.cloudFlareApi.delete(`/${projectName}`);
+      const { data } = await this.cloudFlareApi.delete(`/${deploymentName}`);
 
       return data;
     } catch (error) {
@@ -83,9 +83,9 @@ export class CloudFlareDeploymentClient implements DeploymentClient {
     }
   }
 
-  async getDeploymentStauts({ projectName }: { projectName: string }) {
+  async getDeploymentStauts({ deploymentName }: { deploymentName: string }) {
     try {
-      const { data } = await this.cloudFlareApi.get(`/${projectName}`);
+      const { data } = await this.cloudFlareApi.get(`/${deploymentName}`);
 
       return data;
     } catch (error) {

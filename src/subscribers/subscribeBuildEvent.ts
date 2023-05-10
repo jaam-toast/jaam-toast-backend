@@ -2,8 +2,12 @@ import { container } from "../@config/di.config";
 import { subscribeEvent } from "../@utils/emitEvent";
 
 import type { BuildService } from "../domains/BuildService";
+import type { Repository } from "../@config/di.config";
+import type { Project } from "../@types/project";
 
 const buildService = container.get<BuildService>("BuildService");
+const projectRepository =
+  container.get<Repository<Project>>("ProjectRepository");
 
 subscribeEvent(
   "CREATE_PROJECT",
@@ -16,7 +20,7 @@ subscribeEvent(
     buildCommand,
     envList,
   }) => {
-    buildService.createDeployment({
+    buildService.createBuild({
       repoName,
       repoCloneUrl,
       projectName,
@@ -27,3 +31,35 @@ subscribeEvent(
     });
   },
 );
+
+subscribeEvent("UPDATE_PROJECT", async ({ isRedeployUpdate, ...payload }) => {
+  if (!isRedeployUpdate) {
+    return;
+  }
+
+  const [project] = await projectRepository.readDocument({
+    documentId: payload.projectName,
+  });
+
+  if (!project) {
+    return;
+  }
+
+  const newEnvList = payload.envList
+    ? project.envList.concat(payload.envList)
+    : null;
+
+  buildService.createBuild({
+    projectName: payload.projectName,
+    repoName: project.repoName,
+    framework: project.framework,
+    repoCloneUrl: payload.repoCloneUrl ?? project.repoCloneUrl,
+    installCommand: payload.installCommand ?? project.installCommand,
+    buildCommand: payload.buildCommand ?? project.buildCommand,
+    envList: newEnvList ?? project.envList,
+  });
+});
+
+subscribeEvent("DELETE_PROJECT", ({ projectName }) => {
+  buildService.deleteBuild({ projectName });
+});
