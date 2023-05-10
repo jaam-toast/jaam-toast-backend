@@ -103,10 +103,8 @@ export class StorageService {
 
       emitEvent("SCHEMA_CREATED", {
         projectName,
-        schemaList: project.schemaList.concat({
-          schemaName,
-          schema,
-        }),
+        schemaName,
+        schema,
       });
     } catch (error) {
       // TODO: fill error message.
@@ -154,7 +152,8 @@ export class StorageService {
 
       emitEvent("SCHEMA_UPDATED", {
         projectName,
-        schemaList: updatedSchemaList,
+        schemaName,
+        schema,
       });
     } catch (error) {
       throw new Error("Cannot update user info.");
@@ -187,13 +186,9 @@ export class StorageService {
         throw new Error();
       }
 
-      const updatedSchemaList = project.schemaList.filter(
-        projectSchema => projectSchema.schemaName !== schemaName,
-      );
-
       emitEvent("SCHEMA_DELETED", {
         projectName,
-        schemaList: updatedSchemaList,
+        schemaName,
       });
     } catch (error) {
       throw new UnknownError("Cannot update user info.", error);

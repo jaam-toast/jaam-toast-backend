@@ -1,8 +1,9 @@
 import { injectable } from "inversify";
 import { MongoClient, ObjectId } from "mongodb";
-import { DatabaseClient } from "../@config/di.config";
 
 import Config from "../@config";
+
+import type { DatabaseClient } from "../@config/di.config";
 
 @injectable()
 export class MongodbDatabaseClient implements DatabaseClient {
