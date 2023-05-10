@@ -5,8 +5,10 @@ import type {
   Repository,
   SchemaClient,
 } from "../../@config/di.config";
-import type { Project } from "../../@types/project";
 import { NotFoundError, ValidateError } from "../../@utils/defineErrors";
+import { emitEvent } from "../../@utils/emitEvent";
+
+import type { Project } from "../../@types/project";
 
 @injectable()
 export class ContentService {
@@ -70,6 +72,16 @@ export class ContentService {
           _updatedAt: createdAt,
         },
       });
+
+      emitEvent("CONTENT_CREATED", {
+        projectName,
+        schema: schemaData.schema,
+        content: {
+          ...content,
+          _createdAt: createdAt,
+          _updatedAt: createdAt,
+        },
+      });
     } catch (error) {
       throw new Error("Cannot create content");
     }
@@ -114,10 +126,19 @@ export class ContentService {
         throw new ValidateError();
       }
 
-      return this.contentClient.updateContent({
+      this.contentClient.updateContent({
         projectName,
         schemaName,
         contentId,
+        content: {
+          ...content,
+          _updatedAt: updatedAt,
+        },
+      });
+
+      emitEvent("CONTENT_UPDATED", {
+        projectName,
+        schema: schemaData.schema,
         content: {
           ...content,
           _updatedAt: updatedAt,
@@ -145,9 +166,12 @@ export class ContentService {
       if (!project) {
         throw new NotFoundError("Cannot find project");
       }
-      if (
-        !project.schemaList.find(schema => schema.schemaName === schemaName)
-      ) {
+
+      const schemaData = project.schemaList.find(
+        schema => schema.schemaName === schemaName,
+      );
+
+      if (!schemaData) {
         throw new NotFoundError("Cannot find schema");
       }
 
@@ -155,6 +179,11 @@ export class ContentService {
         projectName,
         schemaName,
         contentIds,
+      });
+
+      emitEvent("CONTENT_DELETED", {
+        projectName,
+        schema: schemaData.schema,
       });
     } catch (error) {
       throw error;
