@@ -1,6 +1,7 @@
 import { Router } from "express";
 import createError from "http-errors";
 import { z } from "zod";
+import { isEmpty } from "lodash";
 
 import Config from "../../@config";
 import { container } from "../../@config/di.config";
@@ -30,38 +31,6 @@ const CLIENT_FRAMEWORK_INFO = {
   VuePress: "VuePress",
 } as const;
 
-const project = z.object({
-  userId: z.string(),
-  space: z.string(),
-  repoName: z.string(),
-  repoCloneUrl: z.string(),
-  projectName: z.string(),
-  framework: z.union([
-    z.literal("Create React App"),
-    z.literal("React Static"),
-    z.literal("Next.js (Static HTML Export)"),
-    z.literal("Nuxt.js"),
-    z.literal("Angular (Angular CLI)"),
-    z.literal("Astro"),
-    z.literal("Gatsby"),
-    z.literal("GitBook"),
-    z.literal("Jekyll"),
-    z.literal("Remix"),
-    z.literal("Svelte"),
-    z.literal("Vue"),
-    z.literal("VuePress"),
-  ]),
-  installCommand: z.string().default("npm install"),
-  buildCommand: z.string().default("npm run build"),
-  envList: z.array(
-    z.object({
-      key: z.string(),
-      value: z.string(),
-    }),
-  ),
-  nodeVersion: z.string().default("12.18.0"),
-});
-
 export const projectsRouter = Router();
 
 projectsRouter.use("/projects", verifyAccessToken);
@@ -69,9 +38,88 @@ projectsRouter.use("/projects", verifyAccessToken);
 projectsRouter.post(
   "/projects",
   parseRequest({
-    body: project,
+    query: z
+      .object({
+        repository: z.string().optional(),
+      })
+      .optional(),
   }),
   handleAsync(async (req, res, next) => {
+    if (!req.query) {
+      return next();
+    }
+
+    /**
+     * Update Project
+     */
+    const projectRepository =
+      container.get<Repository<Project>>("ProjectRepository");
+
+    const { repository } = req.query;
+
+    if (!repository) {
+      return next(createError(400, "Bad Request"));
+    }
+
+    const projects = await projectRepository.readDocument({
+      filter: { repoCloneUrl: repository },
+    });
+
+    if (isEmpty(projects)) {
+      return next(createError(404, "Projects Not Found"));
+    }
+
+    projects.forEach(project => {
+      if (!project?.projectName) {
+        return;
+      }
+
+      emitEvent("UPDATE_PROJECT", {
+        projectName: project.projectName,
+      });
+    });
+
+    res.status(200).json({
+      message: "ok",
+    });
+  }),
+  parseRequest({
+    body: z.object({
+      userId: z.string(),
+      space: z.string(),
+      repoName: z.string(),
+      repoCloneUrl: z.string(),
+      projectName: z.string(),
+      framework: z.union([
+        z.literal("Create React App"),
+        z.literal("React Static"),
+        z.literal("Next.js (Static HTML Export)"),
+        z.literal("Nuxt.js"),
+        z.literal("Angular (Angular CLI)"),
+        z.literal("Astro"),
+        z.literal("Gatsby"),
+        z.literal("GitBook"),
+        z.literal("Jekyll"),
+        z.literal("Remix"),
+        z.literal("Svelte"),
+        z.literal("Vue"),
+        z.literal("VuePress"),
+      ]),
+      installCommand: z.string().default("npm install"),
+      buildCommand: z.string().default("npm run build"),
+      envList: z.array(
+        z.object({
+          key: z.string(),
+          value: z.string(),
+        }),
+      ),
+      nodeVersion: z.string().default("12.18.0"),
+    }),
+  }),
+  handleAsync(async (req, res, next) => {
+    /**
+     * Create a new Project
+     */
     const projectRepository =
       container.get<Repository<Project>>("ProjectRepository");
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
@@ -85,10 +133,6 @@ projectsRouter.post(
       return next(createError(400, "Project is already exist."));
     }
 
-    res.status(201).json({
-      message: "ok",
-    });
-
     const storageKey = tokenClient.createToken({
       payload: { projectName },
       key: Config.STORAGE_JWT_SECRET,
@@ -96,14 +140,13 @@ projectsRouter.post(
 
     emitEvent("CREATE_PROJECT", {
       ...req.body,
-      status: ProjectStatus.pending,
+      status: ProjectStatus.Pending,
       framework: CLIENT_FRAMEWORK_INFO[framework],
-      schemaList: [],
       storageKey,
     });
 
-    emitEvent("CREATE_STORAGE", {
-      projectName,
+    res.status(201).json({
+      message: "ok",
     });
   }),
 );
@@ -143,25 +186,6 @@ projectsRouter.get(
   }),
 );
 
-projectsRouter.put(
-  "/projects/:projectName",
-  parseRequest({
-    params: z.object({
-      projectName: z.string(),
-    }),
-  }),
-  handleAsync(async (req, res) => {
-    const { projectName } = req.params;
-    const updateData = req.body;
-
-    // TODO: update project.
-
-    return res.json({
-      message: "ok",
-    });
-  }),
-);
-
 projectsRouter.delete(
   "/projects/:projectName",
   parseRequest({
@@ -172,6 +196,8 @@ projectsRouter.delete(
   handleAsync(async (req, res) => {
     const { userId } = req.app.locals;
     const { projectName } = req.params;
+
+    emitEvent("DELETE_PROJECT", { userId, projectName });
 
     return res.status(204).json({
       message: "ok",

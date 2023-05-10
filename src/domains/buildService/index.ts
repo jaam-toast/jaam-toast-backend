@@ -1,6 +1,7 @@
 import path from "path";
 import { inject, injectable } from "inversify";
 import { isEmpty } from "lodash";
+import { nanoid } from "nanoid";
 
 import Config from "../../@config";
 import { runCommand } from "../../@utils/runCommand";
@@ -40,7 +41,7 @@ export class BuildService {
     this.socketClient = socketClient;
   }
 
-  async createDeployment({
+  async createBuild({
     repoName,
     repoCloneUrl,
     projectName,
@@ -57,31 +58,38 @@ export class BuildService {
     buildCommand: string;
     envList: Env[];
   }) {
+    const deploymentName = projectName + nanoid();
+
     /**
      * configure socket building log
      */
-    this.socketClient.server.on("connection", socket => {
-      socket.on("get-building-log", project => {
-        log.debug(`Getting ready for sending a building log for ${project}`);
-        log.subscribe(message => socket.emit("new-building-log", message));
+    if (isCreateMode) {
+      this.socketClient.server.on("connection", socket => {
+        socket.on("get-building-log", project => {
+          log.debug(`Getting ready for sending a building log for ${project}`);
+          log.subscribe(message => socket.emit("new-building-log", message));
 
-        subscribeEvent(
-          "PROJECT_CREATED",
-          ({ originalBuildDomain }, unsubscribe) => {
-            socket.emit(
-              "build-complete",
-              JSON.stringify({ originalBuildDomain }),
-            );
-            unsubscribe();
-          },
-        );
+          subscribeEvent(
+            "DEPLOYMENT_CREATED",
+            ({ originalBuildDomain }, unsubscribe) => {
+              socket.emit(
+                "build-complete",
+                JSON.stringify({ originalBuildDomain }),
+              );
+              unsubscribe();
+            },
+          );
 
-        subscribeEvent("PROJECT_CREATION_ERROR", ({ message }, unsubscribe) => {
-          socket.emit("build-error", message);
-          unsubscribe();
+          subscribeEvent(
+            "DEPLOYMENT_CREATION_ERROR",
+            ({ message }, unsubscribe) => {
+              socket.emit("build-error", message);
+              unsubscribe();
+            },
+          );
         });
       });
-    });
+    }
 
     try {
       /**
@@ -89,9 +97,8 @@ export class BuildService {
        */
       await runCommand({
         command: [
-          `rm -rf ${projectName}`,
-          `mkdir ${projectName}`,
-          `cd ${projectName}`,
+          `mkdir ${deploymentName}`,
+          `cd ${deploymentName}`,
           `git clone ${repoCloneUrl}`,
         ],
         cwd: path.join(process.cwd(), RESOURCES_PATH),
@@ -111,7 +118,12 @@ export class BuildService {
 
         await runCommand({
           command: [`touch .env`, `echo "${envFileText}" > .env`],
-          cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
+          cwd: path.join(
+            process.cwd(),
+            RESOURCES_PATH,
+            deploymentName,
+            repoName,
+          ),
         });
 
         log.build("Evironment Varables complete.");
@@ -122,7 +134,7 @@ export class BuildService {
        */
       await runCommand({
         command: [installCommand],
-        cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
+        cwd: path.join(process.cwd(), RESOURCES_PATH, deploymentName, repoName),
         onStdout: log.debug,
         onStderr: log.debug,
       });
@@ -134,7 +146,7 @@ export class BuildService {
        */
       await runCommand({
         command: [buildCommand],
-        cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
+        cwd: path.join(process.cwd(), RESOURCES_PATH, deploymentName, repoName),
         onStdout: log.build,
       });
 
@@ -143,7 +155,7 @@ export class BuildService {
       const resourcePath = path.join(
         process.cwd(),
         RESOURCES_PATH,
-        projectName,
+        deploymentName,
         repoName,
         PRAMEWORK_PRESET[framework].buildDirectory,
       );
@@ -153,17 +165,23 @@ export class BuildService {
        * upload resources
        */
       const originalBuildDomain = await this.deploymentClient.createDeployment({
-        projectName,
+        deploymentName,
         resourcePath,
       });
 
       /**
-       * create CNAME record
+       * create CNAME record.
        */
-      const recordId = await this.recordClient.createCNAME({
-        recordName: jaamToastDomain,
-        recordValue: originalBuildDomain,
-      });
+      const recordId = isCreateMode
+        ? await this.recordClient.createCNAME({
+            recordName: jaamToastDomain,
+            recordValue: originalBuildDomain,
+          })
+        : await this.recordClient.upsertCNAME({
+            recordName: jaamToastDomain,
+            recordValue: originalBuildDomain,
+          });
+      // TODO: upsertCNAME
 
       await waitFor({
         act: () => this.recordClient.getRecordStatus({ recordId }),
@@ -173,12 +191,20 @@ export class BuildService {
       /**
        * add jaam toast domain
        */
+
+      if (!isCreateMode) {
+        await this.domainClient.removeDomain({
+          // TODO: prevDeploymentName
+          projectName: "prevDeploymentName",
+          domain: jaamToastDomain,
+        });
+      }
       await this.domainClient.addDomain({
-        projectName,
+        projectName: deploymentName,
         domain: jaamToastDomain,
       });
 
-      emitEvent("PROJECT_CREATED", {
+      emitEvent("DEPLOYMENT_CREATED", {
         projectName,
         jaamToastDomain,
         originalBuildDomain,
@@ -186,7 +212,7 @@ export class BuildService {
       });
     } catch (error) {
       if (error instanceof Error) {
-        emitEvent("PROJECT_CREATION_ERROR", {
+        emitEvent("DEPLOYMENT_CREATION_ERROR", {
           projectName,
           message: error.message,
         });
@@ -196,15 +222,13 @@ export class BuildService {
        * remove resource
        */
       runCommand({
-        command: [`rm -rf ${projectName}`],
+        command: [`rm -rf ${deploymentName}`],
         cwd: path.join(process.cwd(), RESOURCES_PATH),
         onStdout: log.debug,
         onStderr: log.debug,
       });
     }
   }
-
-  async updateBuild() {}
 
   async deleteBuild({ projectName }: { projectName: string }) {
     try {
@@ -213,6 +237,34 @@ export class BuildService {
           "Cannot find environment data before delete project.",
         );
       }
+      // projectRepository..?
+      // cloudeFlare deployments 전부 제거, Route53 최근 deploymnet 제거, NGINX에서 제거
+
+      // const project = this.this.deploymentClient.deleteDeployment({
+      //   deploymentName,
+      // });
+    } catch (error) {
+      throw new UnknownError(
+        "An unexpected error occurred during build project",
+        error,
+      );
+    }
+  }
+
+  async connectDomain({ url }: { url: string }) {
+    try {
+      // SSH
+    } catch (error) {
+      throw new UnknownError(
+        "An unexpected error occurred during build project",
+        error,
+      );
+    }
+  }
+
+  async disconnectDomain({ url }: { url: string }) {
+    try {
+      // SSH
     } catch (error) {
       throw new UnknownError(
         "An unexpected error occurred during build project",
