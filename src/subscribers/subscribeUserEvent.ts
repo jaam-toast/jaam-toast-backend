@@ -15,6 +15,8 @@ subscribeEvent("CREATE_PROJECT", async ({ userId, projectName }) => {
 
   userRepository.updateDocument({
     documentId: userId,
-    document: { projects: user.projects.concat(projectName) },
+    document: {
+      projects: user.projects.concat(projectName),
+    },
   });
 });

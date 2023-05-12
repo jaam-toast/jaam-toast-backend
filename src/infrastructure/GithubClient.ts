@@ -30,20 +30,24 @@ export class GithubClient {
       token_type: string;
     };
 
-    const { data } = await this.oauthClient.post<GithubToken>(
-      "/login/oauth/access_token?",
-      {},
-      {
-        params: {
-          client_id: Config.GITHUB_CLIENT_ID,
-          client_secret: Config.GITHUB_CLIENT_SECRET,
-          redirect_uri: Config.GITHUB_REDIRECT_URL,
-          code,
+    try {
+      const { data } = await this.oauthClient.post<GithubToken>(
+        "/login/oauth/access_token?",
+        {},
+        {
+          params: {
+            client_id: Config.GITHUB_CLIENT_ID,
+            client_secret: Config.GITHUB_CLIENT_SECRET,
+            redirect_uri: Config.GITHUB_REDIRECT_URL,
+            code,
+          },
         },
-      },
-    );
+      );
 
-    return data.access_token;
+      return data.access_token;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserInstallations({ accessToken }: { accessToken: string }) {
@@ -63,16 +67,19 @@ export class GithubClient {
       total_count: number;
     };
 
-    const { data } = await this.dataClient.get<GithubInstallation>(
-      "/user/installations",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+    try {
+      const { data } = await this.dataClient.get<GithubInstallation>(
+        "/user/installations",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
-
-    return data;
+      );
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getInstallationRepos({
