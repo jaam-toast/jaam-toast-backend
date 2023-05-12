@@ -48,7 +48,7 @@ export class UserRepository implements Repository<User> {
     return this.databaseClient.update<User>({
       dbName: Config.APP_DB_NAME,
       collectionName: "users",
-      filter: { id: documentId },
+      id: documentId,
       document,
     });
   }

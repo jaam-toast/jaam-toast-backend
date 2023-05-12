@@ -45,7 +45,7 @@ projectsRouter.post(
       .optional(),
   }),
   handleAsync(async (req, res, next) => {
-    if (!req.query) {
+    if (!req.query?.repository) {
       return next();
     }
 
