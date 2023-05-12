@@ -53,6 +53,8 @@ export async function emitEvent<EventName extends Events["name"]>(
   eventName: EventName,
   payload: EventPayload<EventName>,
 ) {
+  log.debug(`[EVENT] Event Emitted: ${eventName}`);
+
   const listeners = subscribers[eventName];
 
   if (!listeners) {
