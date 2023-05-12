@@ -7,8 +7,7 @@ import { StorageService } from "../domains/StorageService";
 import { ContentService } from "../domains/ContentsService";
 import { BuildService } from "../domains/BuildService";
 import { UserService } from "../domains/UserService";
-import { CloudFlareDeploymentClient } from "../infrastructure/CloudFlareDeploymentClient";
-import { CloudFlareDomainClient } from "../infrastructure/CloudFlareDomainClient";
+import { S3CloudFrontDeploymentClient } from "../infrastructure/S3CloudFrontDeploymentClient";
 import { MongodbContentClient } from "../infrastructure/MongodbContentClient";
 import { MongodbDatabaseClient } from "../infrastructure/MongodbDatabaseClient";
 import { JwtTokenClient } from "../infrastructure/JwtTokenClient";
@@ -90,42 +89,25 @@ container
 // Build Client
 export interface DeploymentClient {
   createDeployment: ({
-    deploymentName,
+    domainName,
     resourcePath,
   }: {
-    deploymentName: string;
+    domainName: string;
     resourcePath: string;
   }) => Promise<string>;
 
-  getDeploymentStauts: (getDeploymentStautsOptions: {
-    deploymentName: string;
+  getDeploymentStauts?: (getDeploymentStautsOptions: {
+    domainName: string;
   }) => Promise<boolean>;
 
   deleteDeployment: (deleteDeploymentOptions: {
-    deploymentName: string;
+    domainName: string;
   }) => Promise<void>;
 }
 
 container
-  .bind<DeploymentClient>("CloudFlareDeploymentClient")
-  .to(CloudFlareDeploymentClient);
-
-// Domain Client
-export interface DomainClient {
-  addDomain: (addDomainOptions: {
-    projectName: string;
-    domain: string;
-  }) => Promise<void>;
-
-  removeDomain: (removeDomainOptions: {
-    projectName: string;
-    domain: string;
-  }) => Promise<void>;
-}
-
-container
-  .bind<DomainClient>("CloudFlareDomainClient")
-  .to(CloudFlareDomainClient);
+  .bind<DeploymentClient>("S3CloudFrontDeploymentClient")
+  .to(S3CloudFrontDeploymentClient);
 
 /**
  * Content Client: Content를 저장할 Storage와 Content를 생성할 수 있습니다.
@@ -290,6 +272,7 @@ container
 */
 export interface RecordClient {
   createARecord: (createARecordOptions: {
+    dnsName: string;
     recordName: string;
   }) => Promise<string>;
 
