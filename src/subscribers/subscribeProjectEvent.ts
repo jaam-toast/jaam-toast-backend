@@ -63,6 +63,7 @@ subscribeEvent(
         status,
         webhookList: [],
         schemaList: initialSchemaList,
+        buildDomain: [],
       },
     });
   },
@@ -175,7 +176,7 @@ subscribeEvent(
   },
 );
 
-subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, message }) => {
+subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, error }) => {
   const updatedAt = new Date().toISOString();
 
   projectRepository.updateDocument({
@@ -186,8 +187,32 @@ subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, message }) => {
     },
   });
 
-  log.serverError(message);
+  log.serverError(error.message, error.stack ?? "-", error.name);
 });
+
+subscribeEvent(
+  "DEPLOYMENT_UPDATED",
+  async ({ projectName, buildDomain, originalBuildDomain }) => {
+    const updatedAt = new Date().toISOString();
+    const [project] = await projectRepository.readDocument({
+      documentId: projectName,
+    });
+
+    if (!project) {
+      return;
+    }
+
+    projectRepository.updateDocument({
+      documentId: projectName,
+      document: {
+        status: ProjectStatus.Ready,
+        projectUpdatedAt: updatedAt,
+        ...(originalBuildDomain && { originalBuildDomain }),
+        buildDomain: project.buildDomain?.concat(buildDomain),
+      },
+    });
+  },
+);
 
 subscribeEvent(
   "SCHEMA_CREATED",

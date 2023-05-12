@@ -59,7 +59,8 @@ export type Project = {
     schema: Schema;
   }[];
   webhookList: Webhook[];
-  buildDomain?: string[];
+  originalBuildDomain?: string;
+  buildDomain: string[];
   cmsDomain?: string;
   assetStorageUrl?: string;
 };
