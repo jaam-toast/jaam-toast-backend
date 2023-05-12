@@ -24,7 +24,12 @@ export function parseRequest<
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        return next(createError(400, "Request body validation failed."));
+        return next(
+          createError(
+            400,
+            `Request body validation failed. ${error.toString()}`,
+          ),
+        );
       }
     }
 
@@ -35,7 +40,10 @@ export function parseRequest<
     } catch (error) {
       if (error instanceof ZodError) {
         return next(
-          createError(400, "Request path Variables validation failed."),
+          createError(
+            400,
+            `Request body validation failed. ${error.toString()}`,
+          ),
         );
       }
     }
@@ -47,7 +55,10 @@ export function parseRequest<
     } catch (error) {
       if (error instanceof ZodError) {
         return next(
-          createError(400, "Request Query params validation failed."),
+          createError(
+            400,
+            `Request body validation failed. ${error.toString()}`,
+          ),
         );
       }
     }
