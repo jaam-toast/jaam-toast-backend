@@ -80,7 +80,9 @@ export type DeploymentUpdatedEvent = BaseEvent<
   "DEPLOYMENT_UPDATED",
   {
     projectName: string;
+    originalBuildDomain: string;
     buildDomain: string | string[];
+    resourcePath: string;
   }
 >;
 
@@ -88,7 +90,7 @@ export type DeploymentErrorEvent = BaseEvent<
   "DEPLOYMENT_ERROR",
   {
     projectName: string;
-    message: string;
+    error: Error;
   }
 >;
 
