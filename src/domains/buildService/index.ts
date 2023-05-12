@@ -1,7 +1,7 @@
 import path from "path";
+import axios from "axios";
 import { inject, injectable } from "inversify";
 import { isEmpty } from "lodash";
-import { nanoid } from "nanoid";
 
 import Config from "../../@config";
 import { runCommand } from "../../@utils/runCommand";
@@ -12,11 +12,7 @@ import { PRAMEWORK_PRESET } from "../@config/frameworkPreset";
 import * as log from "../../@utils/log";
 
 import type { Env, Framework } from "../../@types/project";
-import type {
-  DeploymentClient,
-  DomainClient,
-  RecordClient,
-} from "../../@config/di.config";
+import type { DeploymentClient, RecordClient } from "../../@config/di.config";
 import type { SocketClient } from "../../infrastructure/SocketClient";
 
 const RESOURCES_PATH = "./resources";
@@ -25,19 +21,16 @@ const RESOURCES_PATH = "./resources";
 export class BuildService {
   private deploymentClient: DeploymentClient;
   private recordClient: RecordClient;
-  private domainClient: DomainClient;
   private socketClient: SocketClient;
 
   constructor(
-    @inject("CloudFlareDeploymentClient")
-    cloudFlareDeploymentClient: DeploymentClient,
+    @inject("S3CloudFrontDeploymentClient")
+    s3CloudFrontDeploymentClient: DeploymentClient,
     @inject("Route53RecordClient") route53RecordClient: RecordClient,
-    @inject("CloudFlareDomainClient") cloudFlareDomainClient: DomainClient,
     @inject("SocketClient") socketClient: SocketClient,
   ) {
-    this.deploymentClient = cloudFlareDeploymentClient;
+    this.deploymentClient = s3CloudFrontDeploymentClient;
     this.recordClient = route53RecordClient;
-    this.domainClient = cloudFlareDomainClient;
     this.socketClient = socketClient;
   }
 
@@ -58,47 +51,41 @@ export class BuildService {
     buildCommand: string;
     envList: Env[];
   }) {
-    const deploymentName = projectName + nanoid();
-
+    log.build("We will now initiate the deployment process.");
     /**
      * configure socket building log
      */
-    if (isCreateMode) {
-      this.socketClient.server.on("connection", socket => {
-        socket.on("get-building-log", project => {
-          log.debug(`Getting ready for sending a building log for ${project}`);
-          log.subscribe(message => socket.emit("new-building-log", message));
+    this.socketClient.server.on("connection", socket => {
+      socket.on("get-building-log", project => {
+        log.debug(`Getting ready for sending a building log for ${project}`);
+        log.subscribe(message => socket.emit("new-building-log", message));
 
-          subscribeEvent(
-            "DEPLOYMENT_CREATED",
-            ({ originalBuildDomain }, unsubscribe) => {
-              socket.emit(
-                "build-complete",
-                JSON.stringify({ originalBuildDomain }),
-              );
-              unsubscribe();
-            },
-          );
+        subscribeEvent(
+          "DEPLOYMENT_UPDATED",
+          ({ originalBuildDomain }, unsubscribe) => {
+            socket.emit(
+              "build-complete",
+              JSON.stringify({ originalBuildDomain }),
+            );
+            unsubscribe();
+          },
+        );
 
-          subscribeEvent(
-            "DEPLOYMENT_CREATION_ERROR",
-            ({ message }, unsubscribe) => {
-              socket.emit("build-error", message);
-              unsubscribe();
-            },
-          );
+        subscribeEvent("DEPLOYMENT_ERROR", ({ error }, unsubscribe) => {
+          socket.emit("build-error", error.message);
+          unsubscribe();
         });
       });
-    }
+    });
 
     try {
       /**
-       * run git clone
+       * Run git clone
        */
       await runCommand({
         command: [
-          `mkdir ${deploymentName}`,
-          `cd ${deploymentName}`,
+          `mkdir ${projectName}`,
+          `cd ${projectName}`,
           `git clone ${repoCloneUrl}`,
         ],
         cwd: path.join(process.cwd(), RESOURCES_PATH),
@@ -106,10 +93,10 @@ export class BuildService {
         onStderr: log.debug,
       });
 
-      log.build("Cloning complete.");
+      log.build("Repository has been successfully retrieved.");
 
       /**
-       * install environmet variables
+       * Install environmet variables
        */
       if (!isEmpty(envList)) {
         const envFileText = envList
@@ -118,44 +105,39 @@ export class BuildService {
 
         await runCommand({
           command: [`touch .env`, `echo "${envFileText}" > .env`],
-          cwd: path.join(
-            process.cwd(),
-            RESOURCES_PATH,
-            deploymentName,
-            repoName,
-          ),
+          cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
         });
 
-        log.build("Evironment Varables complete.");
+        log.build("Environment variable has been successfully completed.");
       }
 
       /**
-       * install packages
+       * Install packages
        */
       await runCommand({
         command: [installCommand],
-        cwd: path.join(process.cwd(), RESOURCES_PATH, deploymentName, repoName),
+        cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
         onStdout: log.debug,
         onStderr: log.debug,
       });
 
-      log.build("Finish installing the necessary files for your project");
+      log.build("Finish installing the necessary files for your project.");
 
       /**
-       * run project
+       * Build project
        */
       await runCommand({
         command: [buildCommand],
-        cwd: path.join(process.cwd(), RESOURCES_PATH, deploymentName, repoName),
+        cwd: path.join(process.cwd(), RESOURCES_PATH, projectName, repoName),
         onStdout: log.build,
       });
 
-      log.build("User project resource creation complete");
+      log.build("User project resource creation completed.");
 
       const resourcePath = path.join(
         process.cwd(),
         RESOURCES_PATH,
-        deploymentName,
+        projectName,
         repoName,
         PRAMEWORK_PRESET[framework].buildDirectory,
       );
@@ -165,56 +147,53 @@ export class BuildService {
        * upload resources
        */
       const originalBuildDomain = await this.deploymentClient.createDeployment({
-        deploymentName,
+        domainName: jaamToastDomain,
         resourcePath,
       });
 
+      log.build("The creation of a new deployment is now complete!");
+      log.build(
+        "Initiating domain connection process for the created deployment.",
+      );
+
       /**
-       * create CNAME record.
+       * create A record.
        */
-      const recordId = isCreateMode
-        ? await this.recordClient.createCNAME({
-            recordName: jaamToastDomain,
-            recordValue: originalBuildDomain,
-          })
-        : await this.recordClient.upsertCNAME({
-            recordName: jaamToastDomain,
-            recordValue: originalBuildDomain,
-          });
-      // TODO: upsertCNAME
+      const recordId = await this.recordClient.createARecord({
+        recordName: jaamToastDomain,
+        dnsName: originalBuildDomain,
+      });
 
       await waitFor({
         act: () => this.recordClient.getRecordStatus({ recordId }),
         until: async isCreated => await isCreated,
       });
 
-      /**
-       * add jaam toast domain
-       */
+      log.build("Domain creation process has been completed.");
+      log.build(
+        "However, we need to wait until the new deployment is fully connected.",
+      );
+      log.build("Please wait a little longer.");
 
-      if (!isCreateMode) {
-        await this.domainClient.removeDomain({
-          // TODO: prevDeploymentName
-          projectName: "prevDeploymentName",
-          domain: jaamToastDomain,
-        });
-      }
-      await this.domainClient.addDomain({
-        projectName: deploymentName,
-        domain: jaamToastDomain,
+      await waitFor({
+        act: () => axios.get(`https://${originalBuildDomain}`),
+        until: async result => !!(await result),
+        intervalTime: 1000,
       });
 
-      emitEvent("DEPLOYMENT_CREATED", {
+      log.build("All deployment processes have been completed!");
+
+      emitEvent("DEPLOYMENT_UPDATED", {
         projectName,
-        jaamToastDomain,
         originalBuildDomain,
+        buildDomain: [originalBuildDomain, jaamToastDomain],
         resourcePath,
       });
     } catch (error) {
       if (error instanceof Error) {
-        emitEvent("DEPLOYMENT_CREATION_ERROR", {
+        emitEvent("DEPLOYMENT_ERROR", {
           projectName,
-          message: error.message,
+          error,
         });
       }
     } finally {
@@ -222,13 +201,15 @@ export class BuildService {
        * remove resource
        */
       runCommand({
-        command: [`rm -rf ${deploymentName}`],
+        command: [`rm -rf ${projectName}`],
         cwd: path.join(process.cwd(), RESOURCES_PATH),
         onStdout: log.debug,
         onStderr: log.debug,
       });
     }
   }
+
+  async updateBuild({ projectName }: { projectName: string }) {}
 
   async deleteBuild({ projectName }: { projectName: string }) {
     try {
@@ -237,12 +218,6 @@ export class BuildService {
           "Cannot find environment data before delete project.",
         );
       }
-      // projectRepository..?
-      // cloudeFlare deployments 전부 제거, Route53 최근 deploymnet 제거, NGINX에서 제거
-
-      // const project = this.this.deploymentClient.deleteDeployment({
-      //   deploymentName,
-      // });
     } catch (error) {
       throw new UnknownError(
         "An unexpected error occurred during build project",
@@ -253,7 +228,6 @@ export class BuildService {
 
   async connectDomain({ url }: { url: string }) {
     try {
-      // SSH
     } catch (error) {
       throw new UnknownError(
         "An unexpected error occurred during build project",
@@ -264,7 +238,6 @@ export class BuildService {
 
   async disconnectDomain({ url }: { url: string }) {
     try {
-      // SSH
     } catch (error) {
       throw new UnknownError(
         "An unexpected error occurred during build project",

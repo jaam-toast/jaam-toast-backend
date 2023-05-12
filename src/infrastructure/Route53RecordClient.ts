@@ -19,7 +19,13 @@ export class Route53RecordClient implements RecordClient {
     },
   });
 
-  async createARecord({ recordName }: { recordName: string }) {
+  async createARecord({
+    dnsName,
+    recordName,
+  }: {
+    dnsName: string;
+    recordName: string;
+  }) {
     try {
       const command = new ChangeResourceRecordSetsCommand({
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
@@ -30,9 +36,9 @@ export class Route53RecordClient implements RecordClient {
               Action: "CREATE",
               ResourceRecordSet: {
                 AliasTarget: {
-                  DNSName: Config.AWS_JAAM_SERVER_DNS_NAME,
+                  DNSName: dnsName,
                   EvaluateTargetHealth: false,
-                  HostedZoneId: Config.AWS_DNS_HOSTED_ZONE_ID,
+                  HostedZoneId: Config.AWS_CLOUDFRONT_HOSTED_ZONE_ID,
                 },
                 Name: recordName,
                 Type: RRType.A,
