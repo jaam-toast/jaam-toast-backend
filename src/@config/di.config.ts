@@ -20,7 +20,7 @@ import type { Schema } from "../@types/schema";
 import type { Content } from "../@types/content";
 import type { Project } from "../@types/project";
 import type { User } from "../@types/user";
-
+import type { S3CloudFrontDeploymentData } from "../infrastructure/S3CloudFrontDeploymentClient";
 /**
  * - 의존성 등록
  *   - identifier(ex "ProjectService" 등 string으로 입력된 곳)를 to("등록할 곳")에 등록합니다.
@@ -92,14 +92,14 @@ export interface DeploymentClient {
     domainName: string;
     resourcePath: string;
   }) => Promise<{
-    deploymentId: string;
+    deploymentData: S3CloudFrontDeploymentData;
     originalBuildDomain: string
   }>;
 
   updateDeployment: (updateDeploymentOptions: {
     domainName: string;
     resourcePath: string;
-    deploymentId: string;
+    deploymentData: S3CloudFrontDeploymentData;
   }) => Promise<void>;
 
   getDeploymentStauts?: (getDeploymentStautsOptions: {

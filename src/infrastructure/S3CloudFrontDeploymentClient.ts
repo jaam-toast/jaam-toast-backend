@@ -27,6 +27,12 @@ import { waitFor } from "../@utils/waitFor";
 
 import type { DeploymentClient } from "../@config/di.config";
 
+export type S3CloudFrontDeploymentData = {
+  deploymentId?: string;
+  oaiId?: string;
+  oaiETag?: string;
+};
+
 @injectable()
 export class S3CloudFrontDeploymentClient implements DeploymentClient {
   private s3Client = new S3Client({
@@ -178,8 +184,9 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
         createOaiCommand,
       );
       const oaiId = createOaiResult?.CloudFrontOriginAccessIdentity?.Id;
+      const oaiETag = createOaiResult?.ETag;
 
-      if (!oaiId) {
+      if (!oaiId || !oaiETag) {
         throw new Error(
           "Cannot find the OAI ID after creating an OAI for S3 bucket.",
         );
@@ -357,7 +364,11 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       }
 
       return {
-        deploymentId,
+        deploymentData: {
+          deploymentId,
+          oaiId,
+          oaiETag,
+        },
         originalBuildDomain,
       };
     } catch (error) {
@@ -368,11 +379,11 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
   async updateDeployment({
     domainName,
     resourcePath,
-    deploymentId,
+    deploymentData,
   }: {
     domainName: string;
     resourcePath: string;
-    deploymentId: string;
+    deploymentData: S3CloudFrontDeploymentData;
   }) {
     try {
       /**
@@ -390,7 +401,7 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
        * Create CloudFront Distribution Invalidation
        */
       const command = new CreateInvalidationCommand({
-        DistributionId: deploymentId,
+        DistributionId: deploymentData.deploymentId,
         InvalidationBatch: {
           Paths: {
             Quantity: 1,
