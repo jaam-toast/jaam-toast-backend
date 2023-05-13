@@ -1,6 +1,7 @@
 import type { Env, Framework, ProjectStatus, Webhook } from "../@types/project";
 import type { Schema } from "../@types/schema";
 import type { BaseEvent } from "../@types/baseEvent";
+import type { S3CloudFrontDeploymentData } from "../infrastructure/S3CloudFrontDeploymentClient";
 
 export type Events =
   | CreateProjectEvent
@@ -80,9 +81,10 @@ export type DeploymentUpdatedEvent = BaseEvent<
   "DEPLOYMENT_UPDATED",
   {
     projectName: string;
-    originalBuildDomain: string;
-    buildDomain: string | string[];
-    resourcePath: string;
+    originalBuildDomain?: string;
+    buildDomain?: string | string[];
+    resourcePath?: string;
+    deploymentData?: S3CloudFrontDeploymentData;
   }
 >;
 

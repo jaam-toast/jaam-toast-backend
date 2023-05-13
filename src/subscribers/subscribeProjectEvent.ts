@@ -64,6 +64,7 @@ subscribeEvent(
         webhookList: [],
         schemaList: initialSchemaList,
         buildDomain: [],
+        deploymentData: {},
       },
     });
   },
@@ -192,7 +193,7 @@ subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, error }) => {
 
 subscribeEvent(
   "DEPLOYMENT_UPDATED",
-  async ({ projectName, buildDomain, originalBuildDomain }) => {
+  async ({ projectName, buildDomain, originalBuildDomain, deploymentData }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -208,7 +209,10 @@ subscribeEvent(
         status: ProjectStatus.Ready,
         projectUpdatedAt: updatedAt,
         ...(originalBuildDomain && { originalBuildDomain }),
-        buildDomain: project.buildDomain?.concat(buildDomain),
+        ...(deploymentData && { deploymentData }),
+        ...(buildDomain && {
+          buildDomain: project.buildDomain.concat(buildDomain),
+        }),
       },
     });
   },

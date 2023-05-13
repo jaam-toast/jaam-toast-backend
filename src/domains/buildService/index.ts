@@ -193,7 +193,7 @@ export class BuildService {
       /**
        * upload resources
        */
-      const { deploymentId, originalBuildDomain } =
+      const { deploymentData, originalBuildDomain } =
         await this.deploymentClient.createDeployment({
           domainName: jaamToastDomain,
           resourcePath,
@@ -233,7 +233,7 @@ export class BuildService {
 
       emitEvent("DEPLOYMENT_UPDATED", {
         projectName,
-        deploymentId,
+        deploymentData,
         originalBuildDomain,
         buildDomain: [originalBuildDomain, jaamToastDomain],
         resourcePath,
@@ -267,7 +267,7 @@ export class BuildService {
       if (!project) {
         throw new NotFoundError("Cannot find Project data.");
       }
-      if (!project.deploymentData.deploymetId) {
+      if (!project.deploymentData) {
         throw new ForbiddenError(
           "Cannot update the project sinse the project initially delployed yet.",
         );
@@ -280,6 +280,7 @@ export class BuildService {
         installCommand,
         buildCommand,
         framework,
+        deploymentData,
       } = project;
 
       const jaamToastDomain = `${projectName}.${Config.SERVER_URL}`;
@@ -298,7 +299,7 @@ export class BuildService {
        */
       await this.deploymentClient.updateDeployment({
         domainName: jaamToastDomain,
-        deploymentId: project.deploymentData.deploymetId,
+        deploymentData,
         resourcePath,
       });
 

@@ -1,4 +1,5 @@
 import type { Schema } from "./schema";
+import type { S3CloudFrontDeploymentData } from "../infrastructure/S3CloudFrontDeploymentClient";
 
 export type Framework =
   | "CreateReactApp"
@@ -43,6 +44,7 @@ export type Project = {
   projectName: string;
   status: ProjectStatus;
   projectUpdatedAt: string;
+  deploymentData: S3CloudFrontDeploymentData;
 
   space: string;
   repoName: string;
