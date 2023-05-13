@@ -8,14 +8,14 @@ import { verifyAccessToken } from "../middlewares/verifyAccessToken";
 import { emitEvent } from "../../@utils/emitEvent";
 import { handleAsync } from "../utils/handleAsync";
 
-export const projectOptionssRouter = Router();
+export const projectOptionsRouter = Router();
 
-projectOptionssRouter.use("/projects/:projectName/options", verifyAccessToken);
+projectOptionsRouter.use("/projects/:projectName/options", verifyAccessToken);
 
-projectOptionssRouter.post(
+projectOptionsRouter.post(
   "/projects/:projectName/options",
   parseRequest({
-    query: z.object({
+    params: z.object({
       projectName: z.string(),
     }),
     body: z.object({
@@ -32,9 +32,13 @@ projectOptionssRouter.post(
     }),
   }),
   handleAsync((req, res, next) => {
-    const { projectName } = req.query;
+    const { projectName } = req.params;
 
-    emitEvent("UPDATE_PROJECT", { projectName, ...req.body });
+    emitEvent("UPDATE_PROJECT", {
+      projectName,
+      isRedeployUpdate: true,
+      ...req.body,
+    });
 
     res.status(200).json({
       message: "ok",
@@ -42,10 +46,10 @@ projectOptionssRouter.post(
   }),
 );
 
-projectOptionssRouter.patch(
+projectOptionsRouter.patch(
   "/projects/:projectName/options",
   parseRequest({
-    query: z.object({
+    params: z.object({
       projectName: z.string(),
     }),
     body: z.object({
@@ -71,17 +75,21 @@ projectOptionssRouter.patch(
       return next(createError(400, "Fill"));
     }
 
-    const { projectName } = req.query;
+    const { projectName } = req.params;
     const { buildDomain, webhook } = req.body;
 
-    emitEvent("ADD_PROJECT_OPTIONS", { projectName, buildDomain, webhook });
+    emitEvent("ADD_PROJECT_OPTIONS", {
+      projectName,
+      buildDomain,
+      webhook,
+    });
   }),
 );
 
-projectOptionssRouter.delete(
+projectOptionsRouter.delete(
   "/projects/:projectName/options",
   parseRequest({
-    query: z.object({
+    params: z.object({
       projectName: z.string(),
     }),
     body: z.object({
@@ -107,10 +115,14 @@ projectOptionssRouter.delete(
       return next(createError(400, "Fill"));
     }
 
-    const { projectName } = req.query;
+    const { projectName } = req.params;
     const { buildDomain, webhook } = req.body;
 
-    emitEvent("REMOVE_PROJECT_OPTIONS", { projectName, buildDomain, webhook });
+    emitEvent("REMOVE_PROJECT_OPTIONS", {
+      projectName,
+      buildDomain,
+      webhook,
+    });
 
     return res.json({ message: "ok" });
   }),
