@@ -88,19 +88,26 @@ container
 
 // Build Client
 export interface DeploymentClient {
-  createDeployment: ({
-    domainName,
-    resourcePath,
-  }: {
+  createDeployment: (createDeploymentOptions: {
     domainName: string;
     resourcePath: string;
-  }) => Promise<string>;
+  }) => Promise<{
+    deploymentId: string;
+    originalBuildDomain: string
+  }>;
+
+  updateDeployment: (updateDeploymentOptions: {
+    domainName: string;
+    resourcePath: string;
+    deploymentId: string;
+  }) => Promise<void>;
 
   getDeploymentStauts?: (getDeploymentStautsOptions: {
     domainName: string;
   }) => Promise<boolean>;
 
-  deleteDeployment: (deleteDeploymentOptions: {
+  deleteDeployment: (deleteDeploymentOptions:
+    Partial<Project["deploymentData"]> & {
     domainName: string;
   }) => Promise<void>;
 }

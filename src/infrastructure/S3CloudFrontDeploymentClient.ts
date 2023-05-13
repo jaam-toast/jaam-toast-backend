@@ -7,22 +7,25 @@ import {
   CreateBucketCommand,
   PutObjectCommand,
   PutBucketPolicyCommand,
-  GetBucketPolicyStatusCommand,
+  ListObjectsCommand,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import {
   CloudFrontClient,
   CreateCloudFrontOriginAccessIdentityCommand,
-  GetCloudFrontOriginAccessIdentityCommand,
-  CreateDistributionCommand,
+  DeleteCloudFrontOriginAccessIdentityCommand,
   CreateInvalidationCommand,
+  CreateDistributionCommand,
   UpdateDistributionCommand,
+  DeleteDistributionCommand,
   GetDistributionConfigCommand,
 } from "@aws-sdk/client-cloudfront";
+import { omit } from "lodash";
 
 import Config from "./@config";
+import { waitFor } from "../@utils/waitFor";
 
 import type { DeploymentClient } from "../@config/di.config";
-import { waitFor } from "../@utils/waitFor";
 
 @injectable()
 export class S3CloudFrontDeploymentClient implements DeploymentClient {
@@ -63,6 +66,80 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
     return files.flat();
   }
 
+  private async uploadBucket({
+    bucketName,
+    resourcePath,
+  }: {
+    bucketName: string;
+    resourcePath: string;
+  }) {
+    const files = await this.getFiles({ resourcePath });
+
+    for await (const filePath of files) {
+      const contentType = (() => {
+        switch (path.extname(filePath)) {
+          case ".js":
+            return "application/javascript";
+          case ".html":
+            return "text/html";
+          case ".txt":
+            return "text/plain";
+          case ".json":
+            return "application/json";
+          case ".ico":
+            return "image/x-icon";
+          case ".svg":
+            return "image/svg+xml";
+          case ".css":
+            return "text/css";
+          case ".jpg":
+          case ".jpeg":
+            return "image/jpeg";
+          case ".png":
+            return "image/png";
+          case ".webp":
+            return "image/webp";
+          case ".map":
+            return "binary/octet-stream";
+          default:
+            return "application/octet-stream";
+        }
+      })();
+      const putObjectCommand = new PutObjectCommand({
+        Key: path.relative(resourcePath, filePath),
+        Bucket: bucketName,
+        Body: createReadStream(filePath),
+        ContentType: contentType,
+      });
+
+      await this.s3Client.send(putObjectCommand);
+    }
+  }
+
+  private async clearBucket({ bucketName }: { bucketName: string }) {
+    try {
+      const listCommand = new ListObjectsCommand({
+        Bucket: bucketName,
+      });
+      const listResult = await this.s3Client.send(listCommand);
+
+      if (!listResult.Contents) {
+        return;
+      }
+
+      const deleteObjectsCommand = new DeleteObjectsCommand({
+        Bucket: bucketName,
+        Delete: {
+          Objects: listResult.Contents.map(({ Key }) => ({ Key })),
+        },
+      });
+
+      await this.s3Client.send(deleteObjectsCommand);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createDeployment({
     domainName,
     resourcePath,
@@ -83,47 +160,10 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       /**
        * Upload Files to S3
        */
-      const files = await this.getFiles({ resourcePath });
-
-      for await (const filePath of files) {
-        const contentType = (() => {
-          switch (path.extname(filePath)) {
-            case ".js":
-              return "application/javascript";
-            case ".html":
-              return "text/html";
-            case ".txt":
-              return "text/plain";
-            case ".json":
-              return "application/json";
-            case ".ico":
-              return "image/x-icon";
-            case ".svg":
-              return "image/svg+xml";
-            case ".css":
-              return "text/css";
-            case ".jpg":
-            case ".jpeg":
-              return "image/jpeg";
-            case ".png":
-              return "image/png";
-            case ".webp":
-              return "image/webp";
-            case ".map":
-              return "binary/octet-stream";
-            default:
-              return "application/octet-stream";
-          }
-        })();
-        const putObjectCommand = new PutObjectCommand({
-          Key: path.relative(resourcePath, filePath),
-          Bucket: domainName,
-          Body: createReadStream(filePath),
-          ContentType: contentType,
-        });
-
-        await this.s3Client.send(putObjectCommand);
-      }
+      await this.uploadBucket({
+        bucketName: domainName,
+        resourcePath,
+      });
 
       /**
        * Create CloudFront OAI from S3 Bucket
@@ -175,9 +215,8 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       });
 
       /**
-       * Create CloudFront Di333stribution
+       * Create CloudFront Distribution
        */
-
       const createDistributionCommand = new CreateDistributionCommand({
         DistributionConfig: {
           DefaultRootObject: "index.html",
@@ -309,18 +348,130 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       );
       const originalBuildDomain =
         createDistributionResult.Distribution?.DomainName;
+      const deploymentId = createDistributionResult.Distribution?.Id;
 
-      if (!originalBuildDomain) {
+      if (!originalBuildDomain || !deploymentId) {
         throw new Error(
           "Cannot find the distribution domain after deploying CloudFront.",
         );
       }
 
-      return originalBuildDomain;
+      return {
+        deploymentId,
+        originalBuildDomain,
+      };
     } catch (error) {
       throw error;
     }
   }
 
-  async deleteDeployment({ domainName }: { domainName: string }) {}
+  async updateDeployment({
+    domainName,
+    resourcePath,
+    deploymentId,
+  }: {
+    domainName: string;
+    resourcePath: string;
+    deploymentId: string;
+  }) {
+    try {
+      /**
+       * Reupload S3 Bucket
+       */
+      await this.clearBucket({
+        bucketName: domainName,
+      });
+      await this.uploadBucket({
+        bucketName: domainName,
+        resourcePath,
+      });
+
+      /**
+       * Create CloudFront Distribution Invalidation
+       */
+      const command = new CreateInvalidationCommand({
+        DistributionId: deploymentId,
+        InvalidationBatch: {
+          Paths: {
+            Quantity: 1,
+            Items: ["/*"],
+          },
+          CallerReference: domainName,
+        },
+      });
+
+      await this.cloudFrontClient.send(command);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteDeployment({
+    domainName,
+    deploymetId,
+    oaiId,
+    oaiETag,
+  }: {
+    domainName: string;
+    deploymetId?: string;
+    oaiId?: string;
+    oaiETag?: string;
+  }) {
+    try {
+      await this.clearBucket({
+        bucketName: domainName,
+      });
+
+      /**
+       * disable distibution
+       */
+      const command = new GetDistributionConfigCommand({
+        Id: deploymetId,
+      });
+      const defaultCommandConfig = await this.cloudFrontClient.send(command);
+
+      if (!defaultCommandConfig || !defaultCommandConfig.DistributionConfig) {
+        return;
+      }
+
+      const disableContributionCommand = new UpdateDistributionCommand({
+        ...omit(defaultCommandConfig, ["ETag", "$metadata"]),
+        Id: deploymetId,
+        DistributionConfig: {
+          ...defaultCommandConfig.DistributionConfig,
+          Enabled: false,
+        },
+        IfMatch: defaultCommandConfig.ETag,
+      });
+
+      await this.cloudFrontClient.send(disableContributionCommand);
+
+      /**
+       * wait 10 minutes
+       */
+      await new Promise(res => setTimeout(res, 1000 * 60 * 10));
+
+      /**
+       * delete distribution
+       */
+      const deleteDistributionCommand = new DeleteDistributionCommand({
+        Id: deploymetId,
+        IfMatch: defaultCommandConfig.ETag,
+      });
+
+      await this.cloudFrontClient.send(deleteDistributionCommand);
+
+      /**
+       * delete oai
+       */
+      const deleteOaiCommand = new DeleteCloudFrontOriginAccessIdentityCommand({
+        Id: oaiId,
+        IfMatch: oaiETag,
+      });
+
+      await this.cloudFrontClient.send(deleteOaiCommand);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
