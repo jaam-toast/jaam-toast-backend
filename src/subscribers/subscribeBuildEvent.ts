@@ -1,5 +1,6 @@
 import { container } from "../@config/di.config";
 import { subscribeEvent } from "../@utils/emitEvent";
+import { NotFoundError } from "../@utils/defineErrors";
 
 import type { BuildService } from "../domains/BuildService";
 import type { Repository } from "../@config/di.config";
@@ -42,14 +43,16 @@ subscribeEvent("UPDATE_PROJECT", async ({ isRedeployUpdate, ...payload }) => {
   });
 
   if (!project) {
-    return;
+    throw new NotFoundError(
+      "An error occurred while executing the event. Cannot find Project data.",
+    );
   }
 
   const newEnvList = payload.envList
     ? project.envList.concat(payload.envList)
     : null;
 
-  buildService.createBuild({
+  await buildService.createBuild({
     projectName: payload.projectName,
     repoName: project.repoName,
     framework: project.framework,
@@ -60,6 +63,6 @@ subscribeEvent("UPDATE_PROJECT", async ({ isRedeployUpdate, ...payload }) => {
   });
 });
 
-subscribeEvent("DELETE_PROJECT", ({ projectName }) => {
-  buildService.deleteBuild({ projectName });
+subscribeEvent("DELETE_PROJECT", async ({ projectName }) => {
+  await buildService.deleteBuild({ projectName });
 });
