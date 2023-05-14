@@ -110,6 +110,11 @@ export interface DeploymentClient {
     Partial<Project["deploymentData"]> & {
     domainName: string;
   }) => Promise<void>;
+
+  updateDeploymentDomain: (updateDeploymentDomainOptions: {
+    deploymentData: S3CloudFrontDeploymentData,
+    domain: string[],
+  }) => Promise<void>;
 }
 
 container
@@ -275,26 +280,27 @@ container
   .to(AjvSchemaClient);
 
 /**
- * A Record / CNAME을 생성, 삭제하고 status를 가져올 수 있습니다.
+ * RecordClient: A Record / CNAME을 생성, 삭제하고 status를 가져올 수 있습니다.
 */
 export interface RecordClient {
   createARecord: (createARecordOptions: {
-    dnsName: string;
+    recordTarget: string;
     recordName: string;
   }) => Promise<string>;
 
   deleteARecord: (deleteARecordOptions: {
     recordName: string;
+    recordTarget: string;
   }) => Promise<void>;
 
   createCNAME: (createCNAMEOptions: {
     recordName: string;
-    recordValue: string;
+    recordTarget: string;
   }) => Promise<string>;
 
   deleteCNAME: (deleteCNAMEOptions: {
     recordName: string;
-    recordValue: string;
+    recordTarget: string;
   }) => Promise<void>;
 
   getRecordStatus: (getRecordStatusOptions: {

@@ -485,4 +485,42 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       throw error;
     }
   }
+
+  async updateDeploymentDomain({
+    deploymentData,
+    domain,
+  }: {
+    deploymentData: S3CloudFrontDeploymentData;
+    domain: string[];
+  }) {
+    try {
+      const getDistributionCommand = new GetDistributionConfigCommand({
+        Id: deploymentData.deploymentId,
+      });
+      const getDistributionResult = await this.cloudFrontClient.send(
+        getDistributionCommand,
+      );
+
+      if (!getDistributionResult.DistributionConfig) {
+        throw new Error("Cannot update deployment domain.");
+      }
+
+      const updateDistributionCommand = new UpdateDistributionCommand({
+        ...omit(getDistributionResult, ["ETag", "$metadata"]),
+        DistributionConfig: {
+          ...getDistributionResult.DistributionConfig,
+          Aliases: {
+            Quantity: domain.length,
+            Items: domain,
+          },
+        },
+        IfMatch: getDistributionResult.ETag,
+        Id: deploymentData.deploymentId,
+      });
+
+      await this.cloudFrontClient.send(updateDistributionCommand);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

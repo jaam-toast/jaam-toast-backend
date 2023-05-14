@@ -209,7 +209,7 @@ export class BuildService {
        */
       const recordId = await this.recordClient.createARecord({
         recordName: jaamToastDomain,
-        dnsName: originalBuildDomain,
+        recordTarget: originalBuildDomain,
       });
 
       await waitFor({
@@ -235,7 +235,7 @@ export class BuildService {
         projectName,
         deploymentData,
         originalBuildDomain,
-        buildDomain: [originalBuildDomain, jaamToastDomain],
+        jaamToastDomain,
         resourcePath,
       });
     } catch (error) {
@@ -333,8 +333,18 @@ export class BuildService {
         domainName: jaamToastDomain,
       });
 
-      for await (const customDomain of project.buildDomain) {
-        await this.disconnectDomain({ url: customDomain });
+      if (project.originalBuildDomain) {
+        for await (const customDomain of project.customDomain) {
+          await this.recordClient.deleteCNAME({
+            recordName: customDomain,
+            recordTarget: project.originalBuildDomain,
+          });
+        }
+
+        await this.recordClient.deleteARecord({
+          recordName: jaamToastDomain,
+          recordTarget: project.originalBuildDomain,
+        });
       }
     } catch (error) {
       throw new UnknownError(
@@ -344,21 +354,83 @@ export class BuildService {
     }
   }
 
-  async connectDomain({ url }: { url: string }) {
+  async connectDomain({
+    projectName,
+    customDomain,
+  }: {
+    projectName: string;
+    customDomain: string;
+  }) {
     try {
+      const [project] = await this.projectRepository.readDocument({
+        documentId: projectName,
+      });
+
+      if (!project) {
+        throw new NotFoundError("Cannot find Project data.");
+      }
+      if (!project.originalBuildDomain) {
+        throw new ForbiddenError(
+          "Cannot delete domain sinse the project initially delployed yet.",
+        );
+      }
+
+      await this.recordClient.createCNAME({
+        recordName: customDomain,
+        recordTarget: project.originalBuildDomain,
+      });
+
+      await this.deploymentClient.updateDeploymentDomain({
+        deploymentData: project.deploymentData,
+        domain: project.customDomain.concat(customDomain),
+      });
     } catch (error) {
       throw new UnknownError(
-        "An unexpected error occurred during build project",
+        "An unexpected error occurred during connect custom domain.",
         error,
       );
     }
   }
 
-  async disconnectDomain({ url }: { url: string }) {
+  async disconnectDomain({
+    projectName,
+    customDomain,
+  }: {
+    projectName: string;
+    customDomain: string;
+  }) {
     try {
+      const [project] = await this.projectRepository.readDocument({
+        documentId: projectName,
+      });
+      const newCustomDomain = project?.customDomain.filter(
+        domain => domain !== customDomain,
+      );
+
+      if (!project) {
+        throw new NotFoundError("Cannot find Project data.");
+      }
+      if (project.customDomain.length === newCustomDomain?.length) {
+        throw new NotFoundError("Cannot find custom domain data.");
+      }
+      if (!project.originalBuildDomain) {
+        throw new ForbiddenError(
+          "Cannot delete domain sinse the project initially delployed yet.",
+        );
+      }
+
+      await this.recordClient.deleteCNAME({
+        recordName: customDomain,
+        recordTarget: project.originalBuildDomain,
+      });
+
+      await this.deploymentClient.updateDeploymentDomain({
+        deploymentData: project.deploymentData,
+        domain: project.customDomain.filter(domain => domain !== customDomain),
+      });
     } catch (error) {
       throw new UnknownError(
-        "An unexpected error occurred during build project",
+        "An unexpected error occurred during disconnect custom domain.",
         error,
       );
     }
