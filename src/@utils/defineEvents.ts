@@ -47,7 +47,6 @@ export type UpdateProjectEvent = BaseEvent<
     installCommand?: string;
     buildCommand?: string;
     envList?: Env | Env[];
-    buildDomain?: string | string[];
   }
 >;
 
@@ -63,7 +62,7 @@ export type AddProjectOptionsEvent = BaseEvent<
   "ADD_PROJECT_OPTIONS",
   {
     projectName: string;
-    buildDomain?: string;
+    customDomain?: string;
     webhook?: Webhook;
   }
 >;
@@ -72,7 +71,7 @@ export type RemoveProjectOptionsEvent = BaseEvent<
   "REMOVE_PROJECT_OPTIONS",
   {
     projectName: string;
-    buildDomain?: string;
+    customDomain?: string;
     webhook?: Webhook;
   }
 >;
@@ -82,7 +81,7 @@ export type DeploymentUpdatedEvent = BaseEvent<
   {
     projectName: string;
     originalBuildDomain?: string;
-    buildDomain?: string | string[];
+    jaamToastDomain?: string;
     resourcePath?: string;
     deploymentData?: S3CloudFrontDeploymentData;
   }
