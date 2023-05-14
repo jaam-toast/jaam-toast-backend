@@ -61,8 +61,9 @@ export type Project = {
     schema: Schema;
   }[];
   webhookList: Webhook[];
+  jaamToastDomain?: string;
   originalBuildDomain?: string;
-  buildDomain: string[];
+  customDomain: string[];
   cmsDomain?: string;
   assetStorageUrl?: string;
 };

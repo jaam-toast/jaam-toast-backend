@@ -63,7 +63,7 @@ subscribeEvent(
         status,
         webhookList: [],
         schemaList: initialSchemaList,
-        buildDomain: [],
+        customDomain: [],
         deploymentData: {},
       },
     });
@@ -78,7 +78,6 @@ subscribeEvent(
     installCommand,
     buildCommand,
     envList,
-    buildDomain,
   }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
@@ -90,9 +89,6 @@ subscribeEvent(
     }
 
     const newEnvList = envList ? project.envList.concat(envList) : null;
-    const newBuildDomain = buildDomain
-      ? (project.buildDomain ?? []).concat(buildDomain)
-      : null;
 
     projectRepository.updateDocument({
       documentId: projectName,
@@ -103,7 +99,6 @@ subscribeEvent(
         ...(installCommand && { installCommand }),
         ...(buildCommand && { buildCommand }),
         ...(newEnvList && { envList: newEnvList }),
-        ...(newBuildDomain && { buildDomain: newBuildDomain }),
       },
     });
   },
@@ -117,7 +112,7 @@ subscribeEvent("DELETE_PROJECT", ({ projectName }) => {
 
 subscribeEvent(
   "ADD_PROJECT_OPTIONS",
-  async ({ projectName, buildDomain, webhook }) => {
+  async ({ projectName, customDomain, webhook }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -127,8 +122,8 @@ subscribeEvent(
       return;
     }
 
-    const newBuildDomain = !!buildDomain
-      ? project.buildDomain?.concat(buildDomain) ?? [buildDomain]
+    const newCustomDomain = !!customDomain
+      ? project.customDomain?.concat(customDomain) ?? [customDomain]
       : null;
     const newWebhookList = !!webhook
       ? project.webhookList.concat(webhook)
@@ -138,7 +133,7 @@ subscribeEvent(
       documentId: projectName,
       document: {
         projectUpdatedAt: updatedAt,
-        ...(newBuildDomain && { buildDomain: newBuildDomain }),
+        ...(newCustomDomain && { customDomain: newCustomDomain }),
         ...(newWebhookList && { webhookList: newWebhookList }),
       },
     });
@@ -147,7 +142,7 @@ subscribeEvent(
 
 subscribeEvent(
   "REMOVE_PROJECT_OPTIONS",
-  async ({ projectName, buildDomain, webhook }) => {
+  async ({ projectName, customDomain, webhook }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -157,8 +152,8 @@ subscribeEvent(
       return;
     }
 
-    const newBuildDomain = !!buildDomain
-      ? project.buildDomain?.filter(domain => domain !== buildDomain) ?? []
+    const newCustomDomain = !!customDomain
+      ? project.customDomain?.filter(domain => domain !== customDomain) ?? []
       : null;
     const newWebhookList = !!webhook
       ? project.webhookList.filter(
@@ -170,7 +165,7 @@ subscribeEvent(
       documentId: projectName,
       document: {
         projectUpdatedAt: updatedAt,
-        ...(newBuildDomain && { buildDomain: newBuildDomain }),
+        ...(newCustomDomain && { customDomain: newCustomDomain }),
         ...(newWebhookList && { webhookList: newWebhookList }),
       },
     });
@@ -193,7 +188,12 @@ subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, error }) => {
 
 subscribeEvent(
   "DEPLOYMENT_UPDATED",
-  async ({ projectName, buildDomain, originalBuildDomain, deploymentData }) => {
+  async ({
+    projectName,
+    originalBuildDomain,
+    deploymentData,
+    jaamToastDomain,
+  }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -210,9 +210,7 @@ subscribeEvent(
         projectUpdatedAt: updatedAt,
         ...(originalBuildDomain && { originalBuildDomain }),
         ...(deploymentData && { deploymentData }),
-        ...(buildDomain && {
-          buildDomain: project.buildDomain.concat(buildDomain),
-        }),
+        ...(jaamToastDomain && { jaamToastDomain }),
       },
     });
   },
