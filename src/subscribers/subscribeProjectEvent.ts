@@ -50,7 +50,7 @@ subscribeEvent(
       },
     ];
 
-    projectRepository.createDocument({
+    await projectRepository.createDocument({
       document: {
         space,
         repoName,
@@ -88,12 +88,14 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
     const newEnvList = envList ? project.envList.concat(envList) : null;
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         status: ProjectStatus.Pending,
@@ -107,8 +109,8 @@ subscribeEvent(
   },
 );
 
-subscribeEvent("DELETE_PROJECT", ({ projectName }) => {
-  projectRepository.deleteDocument({
+subscribeEvent("DELETE_PROJECT", async ({ projectName }) => {
+  await projectRepository.deleteDocument({
     documentId: projectName,
   });
 });
@@ -122,7 +124,9 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
     const newCustomDomain = !!customDomain
@@ -145,7 +149,9 @@ subscribeEvent(
       );
 
       if (!updatedWebhook) {
-        throw new NotFoundError("Cannot find project webhook data.");
+        throw new NotFoundError(
+          "An error occurred while executing the event. Cannot find Project webhook data.",
+        );
       }
 
       const newWebhookEventsSet = new Set(updatedWebhook.events);
@@ -168,7 +174,7 @@ subscribeEvent(
       );
     })();
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         projectUpdatedAt: updatedAt,
@@ -188,7 +194,9 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
     const newCustomDomain = !!customDomain
@@ -200,7 +208,7 @@ subscribeEvent(
         )
       : null;
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         projectUpdatedAt: updatedAt,
@@ -211,10 +219,10 @@ subscribeEvent(
   },
 );
 
-subscribeEvent("DEPLOYMENT_ERROR", ({ projectName, error }) => {
+subscribeEvent("DEPLOYMENT_ERROR", async ({ projectName, error }) => {
   const updatedAt = new Date().toISOString();
 
-  projectRepository.updateDocument({
+  await projectRepository.updateDocument({
     documentId: projectName,
     document: {
       status: ProjectStatus.Fail,
@@ -239,10 +247,12 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         status: ProjectStatus.Ready,
@@ -263,12 +273,14 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
     const newSchemaList = project.schemaList.concat({ schema, schemaName });
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         schemaList: newSchemaList,
@@ -285,7 +297,9 @@ subscribeEvent(
     });
 
     if (!project) {
-      return;
+      throw new NotFoundError(
+        "An error occurred while executing the event. Cannot find Project data.",
+      );
     }
 
     const newSchemaList = project.schemaList.map(projectSchema =>
@@ -294,7 +308,7 @@ subscribeEvent(
         : projectSchema,
     );
 
-    projectRepository.updateDocument({
+    await projectRepository.updateDocument({
       documentId: projectName,
       document: {
         schemaList: newSchemaList,
@@ -309,14 +323,16 @@ subscribeEvent("SCHEMA_DELETED", async ({ projectName, schemaName }) => {
   });
 
   if (!project) {
-    return;
+    throw new NotFoundError(
+      "An error occurred while executing the event. Cannot find Project data.",
+    );
   }
 
   const newSchemaList = project.schemaList.filter(
     projectSchema => projectSchema.schemaName !== schemaName,
   );
 
-  projectRepository.updateDocument({
+  await projectRepository.updateDocument({
     documentId: projectName,
     document: {
       schemaList: newSchemaList,

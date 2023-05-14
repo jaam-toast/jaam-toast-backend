@@ -73,10 +73,20 @@ projectOptionsRouter.patch(
   }),
   handleAsync(async (req, res, next) => {
     if (isEmpty(req.body)) {
-      return next(createError(400, "Fill"));
+      return next(
+        createError(
+          400,
+          "Please specify the options for the project you wish to add.",
+        ),
+      );
     }
     if (!!req.params.webhookId && !req.body.webhook) {
-      return next(createError(400, "Fill"));
+      return next(
+        createError(
+          400,
+          "The webhookId has been defined, but the webhook data to be updated has not been defined.",
+        ),
+      );
     }
 
     const { projectName, webhookId } = req.params;
@@ -108,7 +118,12 @@ projectOptionsRouter.delete(
   }),
   handleAsync(async (req, res, next) => {
     if (isEmpty(req.body)) {
-      return next(createError(400, "Fill"));
+      return next(
+        createError(
+          400,
+          "Please specify the options for the project you wish to remove.",
+        ),
+      );
     }
 
     const { projectName } = req.params;
