@@ -34,6 +34,7 @@ export type WebhookEvents =
   | "CONTENT_DELETED";
 
 export type Webhook = {
+  webhookId: string;
   name: string;
   url: string;
   events: WebhookEvents[];

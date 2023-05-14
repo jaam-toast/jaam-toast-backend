@@ -9,7 +9,7 @@ import type { Repository } from "../@config/di.config";
 const projectRepository =
   container.get<Repository<Project>>("ProjectRepository");
 
-subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName, buildDomain }) => {
+subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName }) => {
   const [project] = await projectRepository.readDocument({
     documentId: projectName,
   });
@@ -18,17 +18,12 @@ subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName, buildDomain }) => {
     return;
   }
 
-  const updatedBuildDomain = Array.isArray(buildDomain)
-    ? buildDomain
-    : [buildDomain];
-
   return project.webhookList
     .filter(({ events }) => events.includes("DEPLOYMENT_UPDATED"))
     .forEach(({ url }) => {
       axios.post(url, {
         event: "DEPLOYMENT_UPDATED",
         project,
-        buildDomain: updatedBuildDomain,
       });
     });
 });

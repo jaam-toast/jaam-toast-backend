@@ -63,7 +63,7 @@ export type AddProjectOptionsEvent = BaseEvent<
   {
     projectName: string;
     customDomain?: string;
-    webhook?: Webhook;
+    webhook?: { webhookId?: string } & Omit<Webhook, "webhookId">;
   }
 >;
 
@@ -72,7 +72,7 @@ export type RemoveProjectOptionsEvent = BaseEvent<
   {
     projectName: string;
     customDomain?: string;
-    webhook?: Webhook;
+    webhookIds?: string[];
   }
 >;
 

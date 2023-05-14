@@ -51,9 +51,10 @@ projectOptionsRouter.patch(
   parseRequest({
     params: z.object({
       projectName: z.string(),
+      webhookId: z.string().optional(),
     }),
     body: z.object({
-      buildDomain: z.string().optional(),
+      customDomain: z.string().optional(),
       webhook: z
         .object({
           name: z.string(),
@@ -74,14 +75,22 @@ projectOptionsRouter.patch(
     if (isEmpty(req.body)) {
       return next(createError(400, "Fill"));
     }
+    if (!!req.params.webhookId && !req.body.webhook) {
+      return next(createError(400, "Fill"));
+    }
 
-    const { projectName } = req.params;
-    const { buildDomain, webhook } = req.body;
+    const { projectName, webhookId } = req.params;
+    const { customDomain, webhook } = req.body;
 
     emitEvent("ADD_PROJECT_OPTIONS", {
       projectName,
-      buildDomain,
-      webhook,
+      customDomain,
+      ...(webhook && {
+        webhook: {
+          webhookId,
+          ...webhook,
+        },
+      }),
     });
   }),
 );
@@ -93,21 +102,8 @@ projectOptionsRouter.delete(
       projectName: z.string(),
     }),
     body: z.object({
-      buildDomain: z.string().optional(),
-      webhook: z
-        .object({
-          name: z.string(),
-          url: z.string(),
-          events: z.array(
-            z.union([
-              z.literal("DEPLOYMENT_UPDATED"),
-              z.literal("CONTENT_CREATED"),
-              z.literal("CONTENT_UPDATED"),
-              z.literal("CONTENT_DELETED"),
-            ]),
-          ),
-        })
-        .optional(),
+      customDomain: z.string().optional(),
+      webhookIds: z.array(z.string()).optional(),
     }),
   }),
   handleAsync(async (req, res, next) => {
@@ -116,12 +112,12 @@ projectOptionsRouter.delete(
     }
 
     const { projectName } = req.params;
-    const { buildDomain, webhook } = req.body;
+    const { customDomain, webhookIds } = req.body;
 
     emitEvent("REMOVE_PROJECT_OPTIONS", {
       projectName,
-      buildDomain,
-      webhook,
+      customDomain,
+      webhookIds,
     });
 
     return res.json({ message: "ok" });
