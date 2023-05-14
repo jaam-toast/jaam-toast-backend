@@ -1,6 +1,9 @@
+import { nanoid } from "nanoid";
+
 import { ProjectStatus } from "../@types/project";
 import { container } from "../@config/di.config";
 import { subscribeEvent } from "../@utils/emitEvent";
+import { NotFoundError } from "../@utils/defineErrors";
 import * as log from "../@utils/log";
 
 import type { Repository } from "../@config/di.config";
@@ -125,9 +128,45 @@ subscribeEvent(
     const newCustomDomain = !!customDomain
       ? project.customDomain?.concat(customDomain) ?? [customDomain]
       : null;
-    const newWebhookList = !!webhook
-      ? project.webhookList.concat(webhook)
-      : null;
+    const newWebhookList = (() => {
+      if (!webhook) {
+        return null;
+      }
+
+      if (!webhook.webhookId) {
+        return project.webhookList.concat({
+          ...webhook,
+          webhookId: nanoid(),
+        });
+      }
+
+      const updatedWebhook = project.webhookList.find(
+        projectWebhook => projectWebhook.webhookId === webhook.webhookId,
+      );
+
+      if (!updatedWebhook) {
+        throw new NotFoundError("Cannot find project webhook data.");
+      }
+
+      const newWebhookEventsSet = new Set(updatedWebhook.events);
+
+      for (const event of webhook.events) {
+        newWebhookEventsSet.add(event);
+      }
+
+      const newWebhookEvents = Array.from(newWebhookEventsSet);
+      const newWebhook = {
+        ...updatedWebhook,
+        ...webhook,
+        events: newWebhookEvents,
+      };
+
+      return project.webhookList.map(projectWebhook =>
+        projectWebhook.webhookId !== webhook.webhookId
+          ? projectWebhook
+          : newWebhook,
+      );
+    })();
 
     projectRepository.updateDocument({
       documentId: projectName,
@@ -142,7 +181,7 @@ subscribeEvent(
 
 subscribeEvent(
   "REMOVE_PROJECT_OPTIONS",
-  async ({ projectName, customDomain, webhook }) => {
+  async ({ projectName, customDomain, webhookIds }) => {
     const updatedAt = new Date().toISOString();
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -155,9 +194,9 @@ subscribeEvent(
     const newCustomDomain = !!customDomain
       ? project.customDomain?.filter(domain => domain !== customDomain) ?? []
       : null;
-    const newWebhookList = !!webhook
+    const newWebhookList = !!webhookIds
       ? project.webhookList.filter(
-          ({ url, name }) => url === webhook.url && name === webhook.name,
+          ({ webhookId }) => !!webhookIds.includes(webhookId),
         )
       : null;
 
