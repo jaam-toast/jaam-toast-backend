@@ -20,14 +20,14 @@ export class Route53RecordClient implements RecordClient {
   });
 
   async createARecord({
-    dnsName,
     recordName,
+    recordTarget,
   }: {
-    dnsName: string;
     recordName: string;
+    recordTarget: string;
   }) {
     try {
-      const command = new ChangeResourceRecordSetsCommand({
+      const createARecordCommand = new ChangeResourceRecordSetsCommand({
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
         ChangeBatch: {
           Comment: `Create a record A`,
@@ -36,7 +36,7 @@ export class Route53RecordClient implements RecordClient {
               Action: "CREATE",
               ResourceRecordSet: {
                 AliasTarget: {
-                  DNSName: dnsName,
+                  DNSName: recordTarget,
                   EvaluateTargetHealth: false,
                   HostedZoneId: Config.AWS_CLOUDFRONT_HOSTED_ZONE_ID,
                 },
@@ -47,7 +47,7 @@ export class Route53RecordClient implements RecordClient {
           ],
         },
       });
-      const { ChangeInfo } = await this.client.send(command);
+      const { ChangeInfo } = await this.client.send(createARecordCommand);
 
       if (!ChangeInfo?.Id) {
         throw new Error("Failed to create record");
@@ -61,9 +61,15 @@ export class Route53RecordClient implements RecordClient {
     }
   }
 
-  async deleteARecord({ recordName }: { recordName: string }) {
+  async deleteARecord({
+    recordName,
+    recordTarget,
+  }: {
+    recordName: string;
+    recordTarget: string;
+  }) {
     try {
-      const command = new ChangeResourceRecordSetsCommand({
+      const deleteARecordCommand = new ChangeResourceRecordSetsCommand({
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
         ChangeBatch: {
           Comment: `Delete a record A`,
@@ -72,7 +78,7 @@ export class Route53RecordClient implements RecordClient {
               Action: "DELETE",
               ResourceRecordSet: {
                 AliasTarget: {
-                  DNSName: Config.AWS_JAAM_SERVER_DNS_NAME,
+                  DNSName: recordTarget,
                   EvaluateTargetHealth: false,
                   HostedZoneId: Config.AWS_DNS_HOSTED_ZONE_ID,
                 },
@@ -83,9 +89,9 @@ export class Route53RecordClient implements RecordClient {
           ],
         },
       });
-      const data = await this.client.send(command);
+      const deleteARecordResult = await this.client.send(deleteARecordCommand);
 
-      if (!data.ChangeInfo) {
+      if (!deleteARecordResult.ChangeInfo) {
         throw new Error(
           "Cannot find the data required to create a DNS record.",
         );
@@ -97,13 +103,13 @@ export class Route53RecordClient implements RecordClient {
 
   async createCNAME({
     recordName,
-    recordValue,
+    recordTarget,
   }: {
     recordName: string;
-    recordValue: string;
+    recordTarget: string;
   }) {
     try {
-      const command = new ChangeResourceRecordSetsCommand({
+      const createCNAMECommand = new ChangeResourceRecordSetsCommand({
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
         ChangeBatch: {
           Comment: `Create a record CNAME`,
@@ -114,13 +120,13 @@ export class Route53RecordClient implements RecordClient {
                 Name: recordName,
                 Type: RRType.CNAME,
                 TTL: 300,
-                ResourceRecords: [{ Value: recordValue }],
+                ResourceRecords: [{ Value: recordTarget }],
               },
             },
           ],
         },
       });
-      const { ChangeInfo } = await this.client.send(command);
+      const { ChangeInfo } = await this.client.send(createCNAMECommand);
 
       if (!ChangeInfo?.Id) {
         throw new Error("Failed to create record");
@@ -134,50 +140,15 @@ export class Route53RecordClient implements RecordClient {
     }
   }
 
-  async upsertCNAME({
-    recordName,
-    recordValue,
-  }: {
-    recordName: string;
-    recordValue: string;
-  }) {
-    try {
-      const command = new ChangeResourceRecordSetsCommand({
-        HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
-        ChangeBatch: {
-          Comment: `Upsert a record CNAME`,
-          Changes: [
-            {
-              Action: "UPSERT",
-              ResourceRecordSet: {
-                Name: recordName,
-                Type: RRType.CNAME,
-                TTL: 300,
-                ResourceRecords: [{ Value: recordValue }],
-              },
-            },
-          ],
-        },
-      });
-      const { ChangeInfo } = await this.client.send(command);
-
-      if (!ChangeInfo?.Id) {
-        throw new Error("Failed to upsert record");
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async deleteCNAME({
     recordName,
-    recordValue,
+    recordTarget,
   }: {
     recordName: string;
-    recordValue: string;
+    recordTarget: string;
   }) {
     try {
-      const command = new ChangeResourceRecordSetsCommand({
+      const deleteCNAMECommand = new ChangeResourceRecordSetsCommand({
         HostedZoneId: Config.AWS_HOSTED_ZONE_ID,
         ChangeBatch: {
           Comment: `Delete a record CNAME`,
@@ -188,13 +159,13 @@ export class Route53RecordClient implements RecordClient {
                 Name: recordName,
                 Type: RRType.CNAME,
                 TTL: 300,
-                ResourceRecords: [{ Value: recordValue }],
+                ResourceRecords: [{ Value: recordTarget }],
               },
             },
           ],
         },
       });
-      const { ChangeInfo } = await this.client.send(command);
+      const { ChangeInfo } = await this.client.send(deleteCNAMECommand);
 
       if (!ChangeInfo?.Id) {
         throw new Error("Failed to delete record");
@@ -206,9 +177,11 @@ export class Route53RecordClient implements RecordClient {
 
   async getRecordStatus({ recordId }: { recordId: string }) {
     try {
-      const command = new GetChangeCommand({ Id: recordId });
-      const data = await this.client.send(command);
-      const recordStatus = data.ChangeInfo?.Status;
+      const getRecordStatusCommand = new GetChangeCommand({ Id: recordId });
+      const getRecordStatusResult = await this.client.send(
+        getRecordStatusCommand,
+      );
+      const recordStatus = getRecordStatusResult.ChangeInfo?.Status;
 
       return recordStatus === "INSYNC";
     } catch {
