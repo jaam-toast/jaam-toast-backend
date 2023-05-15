@@ -82,7 +82,7 @@ loginRouter.get(
     const productionCookieOptions =
       Config.NODE_ENV === "production"
         ? {
-            httpOnly: true,
+            // httpOnly: true,
             secure: true,
             domain: Config.ORIGIN_SERVER_URL,
           }
