@@ -492,6 +492,10 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
 
   private initDeleteDistributionCronJob() {
     Cron("*/10 * * * *", () => {
+      if (this.deleteMessageQueue.length === 0) {
+        return;
+      }
+
       while (
         Date.now() - this.deleteMessageQueue[0].createdAt >
         1000 * 60 * 10
