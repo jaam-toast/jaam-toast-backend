@@ -21,14 +21,18 @@ subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName }) => {
     );
   }
 
-  project.webhookList
-    .filter(({ events }) => events.includes("DEPLOYMENT_UPDATED"))
-    .forEach(({ url }) => {
-      axios.post(url, {
+  const eventWebhook = project.webhookList.filter(({ events }) =>
+    events.includes("DEPLOYMENT_UPDATED"),
+  );
+
+  for await (const webhook of eventWebhook) {
+    try {
+      await axios.post(webhook.url, {
         event: "DEPLOYMENT_UPDATED",
         project,
       });
-    });
+    } catch {}
+  }
 });
 
 subscribeEvent("CONTENT_CREATED", async ({ projectName, schema, content }) => {
@@ -42,15 +46,23 @@ subscribeEvent("CONTENT_CREATED", async ({ projectName, schema, content }) => {
     );
   }
 
-  project.webhookList
-    .filter(({ events }) => events.includes("CONTENT_CREATED"))
-    .forEach(({ url }) => {
-      axios.post(url, {
+  project.webhookList.filter(({ events }) =>
+    events.includes("CONTENT_CREATED"),
+  );
+
+  const eventWebhook = project.webhookList.filter(({ events }) =>
+    events.includes("CONTENT_CREATED"),
+  );
+
+  for await (const webhook of eventWebhook) {
+    try {
+      await axios.post(webhook.url, {
         event: "CONTENT_CREATED",
         schema,
         content,
       });
-    });
+    } catch {}
+  }
 });
 
 subscribeEvent("CONTENT_UPDATED", async ({ projectName, schema, content }) => {
@@ -64,15 +76,19 @@ subscribeEvent("CONTENT_UPDATED", async ({ projectName, schema, content }) => {
     );
   }
 
-  project.webhookList
-    .filter(({ events }) => events.includes("CONTENT_UPDATED"))
-    .forEach(({ url }) => {
-      axios.post(url, {
+  const eventWebhook = project.webhookList.filter(({ events }) =>
+    events.includes("CONTENT_UPDATED"),
+  );
+
+  for await (const webhook of eventWebhook) {
+    try {
+      await axios.post(webhook.url, {
         event: "CONTENT_UPDATED",
         schema,
         content,
       });
-    });
+    } catch {}
+  }
 });
 
 subscribeEvent("CONTENT_DELETED", async ({ projectName, schema }) => {
@@ -86,12 +102,16 @@ subscribeEvent("CONTENT_DELETED", async ({ projectName, schema }) => {
     );
   }
 
-  project.webhookList
-    .filter(({ events }) => events.includes("CONTENT_DELETED"))
-    .forEach(({ url }) => {
-      axios.post(url, {
+  const eventWebhook = project.webhookList.filter(({ events }) =>
+    events.includes("CONTENT_UPDATED"),
+  );
+
+  for await (const webhook of eventWebhook) {
+    try {
+      await axios.post(webhook.url, {
         event: "CONTENT_DELETED",
         schema,
       });
-    });
+    } catch {}
+  }
 });
