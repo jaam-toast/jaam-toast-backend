@@ -35,12 +35,10 @@ export class StorageService {
 
   async createStorageDomain({ projectName }: { projectName: string }) {
     try {
-      /**
-       * create CNAME record
-       */
-      const jaamToastStorageDomain = `api-${projectName}.${Config.SERVER_URL}`;
+      const jaamToastCmsDomain = `api-${projectName}.${Config.SERVER_URL}`;
       const recordId = await this.recordClient.createARecord({
-        recordName: jaamToastStorageDomain,
+        recordName: jaamToastCmsDomain,
+        recordTarget: Config.JAAM_SERVER_DNS_NAME,
       });
 
       await waitFor({
@@ -49,7 +47,7 @@ export class StorageService {
       });
 
       emitEvent("STORAGE_CREATED", {
-        storageDomain: jaamToastStorageDomain,
+        storageDomain: jaamToastCmsDomain,
       });
     } catch (error) {
       throw error;
@@ -57,14 +55,16 @@ export class StorageService {
   }
 
   async deleteStorageDomain({ projectName }: { projectName: string }) {
-    // try {
-    //   if (!projectName) {
-    //     throw Error(CMS_MESSAGE.DELETE_ERROR.ENVIRONMENT_DATA_NOT_FOUND);
-    //   }
-    //   await deleteDomain({ subdomain: `api-${projectName}` });
-    // } catch (error) {
-    //   throw error;
-    // }
+    try {
+      const jaamToastCmsDomain = `api-${projectName}.${Config.SERVER_URL}`;
+
+      await this.recordClient.deleteARecord({
+        recordName: jaamToastCmsDomain,
+        recordTarget: Config.JAAM_SERVER_DNS_NAME,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async addSchema({
