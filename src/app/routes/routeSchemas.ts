@@ -137,8 +137,7 @@ schemasRouter.delete(
     const { schemaName } = req.query;
 
     if (!schemaName) {
-      // TODO
-      return next(createError(400, "SchemaName을 정의해주세요"));
+      return next(createError(400, "'schemaName' has not been defined."));
     }
 
     if (typeof schemaName === "string") {

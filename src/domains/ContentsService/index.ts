@@ -59,8 +59,7 @@ export class ContentService {
       });
 
       if (!isValidated) {
-        // TODO: fill error message.
-        throw new ValidateError();
+        throw new ValidateError("Content schema validation has failed.");
       }
 
       await this.contentClient.createContent({
@@ -122,8 +121,7 @@ export class ContentService {
       });
 
       if (!isValidate) {
-        // TODO: fill error message.
-        throw new ValidateError();
+        throw new ValidateError("Content schema validation has failed.");
       }
 
       this.contentClient.updateContent({
