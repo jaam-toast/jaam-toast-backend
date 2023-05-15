@@ -39,8 +39,9 @@ subscribeEvent(
               type: "string",
               format: "url",
             },
-            name: {
+            path: {
               type: "string",
+              description: "text",
             },
             size: {
               type: "number",
@@ -108,12 +109,6 @@ subscribeEvent(
     });
   },
 );
-
-subscribeEvent("DELETE_PROJECT", async ({ projectName }) => {
-  await projectRepository.deleteDocument({
-    documentId: projectName,
-  });
-});
 
 subscribeEvent(
   "ADD_PROJECT_OPTIONS",
@@ -279,34 +274,6 @@ subscribeEvent(
     }
 
     const newSchemaList = project.schemaList.concat({ schema, schemaName });
-
-    await projectRepository.updateDocument({
-      documentId: projectName,
-      document: {
-        schemaList: newSchemaList,
-      },
-    });
-  },
-);
-
-subscribeEvent(
-  "SCHEMA_UPDATED",
-  async ({ projectName, schemaName, schema }) => {
-    const [project] = await projectRepository.readDocument({
-      documentId: projectName,
-    });
-
-    if (!project) {
-      throw new NotFoundError(
-        "An error occurred while executing the event. Cannot find Project data.",
-      );
-    }
-
-    const newSchemaList = project.schemaList.map(projectSchema =>
-      projectSchema.schemaName === schemaName
-        ? { schemaName, schema }
-        : projectSchema,
-    );
 
     await projectRepository.updateDocument({
       documentId: projectName,
