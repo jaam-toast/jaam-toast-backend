@@ -160,12 +160,10 @@ export interface ContentClient {
     projectName: string;
     schemaName: string;
     pagination?: {
-      page?: number;
-      pageLength?: number;
-    };
-    sort?: {
-      [key: string]: "asc" | "desc" | "ascending" | "descending";
-    }[];
+      page: number;
+      pageLength: number;
+    },
+    sort?: Record<string, "asc" | "ascending" | "desc" | "descending">;
     filter?: {
       [key: string]: string | number | boolean;
     };

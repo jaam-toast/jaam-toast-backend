@@ -72,7 +72,22 @@ storageRouter.get(
         page: z.string().optional(),
         pageLength: z.string().optional(),
         sort: z.union([z.string(), z.array(z.string())]).optional(),
-        order: z.union([z.string(), z.array(z.string())]).optional(),
+        order: z
+          .union([
+            z.literal("ascending"),
+            z.literal("asc"),
+            z.literal("descending"),
+            z.literal("desc"),
+            z.array(
+              z.union([
+                z.literal("ascending"),
+                z.literal("asc"),
+                z.literal("descending"),
+                z.literal("desc"),
+              ]),
+            ),
+          ])
+          .optional(),
       })
       .optional(),
   }),
@@ -83,49 +98,13 @@ storageRouter.get(
     const { schemaName } = req.params;
     const { page, pageLength, sort, order } = req?.query ?? {};
 
-    const pagination = {
-      ...(page && { page: Number(page) }),
-      ...(pageLength && { pageLength: Number(pageLength) }),
-    };
-
-    const sortOptions: {
-      [key: string]: string;
-    }[] = (() => {
-      if (Array.isArray(sort)) {
-        if (Array.isArray(order)) {
-          return sort.map((sort, index) => ({
-            [sort]: typeof order[index] === "string" ? order[index] : "asc",
-          }));
-        }
-        if (typeof order === "string") {
-          return sort.map((sort, index) =>
-            index === 0 ? { [sort]: order } : { [sort]: "asc" },
-          );
-        }
-        if (!order) {
-          return sort.map(sort => ({ [sort]: "asc" }));
-        }
-      }
-      if (typeof sort === "string") {
-        if (Array.isArray(order) && typeof order[0] === "string") {
-          return [{ [sort]: order[0] }];
-        }
-        if (typeof order === "string") {
-          return [{ [sort]: order }];
-        }
-        if (!order) {
-          return [{ [sort]: "asc" }];
-        }
-      }
-
-      return [];
-    })();
-
     const contents = await contentService.queryContents({
       projectName,
       schemaName,
-      pagination,
-      sort: sortOptions,
+      ...(page && { page: Number(page) }),
+      ...(pageLength && { pageLength: Number(pageLength) }),
+      ...(sort && { sort }),
+      ...(order && { order }),
     });
 
     const totalCounts = await contentService.getContentsTotalCounts({
