@@ -331,6 +331,7 @@ export class BuildService {
 
       await this.deploymentClient.deleteDeployment({
         domainName: jaamToastDomain,
+        deploymentData: project.deploymentData,
       });
 
       if (project.originalBuildDomain) {

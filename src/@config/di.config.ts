@@ -106,9 +106,9 @@ export interface DeploymentClient {
     domainName: string;
   }) => Promise<boolean>;
 
-  deleteDeployment: (deleteDeploymentOptions:
-    Partial<Project["deploymentData"]> & {
+  deleteDeployment: (deleteDeploymentOptions: {
     domainName: string;
+    deploymentData: S3CloudFrontDeploymentData;
   }) => Promise<void>;
 
   updateDeploymentDomain: (updateDeploymentDomainOptions: {
