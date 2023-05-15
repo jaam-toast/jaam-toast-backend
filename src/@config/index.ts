@@ -6,6 +6,7 @@ dotenv.config();
 
 const Config = {
   NODE_ENV: process.env.NODE_ENV!,
+  ORIGIN_SERVER_URL: process.env.ORIGIN_SERVER_URL!,
   LOGGER_OPTIONS: {
     debug: !!parseInt(process.env.DEBUG!),
   },
