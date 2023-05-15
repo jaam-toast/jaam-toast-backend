@@ -121,39 +121,43 @@ schemasRouter.put(
 );
 
 schemasRouter.delete(
-  "/projects/:projectName/schemas/:schemaName",
+  "/projects/:projectName/schemas",
   parseRequest({
     params: z.object({
       projectName: z.string(),
-      schemaName: z.string(),
+    }),
+    query: z.object({
+      schemaName: z.union([z.string(), z.array(z.string())]),
     }),
   }),
   handleAsync(async (req, res, next) => {
     const storageService = container.get<StorageService>("StorageService");
-    const projectRepository =
-      container.get<Repository<Project>>("ProjectRepository");
 
-    const { projectName, schemaName } = req.params;
-    const [project] = await projectRepository.readDocument({
-      documentId: projectName,
-    });
+    const { projectName } = req.params;
+    const { schemaName } = req.query;
 
-    if (!project) {
-      return next(createError(404, "Cannot find project."));
+    if (!schemaName) {
+      // TODO
+      return next(createError(400, "SchemaName을 정의해주세요"));
     }
 
-    const isSchemaExist = !!project.schemaList.find(
-      proejctSchema => proejctSchema.schemaName === schemaName,
-    );
-
-    if (!isSchemaExist) {
-      return next(createError(404, "Cannot find schema."));
+    if (typeof schemaName === "string") {
+      await storageService.deleteSchema({
+        projectName,
+        schemaName,
+      });
+    } else if (Array.isArray(schemaName)) {
+      for await (const schema of schemaName) {
+        await storageService.deleteSchema({
+          projectName,
+          schemaName: schema,
+        });
+      }
+    } else {
+      return next(
+        createError(500, "Server에서 schemaName을 정의할 수 없습니다."),
+      );
     }
-
-    await storageService.deleteSchema({
-      projectName,
-      schemaName,
-    });
 
     return res.status(200).json({
       message: "ok",

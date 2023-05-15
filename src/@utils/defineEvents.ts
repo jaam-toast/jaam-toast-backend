@@ -6,7 +6,6 @@ import type { S3CloudFrontDeploymentData } from "../infrastructure/S3CloudFrontD
 export type Events =
   | CreateProjectEvent
   | UpdateProjectEvent
-  | DeleteProjectEvent
   | AddProjectOptionsEvent
   | RemoveProjectOptionsEvent
   | DeploymentUpdatedEvent
@@ -47,14 +46,6 @@ export type UpdateProjectEvent = BaseEvent<
     installCommand?: string;
     buildCommand?: string;
     envList?: Env | Env[];
-  }
->;
-
-export type DeleteProjectEvent = BaseEvent<
-  "DELETE_PROJECT",
-  {
-    projectName: string;
-    userId: string;
   }
 >;
 

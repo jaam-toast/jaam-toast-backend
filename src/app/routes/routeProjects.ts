@@ -13,7 +13,9 @@ import { emitEvent } from "../../@utils/emitEvent";
 
 import type { Project } from "../../@types/project";
 import type { Repository } from "../../@config/di.config";
+import type { User } from "../../@types/user";
 import type { TokenClient } from "../../@config/di.config";
+import type { BuildService } from "../../domains/BuildService";
 
 const CLIENT_FRAMEWORK_INFO = {
   "Create React App": "CreateReactApp",
@@ -194,10 +196,24 @@ projectsRouter.delete(
     }),
   }),
   handleAsync(async (req, res) => {
+    const buildService = container.get<BuildService>("BuildService");
+    const userRepository = container.get<Repository<User>>("UserRepository");
+
     const { userId } = req.app.locals;
     const { projectName } = req.params;
+    const [user] = await userRepository.readDocument({ documentId: userId });
 
-    emitEvent("DELETE_PROJECT", { userId, projectName });
+    if (!user) {
+      return createError(500, "Server cannot find user data.");
+    }
+
+    await buildService.deleteBuild({ projectName });
+    await userRepository.updateDocument({
+      documentId: userId,
+      document: {
+        projects: user.projects.filter(project => project !== projectName),
+      },
+    });
 
     return res.status(204).json({
       message: "ok",

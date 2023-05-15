@@ -21,9 +21,11 @@ import {
   GetDistributionConfigCommand,
 } from "@aws-sdk/client-cloudfront";
 import { omit } from "lodash";
+import { Cron } from "croner";
 
 import Config from "./@config";
 import { waitFor } from "../@utils/waitFor";
+import * as log from "../@utils/log";
 
 import type { DeploymentClient } from "../@config/di.config";
 
@@ -31,6 +33,13 @@ export type S3CloudFrontDeploymentData = {
   deploymentId?: string;
   oaiId?: string;
   oaiETag?: string;
+};
+
+type DeleteMessage = {
+  createdAt: number;
+  payload: S3CloudFrontDeploymentData & {
+    distributionEtag: string;
+  };
 };
 
 @injectable()
@@ -52,6 +61,10 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
       secretAccessKey: Config.AWS_SECRET_ACCESS_KEY,
     },
   });
+
+  constructor() {
+    this.initDeleteDistributionCronJob();
+  }
 
   private async getFiles({
     resourcePath,
@@ -419,14 +432,10 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
 
   async deleteDeployment({
     domainName,
-    deploymetId,
-    oaiId,
-    oaiETag,
+    deploymentData,
   }: {
     domainName: string;
-    deploymetId?: string;
-    oaiId?: string;
-    oaiETag?: string;
+    deploymentData: S3CloudFrontDeploymentData;
   }) {
     try {
       await this.clearBucket({
@@ -437,17 +446,21 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
        * disable distibution
        */
       const command = new GetDistributionConfigCommand({
-        Id: deploymetId,
+        Id: deploymentData.deploymentId,
       });
       const defaultCommandConfig = await this.cloudFrontClient.send(command);
 
-      if (!defaultCommandConfig || !defaultCommandConfig.DistributionConfig) {
+      if (
+        !defaultCommandConfig ||
+        !defaultCommandConfig.DistributionConfig ||
+        !defaultCommandConfig.ETag
+      ) {
         return;
       }
 
       const disableContributionCommand = new UpdateDistributionCommand({
         ...omit(defaultCommandConfig, ["ETag", "$metadata"]),
-        Id: deploymetId,
+        Id: deploymentData.deploymentId,
         DistributionConfig: {
           ...defaultCommandConfig.DistributionConfig,
           Enabled: false,
@@ -457,17 +470,53 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
 
       await this.cloudFrontClient.send(disableContributionCommand);
 
-      /**
-       * wait 10 minutes
-       */
-      await new Promise(res => setTimeout(res, 1000 * 60 * 10));
+      const deleteMessage = {
+        createdAt: Date.now(),
+        payload: {
+          distributionEtag: defaultCommandConfig.ETag,
+          ...deploymentData,
+        },
+      };
 
+      this.publishDeleteMessageQueue(deleteMessage);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  private deleteMessageQueue: DeleteMessage[] = [];
+
+  private publishDeleteMessageQueue(deleteMessage: DeleteMessage) {
+    this.deleteMessageQueue.push(deleteMessage);
+  }
+
+  private initDeleteDistributionCronJob() {
+    Cron("*/10 * * * *", () => {
+      while (
+        Date.now() - this.deleteMessageQueue[0].createdAt >
+        1000 * 60 * 10
+      ) {
+        this.deleteDistribution(this.deleteMessageQueue[0].payload);
+        this.deleteMessageQueue.shift();
+      }
+    });
+  }
+
+  private async deleteDistribution({
+    distributionEtag,
+    deploymentId,
+    oaiId,
+    oaiETag,
+  }: S3CloudFrontDeploymentData & {
+    distributionEtag: string;
+  }) {
+    try {
       /**
        * delete distribution
        */
       const deleteDistributionCommand = new DeleteDistributionCommand({
-        Id: deploymetId,
-        IfMatch: defaultCommandConfig.ETag,
+        Id: deploymentId,
+        IfMatch: distributionEtag,
       });
 
       await this.cloudFrontClient.send(deleteDistributionCommand);
@@ -482,7 +531,9 @@ export class S3CloudFrontDeploymentClient implements DeploymentClient {
 
       await this.cloudFrontClient.send(deleteOaiCommand);
     } catch (error) {
-      throw error;
+      if (error instanceof Error) {
+        log.serverError(error.name, error.message, error.stack ?? "");
+      }
     }
   }
 

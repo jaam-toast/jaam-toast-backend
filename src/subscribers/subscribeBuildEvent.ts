@@ -62,7 +62,3 @@ subscribeEvent("UPDATE_PROJECT", async ({ isRedeployUpdate, ...payload }) => {
     envList: newEnvList ?? project.envList,
   });
 });
-
-subscribeEvent("DELETE_PROJECT", async ({ projectName }) => {
-  await buildService.deleteBuild({ projectName });
-});
