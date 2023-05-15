@@ -84,7 +84,7 @@ loginRouter.get(
         ? {
             httpOnly: true,
             secure: true,
-            domain: Config.CLIENT_URL,
+            domain: Config.ORIGIN_SERVER_URL,
           }
         : {};
     const cookieOptions = {
