@@ -5,10 +5,16 @@ import type {
   Repository,
   SchemaClient,
 } from "../../@config/di.config";
-import { NotFoundError, ValidateError } from "../../@utils/defineErrors";
+import {
+  NotFoundError,
+  UnknownError,
+  ValidateError,
+} from "../../@utils/defineErrors";
 import { emitEvent } from "../../@utils/emitEvent";
+import { BaseError } from "../../@types/baseError";
 
 import type { Project } from "../../@types/project";
+import Config from "../../@config";
 
 @injectable()
 export class ContentService {
@@ -191,20 +197,24 @@ export class ContentService {
   public async queryContents({
     projectName,
     schemaName,
-    pagination,
+    page,
+    pageLength,
     sort,
+    order,
     filter,
     contentId,
   }: {
     projectName: string;
     schemaName: string;
-    pagination?: {
-      page?: number;
-      pageLength?: number;
-    };
-    sort?: {
-      [key: string]: string;
-    }[];
+    page?: number;
+    pageLength?: number;
+    sort?: string | string[];
+    order?:
+      | "asc"
+      | "ascending"
+      | "desc"
+      | "descending"
+      | ("asc" | "ascending" | "desc" | "descending")[];
     filter?: {
       [key: string]: string | number | boolean;
     };
@@ -226,45 +236,72 @@ export class ContentService {
       if (!schemaInfo) {
         throw new NotFoundError("Cannot find schema");
       }
-    } catch (error) {
-      throw error;
-    }
 
-    if (!!contentId) {
+      if (!!contentId) {
+        return this.contentClient.queryContents({
+          projectName,
+          schemaName,
+          filter: { id: contentId },
+        });
+      }
+
+      const sortOptionsEntries: [
+        string,
+        "asc" | "ascending" | "desc" | "descending",
+      ][] = (() => {
+        if (Array.isArray(sort)) {
+          if (Array.isArray(order)) {
+            return sort.map((sort, index) => [
+              sort,
+              typeof order[index] === "string" ? order[index] : "asc",
+            ]);
+          }
+          if (typeof order === "string") {
+            return sort.map((sort, index) => [
+              sort,
+              index === 0 ? order : "asc",
+            ]);
+          }
+          if (!order) {
+            return sort.map(sort => [sort, "asc"]);
+          }
+        }
+        if (typeof sort === "string") {
+          if (Array.isArray(order)) {
+            return [[sort, order[0]]];
+          }
+          if (typeof order === "string") {
+            return [[sort, order]];
+          }
+          if (!order) {
+            return [[sort, "asc"]];
+          }
+        }
+
+        return [];
+      })();
+      const sortOptions = Object.fromEntries(sortOptionsEntries);
+      const paginationOptions = {
+        ...(page ? { page } : { page: 1 }),
+        ...(pageLength
+          ? { pageLength }
+          : { pageLength: Config.MAX_NUMBER_PER_PAGE }),
+      };
+
       return this.contentClient.queryContents({
         projectName,
         schemaName,
-        filter: { id: contentId },
+        pagination: paginationOptions,
+        sort: sortOptions,
+        filter,
       });
-    }
-
-    const sortQueries = sort?.map(sortOption => {
-      const sortQuery: { [key: string]: "asc" | "desc" } = {};
-
-      for (const sort in sortOption) {
-        if (sortOption.hasOwnProperty(sort)) {
-          const order = sortOption[sort];
-
-          if (order === "descending" || order === "desc") {
-            sortQuery[sort] = "desc";
-          } else {
-            sortQuery[sort] = "asc";
-          }
-
-          break;
-        }
+    } catch (error) {
+      if (error instanceof BaseError) {
+        throw error;
       }
 
-      return sortQuery;
-    }) ?? [{ _id: "asc" }];
-
-    return this.contentClient.queryContents({
-      projectName,
-      schemaName,
-      pagination,
-      sort: sortQueries,
-      filter,
-    });
+      throw new UnknownError("An Error Occured during getting contents.");
+    }
   }
 
   public getContentsTotalCounts({

@@ -143,12 +143,10 @@ export class MongodbContentClient implements ContentClient {
     projectName: string;
     schemaName: string;
     pagination?: {
-      page?: number;
-      pageLength?: number;
+      page: number;
+      pageLength: number;
     };
-    sort?: {
-      [key: string]: "asc" | "desc" | "ascending" | "descending";
-    }[];
+    sort?: Record<string, "asc" | "ascending" | "desc" | "descending">;
     filter?: {
       [key: string]: string | number | boolean;
     };
@@ -165,25 +163,8 @@ export class MongodbContentClient implements ContentClient {
     const page = pagination?.page ?? 1;
     const limit = pagination?.pageLength || Config.MAX_NUMBER_PER_PAGE;
     const skip = (page - 1) * limit;
-    const sortOptions = sort
-      ? sort.reduce((sortOptions, option) => {
-          const sortOrders = Object.values(option).map(order =>
-            order === "asc" || order === "ascending" ? 1 : -1,
-          );
-          const sortProps = Object.keys(option).reduce(
-            (sortOperators, prop, index) => ({
-              ...sortOperators,
-              [prop]: sortOrders[index],
-            }),
-            {},
-          );
-          return {
-            ...sortOptions,
-            ...sortProps,
-          };
-        }, {})
-      : {};
     const filterOptions = filter ?? {};
+    const sortOptions = sort ?? {};
 
     return this.client
       .db(projectName)
