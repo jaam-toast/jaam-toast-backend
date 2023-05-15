@@ -3,7 +3,11 @@ import { inject, injectable } from "inversify";
 import Config from "../../@config";
 import { waitFor } from "../../@utils/waitFor";
 import { emitEvent } from "../../@utils/emitEvent";
-import { UnknownError, ValidateError } from "../../@utils/defineErrors";
+import {
+  NotFoundError,
+  UnknownError,
+  ValidateError,
+} from "../../@utils/defineErrors";
 
 import type {
   ContentClient,
@@ -13,6 +17,7 @@ import type {
 } from "../../@config/di.config";
 import type { Schema } from "../../@types/schema";
 import type { Project } from "../../@types/project";
+import { BaseError } from "../../@types/baseError";
 
 @injectable()
 export class StorageService {
@@ -97,8 +102,7 @@ export class StorageService {
       });
 
       if (!project) {
-        // TODO: fill error message.
-        throw new ValidateError();
+        throw new NotFoundError("Cannot find Project data.");
       }
 
       emitEvent("SCHEMA_CREATED", {
@@ -107,7 +111,10 @@ export class StorageService {
         schema,
       });
     } catch (error) {
-      // TODO: fill error message.
+      if (error instanceof BaseError) {
+        throw error;
+      }
+
       throw new UnknownError("Cannot update user info.", error);
     }
   }
@@ -126,7 +133,7 @@ export class StorageService {
     });
 
     if (!isValidated) {
-      throw new Error(
+      throw new UnknownError(
         "The schema field is not of JSON Schema or failed validation.",
       );
     }
@@ -137,18 +144,23 @@ export class StorageService {
       });
 
       if (!project) {
-        // TODO: fill error message.
-        throw new ValidateError();
+        throw new NotFoundError(
+          "An error occurred while executing the event. Cannot find Project data.",
+        );
       }
 
-      const updatedSchemaList = project.schemaList.map(projectSchema =>
-        projectSchema.schemaName !== schemaName
-          ? projectSchema
-          : {
-              schemaName,
-              schema,
-            },
+      const newSchemaList = project.schemaList.map(projectSchema =>
+        projectSchema.schemaName === schemaName
+          ? { schemaName, schema }
+          : projectSchema,
       );
+
+      await this.projectRepository.updateDocument({
+        documentId: projectName,
+        document: {
+          schemaList: newSchemaList,
+        },
+      });
 
       emitEvent("SCHEMA_UPDATED", {
         projectName,
@@ -156,7 +168,11 @@ export class StorageService {
         schema,
       });
     } catch (error) {
-      throw new Error("Cannot update user info.");
+      if (error instanceof BaseError) {
+        throw error;
+      }
+
+      throw new UnknownError("Cannot update schema.", error);
     }
   }
 
@@ -172,26 +188,13 @@ export class StorageService {
         projectName,
         schemaName,
       });
-    } catch (error) {
-      throw new UnknownError("Cannot delete contents's storage.");
-    }
-
-    try {
-      const [project] = await this.projectRepository.readDocument({
-        documentId: projectName,
-      });
-
-      if (!project) {
-        // TODO: fill error message.
-        throw new Error();
-      }
 
       emitEvent("SCHEMA_DELETED", {
         projectName,
         schemaName,
       });
     } catch (error) {
-      throw new UnknownError("Cannot update user info.", error);
+      throw new UnknownError("Cannot delete contents's storage.");
     }
   }
 }
