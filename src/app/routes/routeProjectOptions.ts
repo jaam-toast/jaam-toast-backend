@@ -47,7 +47,7 @@ projectOptionsRouter.post(
 );
 
 projectOptionsRouter.patch(
-  "/projects/:projectName/options",
+  "/projects/:projectName/options/:webhookId?",
   parseRequest({
     params: z.object({
       projectName: z.string(),
