@@ -1,10 +1,13 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
+import Config from "../@config";
 import { logRequest } from "./middlewares/logRequest";
 import { handleError } from "./middlewares/handleError";
-import { router } from "./routes";
+import { router as apiRouter } from "./routes";
+import { storageRouter } from "./routes/routeStorage";
 
 import type { Express } from "express";
 
@@ -20,11 +23,23 @@ export const createApp = async (): Promise<Express> => {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
-  app.use(cors());
+  app.use(
+    "/api",
+    cors({
+      origin:
+        Config.NODE_ENV === "production"
+          ? Config.CLIENT_URL
+          : Config.CLIENT_LOCAL_URL,
+      credentials: true,
+    }),
+  );
+  app.use("/storage", cors());
+  app.use(cookieParser());
   app.use(helmet());
   app.use(logRequest);
 
-  app.use("/api", router);
+  app.use("/storage", storageRouter);
+  app.use("/api", apiRouter);
 
   app.use((req, res, next) => {
     res.sendStatus(404);

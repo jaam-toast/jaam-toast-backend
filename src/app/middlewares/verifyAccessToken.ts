@@ -1,45 +1,19 @@
 import createError from "http-errors";
-import jwt from "jsonwebtoken";
 
+import { container } from "../../@config/di.config";
 import Config from "../../@config";
 
-import type { User } from "../../@types/user";
+import type { TokenClient } from "../../@config/di.config";
 import type { RequestHandler } from "express";
 
 export const verifyAccessToken: RequestHandler = (req, res, next) => {
-  const authToken = req.headers.authorization;
+  const tokenClient = container.get<TokenClient>("TokenClient");
 
-  if (!authToken) {
-    return next(
-      createError(
-        401,
-        "Authentication failed because the authorization header could not be found.",
-      ),
-    );
-  }
-
-  if (authToken.split(" ")[0] !== "Bearer") {
-    return next(
-      createError(
-        401,
-        "Authentication failed because the authorization header did not start with 'Bearer'.",
-      ),
-    );
-  }
-
-  const accessToken = authToken.split(" ")[1];
-
-  const getVerifiedUserData = (userAccessToken: string) => {
-    try {
-      const decodedUserData = jwt.verify(userAccessToken, Config.JWT_SECRET);
-
-      return decodedUserData;
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const verifiedUserData = getVerifiedUserData(accessToken);
+  const { accessToken } = req.cookies;
+  const verifiedUserData = tokenClient.validateToken({
+    token: accessToken,
+    key: Config.JWT_SECRET,
+  });
 
   if (!verifiedUserData) {
     return next(
@@ -49,8 +23,6 @@ export const verifyAccessToken: RequestHandler = (req, res, next) => {
       ),
     );
   }
-
-  req.app.locals = verifiedUserData as User;
 
   next();
 };

@@ -1,10 +1,6 @@
 import { inject, injectable } from "inversify";
 
-import type {
-  ContentClient,
-  Repository,
-  SchemaClient,
-} from "../../@config/di.config";
+import Config from "../../@config";
 import {
   NotFoundError,
   UnknownError,
@@ -13,8 +9,12 @@ import {
 import { emitEvent } from "../../@utils/emitEvent";
 import { BaseError } from "../../@types/baseError";
 
+import type {
+  ContentClient,
+  Repository,
+  SchemaClient,
+} from "../../@config/di.config";
 import type { Project } from "../../@types/project";
-import Config from "../../@config";
 
 @injectable()
 export class ContentService {

@@ -70,19 +70,10 @@ loginRouter.get(
       options: { expiresIn: "1d" },
     });
 
-    const loginData = JSON.stringify({
-      id: userData?._id,
-      name: userData?.username,
-      githubUri: userData?.userGithubUri,
-      image: userData?.userImage,
-      accessToken,
-      githubAccessToken,
-    });
-
     const productionCookieOptions =
       Config.NODE_ENV === "production"
         ? {
-            // httpOnly: true,
+            httpOnly: true,
             secure: true,
             domain: Config.ORIGIN_SERVER_URL,
           }
@@ -99,9 +90,7 @@ loginRouter.get(
     return res
       .cookie("githubAccessToken", githubAccessToken, cookieOptions)
       .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("loginData", loginData, cookieOptions)
+      .cookie("userId", userData._id, cookieOptions)
       .redirect(referer ?? Config.CLIENT_URL);
   }),
 );
-
-export default loginRouter;
