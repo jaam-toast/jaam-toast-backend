@@ -146,7 +146,7 @@ export class MongodbContentClient implements ContentClient {
       page: number;
       pageLength: number;
     };
-    sort?: Record<string, "asc" | "ascending" | "desc" | "descending">;
+    sort?: [string, "asc" | "ascending" | "desc" | "descending"][];
     filter?: {
       [key: string]: string | number | boolean;
     };
