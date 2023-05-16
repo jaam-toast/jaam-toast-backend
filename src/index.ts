@@ -12,7 +12,7 @@ async function startServer(): Promise<void> {
   const server = await createServer(app);
 
   await connectDatabase();
-  await createSocket({ server, clientOrigin: Config.CLIENT_URL });
+  await createSocket({ server });
 }
 
 startServer();
