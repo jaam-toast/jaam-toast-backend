@@ -15,8 +15,8 @@ export class UserRepository implements Repository<User> {
     this.databaseClient = mongodbDatabaseClient;
   }
 
-  public createDocument({ document }: { document: User }) {
-    return this.databaseClient.create<User>({
+  public createDocument({ document }: { document: Omit<User, "_id"> }) {
+    return this.databaseClient.create<Omit<User, "_id">>({
       dbName: Config.APP_DB_NAME,
       collectionName: "users",
       document,
