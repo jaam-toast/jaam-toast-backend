@@ -146,7 +146,7 @@ export class MongodbContentClient implements ContentClient {
       page: number;
       pageLength: number;
     };
-    sort?: [string, "asc" | "ascending" | "desc" | "descending"][];
+    sort?: Record<string, "asc" | "ascending" | "desc" | "descending">;
     filter?: {
       [key: string]: string | number | boolean;
     };
@@ -164,7 +164,16 @@ export class MongodbContentClient implements ContentClient {
     const limit = pagination?.pageLength || Config.MAX_NUMBER_PER_PAGE;
     const skip = (page - 1) * limit;
     const filterOptions = filter ?? {};
-    const sortOptions = sort ?? {};
+    const sortOptions: Record<string, -1 | 1> = {};
+
+    for (const sortOption in sort) {
+      if (!sort.hasOwnProperty(sortOption)) {
+        continue;
+      }
+
+      sortOptions[sortOption] =
+        sort[sortOption] === "asc" || sort[sortOption] === "ascending" ? 1 : -1;
+    }
 
     return this.client
       .db(projectName)
