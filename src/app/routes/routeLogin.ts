@@ -54,7 +54,7 @@ loginRouter.get(
     }
 
     const userData = await userService.login({
-      username: githubData.login,
+      userName: githubData.login,
       userGithubUri: githubData.url,
       userImage: githubData.avatar_url ?? "",
       githubAccessToken,
@@ -62,7 +62,7 @@ loginRouter.get(
 
     const accessToken = tokenClient.createToken({
       payload: {
-        username: githubData.login,
+        userName: githubData.login,
         userGithubUri: githubData.url,
         userImage: githubData.avatar_url ?? "",
       },

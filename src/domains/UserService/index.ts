@@ -21,12 +21,12 @@ export class UserService {
   }
 
   public async login({
-    username,
+    userName,
     userGithubUri,
     userImage,
     githubAccessToken,
   }: {
-    username: string;
+    userName: string;
     userGithubUri: string;
     userImage: string;
     githubAccessToken: string;
@@ -39,7 +39,7 @@ export class UserService {
       if (!user) {
         const [userId] = await this.userRepository.createDocument({
           document: {
-            username,
+            userName,
             userGithubUri,
             userImage,
             githubAccessToken,
