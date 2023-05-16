@@ -6,17 +6,14 @@ import type { Server } from "http";
 
 export const createSocket = async ({
   server,
-  clientOrigin,
 }: {
   server: Server;
-  clientOrigin: string;
 }): Promise<void> => {
   const socketClient = container.get<SocketClient>("SocketClient");
 
   try {
     socketClient.connect({
       server,
-      clientOrigin,
     });
 
     log.debug("🚀 A new socket instance is created");

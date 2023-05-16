@@ -2,21 +2,22 @@ import { injectable } from "inversify";
 import { Server as SocketServer } from "socket.io";
 
 import type { Server } from "http";
+import Config from "../@config";
 
 @injectable()
 export class SocketClient {
   private static instance: SocketServer | null = null;
 
-  public connect({
-    server,
-    clientOrigin,
-  }: {
-    server: Server;
-    clientOrigin: string;
-  }) {
+  public connect({ server }: { server: Server }) {
     SocketClient.instance = new SocketServer(server, {
       cors: {
-        origin: clientOrigin,
+        origin: [
+          Config.NODE_ENV === "production"
+            ? Config.CLIENT_URL
+            : Config.CLIENT_LOCAL_URL,
+          Config.PRODUCTION_CLIENT_URL,
+          Config.ORIGIN_SERVER_URL,
+        ],
         methods: ["GET", "POST"],
       },
     });
