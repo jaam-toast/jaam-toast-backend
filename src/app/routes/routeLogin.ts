@@ -90,7 +90,10 @@ loginRouter.get(
     return res
       .cookie("githubAccessToken", githubAccessToken, cookieOptions)
       .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("userId", userData._id, cookieOptions)
+      .cookie("userId", userData._id, {
+        ...cookieOptions,
+        httpOnly: false,
+      })
       .redirect(referer ?? Config.CLIENT_URL);
   }),
 );
