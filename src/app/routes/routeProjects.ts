@@ -87,7 +87,6 @@ projectsRouter.post(
   }),
   parseRequest({
     body: z.object({
-      userId: z.string(),
       space: z.string(),
       repoName: z.string(),
       repoCloneUrl: z.string(),
@@ -126,6 +125,7 @@ projectsRouter.post(
       container.get<Repository<Project>>("ProjectRepository");
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
+    const { userId } = req.cookies;
     const { projectName, framework } = req.body;
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -142,6 +142,7 @@ projectsRouter.post(
 
     emitEvent("CREATE_PROJECT", {
       ...req.body,
+      userId,
       status: ProjectStatus.Pending,
       framework: CLIENT_FRAMEWORK_INFO[framework],
       storageKey,

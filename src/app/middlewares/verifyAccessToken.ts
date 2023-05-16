@@ -7,7 +7,7 @@ import type { TokenClient } from "../../@config/di.config";
 import type { RequestHandler } from "express";
 
 export const verifyAccessToken: RequestHandler = (req, res, next) => {
-  const tokenClient = container.get<TokenClient>("TokenClient");
+  const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
   const { accessToken } = req.cookies;
   const verifiedUserData = tokenClient.validateToken({
