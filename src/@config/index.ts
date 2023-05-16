@@ -10,7 +10,7 @@ const Config = {
   LOGGER_OPTIONS: {
     debug: !!parseInt(process.env.DEBUG!),
   },
-  CLIENT_LOCAL_URL: "http://localhost:5173!",
+  CLIENT_LOCAL_URL: "http://localhost:5173",
   SERVER_URL: process.env.ORIGIN_SERVER_URL!,
   CLIENT_URL: process.env.CLIENT_URL!,
   SERVER_PORT: process.env.SERVER_PORT!,

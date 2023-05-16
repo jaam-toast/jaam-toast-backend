@@ -14,7 +14,7 @@ import type { ContentService } from "../../domains/ContentsService";
 export const storageRouter = Router();
 
 storageRouter.use(
-  "/storage",
+  "/",
   handleAsync(async (req, res, next) => {
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
@@ -35,7 +35,7 @@ storageRouter.use(
 );
 
 storageRouter.post(
-  "/storage/:schemaName/contents",
+  "/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -62,7 +62,7 @@ storageRouter.post(
 );
 
 storageRouter.get(
-  "/storage/:schemaName/contents",
+  "/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -123,7 +123,7 @@ storageRouter.get(
 );
 
 storageRouter.get(
-  "/storage/:schemaName/contents/:contentId",
+  "/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -149,7 +149,7 @@ storageRouter.get(
 );
 
 storageRouter.put(
-  "/storage/:schemaName/contents/:contentId",
+  "/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -177,7 +177,7 @@ storageRouter.put(
 );
 
 storageRouter.delete(
-  "/storage/:schemaName/contents/:contentId",
+  "/:schemaName/contents/:contentId",
   parseRequest({
     params: z.object({
       schemaName: z.string(),
@@ -203,7 +203,7 @@ storageRouter.delete(
 );
 
 storageRouter.delete(
-  "/storage/:schemaName/contents",
+  "/:schemaName/contents",
   parseRequest({
     params: z.object({
       schemaName: z.string(),

@@ -33,12 +33,12 @@ export const createApp = async (): Promise<Express> => {
       credentials: true,
     }),
   );
-  app.use("/storage", cors());
+  app.use("/api/storage", cors());
   app.use(cookieParser());
   app.use(helmet());
   app.use(logRequest);
 
-  app.use("/storage", storageRouter);
+  app.use("/api/storage", storageRouter);
   app.use("/api", apiRouter);
 
   app.use((req, res, next) => {
