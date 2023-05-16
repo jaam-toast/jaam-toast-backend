@@ -199,7 +199,7 @@ projectsRouter.delete(
     const buildService = container.get<BuildService>("BuildService");
     const userRepository = container.get<Repository<User>>("UserRepository");
 
-    const { userId } = req.app.locals;
+    const { userId } = req.cookies;
     const { projectName } = req.params;
     const [user] = await userRepository.readDocument({ documentId: userId });
 

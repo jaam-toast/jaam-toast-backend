@@ -1,5 +1,8 @@
 import { injectable, inject } from "inversify";
 
+import { UnknownError } from "../../@utils/defineErrors";
+import { BaseError } from "../../@types/baseError";
+
 import type { User } from "../../@types/user";
 import type { Repository } from "../../@config/di.config";
 import type { GithubClient } from "../../infrastructure/GithubClient";
@@ -28,28 +31,42 @@ export class UserService {
     userImage: string;
     githubAccessToken: string;
   }) {
-    const [user] = await this.userRepository.readDocument({
-      filter: { userGithubUri },
-    });
-
-    if (!user) {
-      const [userId] = await this.userRepository.createDocument({
-        document: {
-          username,
-          userGithubUri,
-          userImage,
-          githubAccessToken,
-          projects: [],
-        },
-      });
-      const [newUserData] = await this.userRepository.readDocument({
-        documentId: userId,
+    try {
+      const [user] = await this.userRepository.readDocument({
+        filter: { userGithubUri },
       });
 
-      return newUserData;
+      if (!user) {
+        const [userId] = await this.userRepository.createDocument({
+          document: {
+            username,
+            userGithubUri,
+            userImage,
+            githubAccessToken,
+            projects: [],
+          },
+        });
+        const [newUserData] = await this.userRepository.readDocument({
+          documentId: userId,
+        });
+
+        if (!newUserData) {
+          throw new UnknownError(
+            "A new user was created because the user did not exist, but the creation process failed.",
+          );
+        }
+
+        return newUserData;
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof BaseError) {
+        throw error;
+      }
+
+      throw new UnknownError("Login failed for an unknown reason.", error);
     }
-
-    return user;
   }
 
   public deleteUser({ userId }: { userId: string }) {

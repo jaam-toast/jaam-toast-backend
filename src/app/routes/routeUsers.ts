@@ -14,16 +14,11 @@ export const usersRouter = Router();
 usersRouter.use("/users", verifyAccessToken);
 
 usersRouter.get(
-  "/users/:userId",
-  parseRequest({
-    params: z.object({
-      userId: z.string().regex(/^[a-f\d]{24}$/i),
-    }),
-  }),
+  "/user",
   handleAsync(async (req, res) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.params;
+    const { userId } = req.cookies;
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });
@@ -36,19 +31,11 @@ usersRouter.get(
 );
 
 usersRouter.get(
-  "/users/:userId/spaces",
-  parseRequest({
-    params: z.object({
-      userId: z.string().regex(/^[a-f\d]{24}$/i),
-    }),
-    query: z.object({
-      githubAccessToken: z.string(),
-    }),
-  }),
+  "/user/spaces",
   handleAsync(async (req, res) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.query;
+    const { githubAccessToken } = req.cookies;
     const spaces = await userService.getSpaces({
       githubAccessToken,
     });
@@ -61,20 +48,16 @@ usersRouter.get(
 );
 
 usersRouter.get(
-  "/users/:userId/spaces/:spaceId/repos",
+  "/user/spaces/:spaceId/repos",
   parseRequest({
     params: z.object({
-      userId: z.string().regex(/^[a-f\d]{24}$/i),
       spaceId: z.string(),
-    }),
-    query: z.object({
-      githubAccessToken: z.string(),
     }),
   }),
   handleAsync(async (req, res) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.query;
+    const { githubAccessToken } = req.cookies;
     const { spaceId } = req.params;
     const repos = await userService.getSpaceRepos({
       githubAccessToken,
@@ -89,16 +72,11 @@ usersRouter.get(
 );
 
 usersRouter.get(
-  "/users/:userId/projects",
-  parseRequest({
-    params: z.object({
-      userId: z.string().regex(/^[a-f\d]{24}$/i),
-    }),
-  }),
+  "/users/projects",
   handleAsync(async (req, res) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.params;
+    const { userId } = req.cookies;
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });
