@@ -116,6 +116,9 @@ projectsRouter.post(
       ),
       nodeVersion: z.string().default("12.18.0"),
     }),
+    cookie: z.object({
+      userId: z.string(),
+    }),
   }),
   handleAsync(async (req, res, next) => {
     /**
@@ -125,7 +128,7 @@ projectsRouter.post(
       container.get<Repository<Project>>("ProjectRepository");
     const tokenClient = container.get<TokenClient>("JwtTokenClient");
 
-    const { userId } = req.cookies;
+    const { userId } = req.cookie;
     const { projectName, framework } = req.body;
     const [project] = await projectRepository.readDocument({
       documentId: projectName,
@@ -195,12 +198,15 @@ projectsRouter.delete(
     params: z.object({
       projectName: z.string(),
     }),
+    cookie: z.object({
+      userId: z.string(),
+    }),
   }),
   handleAsync(async (req, res) => {
     const buildService = container.get<BuildService>("BuildService");
     const userRepository = container.get<Repository<User>>("UserRepository");
 
-    const { userId } = req.cookies;
+    const { userId } = req.cookie;
     const { projectName } = req.params;
     const [user] = await userRepository.readDocument({ documentId: userId });
 

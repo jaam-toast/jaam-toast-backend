@@ -15,10 +15,15 @@ usersRouter.use("/users", verifyAccessToken);
 
 usersRouter.get(
   "/user",
+  parseRequest({
+    cookie: z.object({
+      userId: z.string(),
+    }),
+  }),
   handleAsync(async (req, res) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.cookies;
+    const { userId } = req.cookie;
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });
@@ -32,10 +37,15 @@ usersRouter.get(
 
 usersRouter.get(
   "/user/spaces",
+  parseRequest({
+    cookie: z.object({
+      githubAccessToken: z.string(),
+    }),
+  }),
   handleAsync(async (req, res) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.cookies;
+    const { githubAccessToken } = req.cookie;
     const spaces = await userService.getSpaces({
       githubAccessToken,
     });
@@ -53,11 +63,14 @@ usersRouter.get(
     params: z.object({
       spaceId: z.string(),
     }),
+    cookie: z.object({
+      githubAccessToken: z.string(),
+    }),
   }),
   handleAsync(async (req, res) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.cookies;
+    const { githubAccessToken } = req.cookie;
     const { spaceId } = req.params;
     const repos = await userService.getSpaceRepos({
       githubAccessToken,
@@ -73,10 +86,15 @@ usersRouter.get(
 
 usersRouter.get(
   "/users/projects",
+  parseRequest({
+    cookie: z.object({
+      githubAccessToken: z.string(),
+    }),
+  }),
   handleAsync(async (req, res) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.cookies;
+    const { userId } = req.cookie;
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });
