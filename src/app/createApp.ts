@@ -26,13 +26,14 @@ export const createApp = async (): Promise<Express> => {
   app.use(
     "/api",
     cors({
-      origin: [
+      origin:
         Config.NODE_ENV === "production"
-          ? Config.CLIENT_URL
+          ? [
+              Config.CLIENT_URL,
+              Config.PRODUCTION_CLIENT_URL,
+              Config.ORIGIN_SERVER_URL,
+            ]
           : Config.CLIENT_LOCAL_URL,
-        Config.PRODUCTION_CLIENT_URL,
-        Config.ORIGIN_SERVER_URL,
-      ],
       credentials: true,
     }),
   );
