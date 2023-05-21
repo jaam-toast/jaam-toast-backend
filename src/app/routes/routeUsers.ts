@@ -1,4 +1,5 @@
 import { Router } from "express";
+import createError from "http-errors";
 import { z } from "zod";
 
 import { container } from "../../@config/di.config";
@@ -15,15 +16,15 @@ usersRouter.use("/users", verifyAccessToken);
 
 usersRouter.get(
   "/user",
-  parseRequest({
-    cookie: z.object({
-      userId: z.string(),
-    }),
-  }),
   handleAsync(async (req, res) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.cookie;
+    const { userId } = req.cookies;
+
+    if (!userId) {
+      return createError(401, "Unauthorized User.");
+    }
+
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });
@@ -37,15 +38,20 @@ usersRouter.get(
 
 usersRouter.get(
   "/user/spaces",
-  parseRequest({
-    cookie: z.object({
-      githubAccessToken: z.string(),
-    }),
-  }),
-  handleAsync(async (req, res) => {
+  handleAsync(async (req, res, next) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.cookie;
+    const { githubAccessToken } = req.cookies;
+
+    if (!githubAccessToken) {
+      return next(
+        createError(
+          400,
+          "The 'githubAccessToken' could not be found in the request header.",
+        ),
+      );
+    }
+
     const spaces = await userService.getSpaces({
       githubAccessToken,
     });
@@ -63,14 +69,21 @@ usersRouter.get(
     params: z.object({
       spaceId: z.string(),
     }),
-    cookie: z.object({
-      githubAccessToken: z.string(),
-    }),
   }),
-  handleAsync(async (req, res) => {
+  handleAsync(async (req, res, next) => {
     const userService = container.get<UserService>("UserService");
 
-    const { githubAccessToken } = req.cookie;
+    const { githubAccessToken } = req.cookies;
+
+    if (!githubAccessToken) {
+      return next(
+        createError(
+          400,
+          "The 'githubAccessToken' could not be found in the request header.",
+        ),
+      );
+    }
+
     const { spaceId } = req.params;
     const repos = await userService.getSpaceRepos({
       githubAccessToken,
@@ -86,15 +99,15 @@ usersRouter.get(
 
 usersRouter.get(
   "/users/projects",
-  parseRequest({
-    cookie: z.object({
-      githubAccessToken: z.string(),
-    }),
-  }),
-  handleAsync(async (req, res) => {
+  handleAsync(async (req, res, next) => {
     const userRepository = container.get<UserRepository>("UserRepository");
 
-    const { userId } = req.cookie;
+    const { userId } = req.cookies;
+
+    if (!userId) {
+      return next(createError(401, "Unauthorized User."));
+    }
+
     const [user] = await userRepository.readDocument({
       documentId: userId,
     });

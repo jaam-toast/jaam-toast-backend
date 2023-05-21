@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import "./subscribers";
 
-import Config from "./@config";
 import { createApp } from "./app/createApp";
 import { connectDatabase } from "./app/connectDatabase";
 import { createServer } from "./app/createServer";

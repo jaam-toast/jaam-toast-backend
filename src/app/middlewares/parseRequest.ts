@@ -7,12 +7,10 @@ export const parseRequest = <
   RequestParamsType extends ZodSchema = z.ZodUnknown,
   RequestBodyType extends ZodSchema = z.ZodUnknown,
   RequestQueryType extends ZodSchema = z.ZodUnknown,
-  RequsetCookieType extends ZodSchema = z.ZodUnknown,
 >(schema: {
   params?: RequestParamsType;
   body?: RequestBodyType;
   query?: RequestQueryType;
-  cookie?: RequsetCookieType;
 }): RequestHandler<
   z.output<RequestParamsType>,
   any,
@@ -60,22 +58,6 @@ export const parseRequest = <
           createError(
             400,
             `Request body validation failed. ${error.toString()}`,
-          ),
-        );
-      }
-    }
-
-    try {
-      if (schema.cookie) {
-        schema.cookie.parse(req.cookies);
-        req.cookie = req.cookies;
-      }
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(
-          createError(
-            400,
-            `Request Cookie validation failed. ${error.toString()}`,
           ),
         );
       }
