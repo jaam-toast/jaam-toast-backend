@@ -1,4 +1,5 @@
 import { inject, injectable } from "inversify";
+import { unlink } from "fs/promises";
 
 import Config from "../../@config";
 import {
@@ -13,6 +14,7 @@ import type {
   ContentClient,
   Repository,
   SchemaClient,
+  AssetClient,
 } from "../../@config/di.config";
 import type { Project } from "../../@types/project";
 
@@ -21,15 +23,18 @@ export class ContentService {
   private projectRepository: Repository<Project>;
   private contentClient: ContentClient;
   private schemaClient: SchemaClient;
+  private assetClient: AssetClient;
 
   constructor(
     @inject("ProjectRepository") projectRepository: Repository<Project>,
     @inject("MongodbContentClient") mongodbContentClient: ContentClient,
     @inject("AjvSchemaClient") ajvSchemaClient: SchemaClient,
+    @inject("S3AssetClient") s3AssetClient: AssetClient,
   ) {
     this.projectRepository = projectRepository;
     this.contentClient = mongodbContentClient;
     this.schemaClient = ajvSchemaClient;
+    this.assetClient = s3AssetClient;
   }
 
   public async createContent({
@@ -192,6 +197,67 @@ export class ContentService {
     } catch (error) {
       throw error;
     }
+  }
+
+  public async createAssetContent({
+    projectName,
+    assets,
+  }: {
+    projectName: string;
+    assets: Express.Multer.File[];
+  }) {
+    try {
+      await Promise.allSettled(
+        assets.map(async asset => {
+          const createdAt = new Date().toISOString();
+          const { key, name } = await this.assetClient.uploadFile({
+            bucketName: "jaam-toast-assets",
+            folderName: projectName,
+            fileName: asset.originalname,
+            mimetype: asset.mimetype,
+            path: asset.path,
+          });
+
+          unlink(asset.path);
+
+          await this.createContent({
+            projectName,
+            schemaName: "assets",
+            content: {
+              name,
+              path: key,
+              url: `${Config.JAAM_ASSET_CDN_URL}/${key}`,
+              size: asset.size,
+              _createdAt: createdAt,
+              _updatedAt: createdAt,
+            },
+          });
+        }),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async deleteAssetContent({
+    projectName,
+    contentIds,
+    assetPath,
+  }: {
+    projectName: string;
+    contentIds: string[];
+    assetPath: string;
+  }) {
+    await this.deleteContent({
+      projectName,
+      schemaName: "assets",
+      contentIds,
+    });
+
+    await this.assetClient.deleteFile({
+      bucketName: "jaam-toast-assets",
+      key: assetPath,
+    });
   }
 
   public async queryContents({
