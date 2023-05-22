@@ -8,6 +8,7 @@ import { ContentService } from "../domains/ContentsService";
 import { BuildService } from "../domains/BuildService";
 import { UserService } from "../domains/UserService";
 import { S3CloudFrontDeploymentClient } from "../infrastructure/S3CloudFrontDeploymentClient";
+import { S3AssetClient } from "../infrastructure/S3AssetClient";
 import { MongodbContentClient } from "../infrastructure/MongodbContentClient";
 import { MongodbDatabaseClient } from "../infrastructure/MongodbDatabaseClient";
 import { JwtTokenClient } from "../infrastructure/JwtTokenClient";
@@ -181,6 +182,31 @@ export interface ContentClient {
 container
   .bind<ContentClient>("MongodbContentClient")
   .to(MongodbContentClient);
+
+/**
+ * Asset Client: file upload, delete 동작을 수행합니다.
+*/
+export interface AssetClient {
+  uploadFile: (uploadFileOptions: {
+    bucketName: string;
+    folderName: string;
+    fileName: string;
+    mimetype: string;
+    path: string
+  }) => Promise<{
+    key: string;
+    name: string;
+  }>;
+
+  deleteFile: (deleteFileOptions: {
+    bucketName: string;
+    key: string;
+  }) => Promise<void>;
+}
+
+container
+  .bind<AssetClient>("S3AssetClient")
+  .to(S3AssetClient);
 
 /**
  * Database Client: Database와 관련된 동작들(create, read, update, delete)을 수행합니다.
