@@ -7,6 +7,7 @@ import Config from "../../@config";
 import { container } from "../../@config/di.config";
 import { parseRequest } from "../middlewares/parseRequest";
 import { handleAsync } from "../utils/handleAsync";
+import { handleFormData } from "../middlewares/handleFormData";
 
 import type { TokenClient } from "../../@config/di.config";
 import type { ContentService } from "../../domains/ContentsService";
@@ -31,6 +32,37 @@ storageRouter.use(
     req.app.locals.projectName = payload.projectName;
 
     next();
+  }),
+);
+
+storageRouter.post(
+  "/assets/contents",
+  parseRequest({
+    body: z.record(z.unknown()),
+  }),
+  handleFormData("assets"),
+  handleAsync(async (req, res, next) => {
+    console.log(req.files);
+
+    const { projectName } = req.app.locals;
+    const files = req.files;
+
+    if (!files || !Array.isArray(files)) {
+      return res.status(400).json({
+        message: "nn",
+      });
+    }
+
+    const contentService = container.get<ContentService>("ContentService");
+
+    await contentService.createAssetContent({
+      projectName,
+      assets: files,
+    });
+
+    return res.status(201).json({
+      message: "ok",
+    });
   }),
 );
 
@@ -168,6 +200,35 @@ storageRouter.put(
       schemaName,
       contentId,
       content: omit(req.body, ["_id"]),
+    });
+
+    return res.status(200).json({
+      message: "ok",
+    });
+  }),
+);
+
+storageRouter.delete(
+  "/assets/contents/:contentId",
+  parseRequest({
+    params: z.object({
+      contentId: z.string(),
+    }),
+    body: z.object({
+      assetPath: z.string(),
+    }),
+  }),
+  handleAsync(async (req, res, next) => {
+    const contentService = container.get<ContentService>("ContentService");
+
+    const { projectName } = req.app.locals;
+    const { contentId } = req.params;
+    const { assetPath } = req.body;
+
+    await contentService.deleteAssetContent({
+      projectName,
+      contentIds: [contentId],
+      assetPath,
     });
 
     return res.status(200).json({
