@@ -13,6 +13,7 @@ import type { RecordClient } from "../@config/di.config";
 @injectable()
 export class Route53RecordClient implements RecordClient {
   private client = new Route53Client({
+    region: Config.AWS_REGION,
     credentials: {
       accessKeyId: Config.AWS_ACCESS_KEY_ID,
       secretAccessKey: Config.AWS_SECRET_ACCESS_KEY,
