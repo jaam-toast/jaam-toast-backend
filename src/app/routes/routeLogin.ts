@@ -97,3 +97,32 @@ loginRouter.get(
       .redirect(referer ?? Config.CLIENT_URL);
   }),
 );
+
+loginRouter.get(
+  "/logout",
+  handleAsync(async (req, res, next) => {
+    const productionCookieOptions =
+      Config.NODE_ENV === "production"
+        ? {
+            httpOnly: true,
+            secure: true,
+            domain: Config.ORIGIN_SERVER_URL,
+          }
+        : {};
+
+    const logoutCookieOptions = {
+      expires: new Date(Date.now() + 1),
+      maxAge: 1,
+      sameSite: "lax",
+      ...productionCookieOptions,
+    } as const;
+
+    res
+      .cookie("githubAccessToken", "", logoutCookieOptions)
+      .cookie("accessToken", "", logoutCookieOptions)
+      .cookie("userId", "", logoutCookieOptions)
+      .json({
+        message: "ok",
+      });
+  }),
+);
