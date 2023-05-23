@@ -11,13 +11,15 @@ export class SocketClient {
   public connect({ server }: { server: Server }) {
     SocketClient.instance = new SocketServer(server, {
       cors: {
-        origin: [
+        origin:
           Config.NODE_ENV === "production"
-            ? Config.CLIENT_URL
+            ? [
+                Config.CLIENT_URL,
+                Config.PRODUCTION_CLIENT_URL,
+                Config.ORIGIN_SERVER_URL,
+              ]
             : Config.CLIENT_LOCAL_URL,
-          Config.PRODUCTION_CLIENT_URL,
-          Config.ORIGIN_SERVER_URL,
-        ],
+        credentials: true,
         methods: ["GET", "POST"],
       },
     });
