@@ -217,18 +217,6 @@ export class BuildService {
         until: async isCreated => await isCreated,
       });
 
-      log.build("Domain creation process has been completed.");
-      log.build(
-        "However, we need to wait until the new deployment is fully connected.",
-      );
-      log.build("Please wait a little longer.");
-
-      await waitFor({
-        act: () => axios.get(`https://${originalBuildDomain}`),
-        until: async result => !!(await result),
-        intervalTime: 1000,
-      });
-
       log.build("All deployment processes have been completed!");
 
       emitEvent("DEPLOYMENT_UPDATED", {
