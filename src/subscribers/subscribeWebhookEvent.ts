@@ -10,30 +10,30 @@ import type { Repository } from "../@config/di.config";
 const projectRepository =
   container.get<Repository<Project>>("ProjectRepository");
 
-subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName }) => {
-  const [project] = await projectRepository.readDocument({
-    documentId: projectName,
-  });
+// subscribeEvent("DEPLOYMENT_UPDATED", async ({ projectName }) => {
+//   const [project] = await projectRepository.readDocument({
+//     documentId: projectName,
+//   });
 
-  if (!project) {
-    throw new NotFoundError(
-      "An error occurred while executing the event. Cannot find Project data.",
-    );
-  }
+//   if (!project) {
+//     throw new NotFoundError(
+//       "An error occurred while executing the event. Cannot find Project data.",
+//     );
+//   }
 
-  const eventWebhook = project.webhookList.filter(({ events }) =>
-    events.includes("DEPLOYMENT_UPDATED"),
-  );
+//   const eventWebhook = project.webhookList.filter(({ events }) =>
+//     events.includes("DEPLOYMENT_UPDATED"),
+//   );
 
-  for await (const webhook of eventWebhook) {
-    try {
-      await axios.post(webhook.url, {
-        event: "DEPLOYMENT_UPDATED",
-        project,
-      });
-    } catch {}
-  }
-});
+//   for await (const webhook of eventWebhook) {
+//     try {
+//       await axios.post(webhook.url, {
+//         event: "DEPLOYMENT_UPDATED",
+//         project,
+//       });
+//     } catch {}
+//   }
+// });
 
 subscribeEvent("CONTENT_CREATED", async ({ projectName, schema, content }) => {
   const [project] = await projectRepository.readDocument({
