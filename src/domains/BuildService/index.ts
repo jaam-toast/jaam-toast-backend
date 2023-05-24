@@ -150,32 +150,6 @@ export class BuildService {
     buildCommand: string;
     envList: Env[];
   }) {
-    /**
-     * configure socket building log
-     */
-    this.socketClient.server.on("connection", socket => {
-      socket.on("get-building-log", project => {
-        log.debug(`Getting ready for sending a building log for ${project}`);
-        log.subscribe(message => socket.emit("new-building-log", message));
-
-        subscribeEvent(
-          "DEPLOYMENT_UPDATED",
-          ({ originalBuildDomain }, unsubscribe) => {
-            socket.emit(
-              "build-complete",
-              JSON.stringify({ originalBuildDomain }),
-            );
-            unsubscribe();
-          },
-        );
-
-        subscribeEvent("DEPLOYMENT_ERROR", ({ error }, unsubscribe) => {
-          socket.emit("build-error", error.message);
-          unsubscribe();
-        });
-      });
-    });
-
     log.build("We will now initiate the deployment process.");
 
     try {

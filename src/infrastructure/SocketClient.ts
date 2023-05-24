@@ -1,8 +1,11 @@
 import { injectable } from "inversify";
 import { Server as SocketServer } from "socket.io";
 
-import type { Server } from "http";
 import Config from "../@config";
+import { subscribeEvent } from "../@utils/emitEvent";
+import * as log from "../@utils/log";
+
+import type { Server } from "http";
 
 @injectable()
 export class SocketClient {
@@ -22,6 +25,29 @@ export class SocketClient {
         credentials: true,
         methods: ["GET", "POST"],
       },
+    });
+
+    SocketClient.instance.on("connection", socket => {
+      socket.on("get-building-log", project => {
+        log.debug(`Getting ready for sending a building log for ${project}`);
+        log.subscribe(message => socket.emit("new-building-log", message));
+
+        subscribeEvent(
+          "DEPLOYMENT_UPDATED",
+          ({ originalBuildDomain }, unsubscribe) => {
+            socket.emit(
+              "build-complete",
+              JSON.stringify({ originalBuildDomain }),
+            );
+            unsubscribe();
+          },
+        );
+
+        subscribeEvent("DEPLOYMENT_ERROR", ({ error }, unsubscribe) => {
+          socket.emit("build-error", error.message);
+          unsubscribe();
+        });
+      });
     });
   }
 
