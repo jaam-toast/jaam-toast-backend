@@ -5,6 +5,7 @@ import { createApp } from "./app/createApp";
 import { connectDatabase } from "./app/connectDatabase";
 import { createServer } from "./app/createServer";
 import { createSocket } from "./app/createSocket";
+import { emitEvent } from "./@utils/emitEvent";
 
 async function startServer(): Promise<void> {
   const app = await createApp();
@@ -12,6 +13,10 @@ async function startServer(): Promise<void> {
 
   await connectDatabase();
   await createSocket({ server });
+
+  emitEvent("DEPLOYMENT_UPDATED", {
+    projectName: "test",
+  });
 }
 
 startServer();
