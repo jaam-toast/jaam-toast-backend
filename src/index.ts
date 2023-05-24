@@ -13,10 +13,6 @@ async function startServer(): Promise<void> {
 
   await connectDatabase();
   await createSocket({ server });
-
-  emitEvent("DEPLOYMENT_UPDATED", {
-    projectName: "test",
-  });
 }
 
 startServer();

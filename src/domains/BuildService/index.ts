@@ -164,6 +164,14 @@ export class BuildService {
         framework,
       });
 
+      emitEvent("DEPLOYMENT_UPDATED", {
+        projectName,
+        jaamToastDomain,
+        resourcePath,
+      });
+
+      return;
+
       /**
        * upload resources
        */
