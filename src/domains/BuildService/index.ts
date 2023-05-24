@@ -197,14 +197,17 @@ export class BuildService {
       );
       log.build("Please wait a little longer.");
 
+      /*
+        wait for success response of original build domain.
+      */
       await waitFor({
         act: () => axios.get<string>(`https://${originalBuildDomain}`),
-        intervalTime: 10000,
+        intervalTime: 1000 * 10,
         until: async result => !!(await result).data,
       });
 
       await new Promise<void>(resolve => {
-        setTimeout(() => resolve(), 50000);
+        setTimeout(resolve, 1000 * 50);
       });
 
       log.build("All deployment processes have been completed!");
