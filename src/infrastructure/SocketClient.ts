@@ -28,25 +28,51 @@ export class SocketClient {
     });
 
     SocketClient.instance.on("connection", socket => {
-      socket.on("get-building-log", project => {
-        log.debug(`Getting ready for sending a building log for ${project}`);
-        log.subscribe(message => socket.emit("new-building-log", message));
+      socket.on("get-building-log", socketProjectName => {
+        log.debug(
+          `Getting ready for sending a building log for ${socketProjectName}`,
+        );
+        log.subscribe(message => {
+          const [projectName, buildMessage] = message.split("-");
+
+          if (!buildMessage) {
+            return;
+          }
+          if (projectName !== socketProjectName) {
+            return;
+          }
+
+          socket.to(socket.id).emit("new-building-log", message);
+        });
 
         subscribeEvent(
           "DEPLOYMENT_UPDATED",
-          ({ originalBuildDomain }, unsubscribe) => {
-            socket.emit(
+          ({ projectName, originalBuildDomain }, unsubscribe) => {
+            if (projectName !== socketProjectName) {
+              return;
+            }
+
+            socket.to(socket.id).emit(
               "build-complete",
-              JSON.stringify({ originalBuildDomain }),
+              JSON.stringify({
+                originalBuildDomain,
+              }),
             );
             unsubscribe();
           },
         );
 
-        subscribeEvent("DEPLOYMENT_ERROR", ({ error }, unsubscribe) => {
-          socket.emit("build-error", error.message);
-          unsubscribe();
-        });
+        subscribeEvent(
+          "DEPLOYMENT_ERROR",
+          ({ projectName, error }, unsubscribe) => {
+            if (projectName !== socketProjectName) {
+              return;
+            }
+
+            socket.to(socket.id).emit("build-error", error.message);
+            unsubscribe();
+          },
+        );
       });
     });
   }

@@ -125,28 +125,24 @@ async function writefile(logType: LogType, ...messages: LogMessage[]) {
   }
 }
 
-function notify(messageType: string, ...messages: LogMessage[]) {
+function notify(...messages: LogMessage[]) {
   for (const message of messages) {
-    messageType === "error" ? send(`[ERROR] ${message}`) : send(message);
+    send(message);
   }
 }
 
 /**
  * logging methods
  */
-export function build(...messages: LogMessage[]) {
+export function build(projectName: string, ...messages: LogMessage[]) {
+  const buildMessages = messages.map(message => `${projectName}-${message}`);
+
   if (Config.LOGGER_OPTIONS.debug) {
-    console(LogType.Deployment, ...messages);
+    console(LogType.Deployment, ...buildMessages);
   }
 
-  writefile(LogType.Deployment, ...messages);
-  notify("build", ...messages);
-}
-
-export function buildError(...messages: LogMessage[]) {
-  writefile(LogType.Error, ...messages);
-  writefile(LogType.Deployment, ...messages);
-  notify("error", ...messages);
+  writefile(LogType.Deployment, ...buildMessages);
+  notify(...buildMessages);
 }
 
 export function debug(...messages: LogMessage[]) {
