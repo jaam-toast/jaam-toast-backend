@@ -16,10 +16,36 @@ subscribeEvent("CREATE_PROJECT", async ({ userId, projectName }) => {
     );
   }
 
-  await userRepository.updateDocument({
-    documentId: userId,
-    document: {
-      projects: user.projects.concat(projectName),
+  const createdProjectName = projectName;
+
+  const deploymentUpdatedSubscription = subscribeEvent(
+    "DEPLOYMENT_UPDATED",
+    async ({ projectName }, unsubscribe) => {
+      if (projectName !== createdProjectName) {
+        return;
+      }
+
+      await userRepository.updateDocument({
+        documentId: userId,
+        document: {
+          projects: Array.from(new Set([projectName].concat(user.projects))),
+        },
+      });
+
+      deploymentErrorSubscription.unsubscribe();
+      unsubscribe();
     },
-  });
+  );
+
+  const deploymentErrorSubscription = subscribeEvent(
+    "DEPLOYMENT_ERROR",
+    async ({ projectName }, unsubscribe) => {
+      if (projectName !== createdProjectName) {
+        return;
+      }
+
+      deploymentUpdatedSubscription.unsubscribe();
+      unsubscribe();
+    },
+  );
 });

@@ -215,14 +215,8 @@ subscribeEvent(
 );
 
 subscribeEvent("DEPLOYMENT_ERROR", async ({ projectName, error }) => {
-  const updatedAt = new Date().toISOString();
-
-  await projectRepository.updateDocument({
+  await projectRepository.deleteDocument({
     documentId: projectName,
-    document: {
-      status: ProjectStatus.Fail,
-      projectUpdatedAt: updatedAt,
-    },
   });
 
   log.serverError(error.message, error.stack ?? "-", error.name);

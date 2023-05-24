@@ -17,22 +17,6 @@ const subscribers: {
   [key in Events["name"]]?: SubscribeCallback<key>[];
 } = {};
 
-export function subscribeEvent<EventName extends Events["name"]>(
-  eventName: EventName,
-  callback: SubscribeCallback<EventName>,
-) {
-  const listeners = subscribers[eventName];
-
-  if (Array.isArray(listeners)) {
-    return listeners.push(callback);
-  }
-
-  subscribers[eventName] = [callback] as Extract<
-    SubscribeCallback<Events["name"]>,
-    { name: typeof eventName }
-  >[];
-}
-
 function unsubscribeEvent({
   eventName,
   callbackIndex,
@@ -47,6 +31,38 @@ function unsubscribeEvent({
   }
 
   listeners.splice(callbackIndex, 1);
+}
+
+export function subscribeEvent<EventName extends Events["name"]>(
+  eventName: EventName,
+  callback: SubscribeCallback<EventName>,
+) {
+  const listeners = subscribers[eventName];
+
+  if (Array.isArray(listeners)) {
+    listeners.push(callback);
+
+    return {
+      unsubscribe: () =>
+        unsubscribeEvent({
+          eventName,
+          callbackIndex: 0,
+        }),
+    };
+  }
+
+  subscribers[eventName] = [callback] as Extract<
+    SubscribeCallback<Events["name"]>,
+    { name: typeof eventName }
+  >[];
+
+  return {
+    unsubscribe: () =>
+      unsubscribeEvent({
+        eventName,
+        callbackIndex: 0,
+      }),
+  };
 }
 
 export async function emitEvent<EventName extends Events["name"]>(
