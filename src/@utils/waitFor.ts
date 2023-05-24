@@ -15,14 +15,18 @@ export function waitFor<ActFunction extends (...args: any) => any>({
   return new Promise((resolve, reject) => {
     const waitInterval = setInterval(async () => {
       try {
+        console.log("check중");
         const actResult = await act();
+        console.log(await until(actResult));
 
         if (await until(actResult)) {
           clearInterval(waitInterval);
           clearTimeout(waitTimeout);
           resolve();
         }
-      } catch {}
+      } catch (err) {
+        console.log(err);
+      }
     }, intervalTime);
 
     const waitTimeout = setTimeout(() => {

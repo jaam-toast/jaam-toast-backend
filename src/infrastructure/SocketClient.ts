@@ -30,15 +30,25 @@ export class SocketClient {
     SocketClient.instance.on("connection", socket => {
       socket.on("get-building-log", project => {
         log.debug(`Getting ready for sending a building log for ${project}`);
-        log.subscribe(message => socket.emit("new-building-log", message));
+        log.subscribe(message => {
+          socket.emit("new-building-log", message);
+        });
 
         subscribeEvent(
           "DEPLOYMENT_UPDATED",
           ({ originalBuildDomain }, unsubscribe) => {
-            socket.emit(
-              "build-complete",
-              JSON.stringify({ originalBuildDomain }),
-            );
+            console.log("다했어..");
+            let count = 3;
+
+            if (count) {
+              setInterval(() => {
+                count--;
+                socket.emit(
+                  "build-complete",
+                  JSON.stringify({ originalBuildDomain }),
+                );
+              }, 1000);
+            }
             unsubscribe();
           },
         );
