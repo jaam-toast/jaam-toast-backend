@@ -222,37 +222,37 @@ subscribeEvent("DEPLOYMENT_ERROR", async ({ projectName, error }) => {
   log.serverError(error.message, error.stack ?? "-", error.name);
 });
 
-subscribeEvent(
-  "DEPLOYMENT_UPDATED",
-  async ({
-    projectName,
-    originalBuildDomain,
-    deploymentData,
-    jaamToastDomain,
-  }) => {
-    const updatedAt = new Date().toISOString();
-    const [project] = await projectRepository.readDocument({
-      documentId: projectName,
-    });
+// subscribeEvent(
+//   "DEPLOYMENT_UPDATED",
+//   async ({
+//     projectName,
+//     originalBuildDomain,
+//     deploymentData,
+//     jaamToastDomain,
+//   }) => {
+//     const updatedAt = new Date().toISOString();
+//     const [project] = await projectRepository.readDocument({
+//       documentId: projectName,
+//     });
 
-    if (!project) {
-      throw new NotFoundError(
-        "An error occurred while executing the event. Cannot find Project data.",
-      );
-    }
+//     if (!project) {
+//       throw new NotFoundError(
+//         "An error occurred while executing the event. Cannot find Project data.",
+//       );
+//     }
 
-    await projectRepository.updateDocument({
-      documentId: projectName,
-      document: {
-        status: ProjectStatus.Ready,
-        projectUpdatedAt: updatedAt,
-        ...(originalBuildDomain && { originalBuildDomain }),
-        ...(deploymentData && { deploymentData }),
-        ...(jaamToastDomain && { jaamToastDomain }),
-      },
-    });
-  },
-);
+//     await projectRepository.updateDocument({
+//       documentId: projectName,
+//       document: {
+//         status: ProjectStatus.Ready,
+//         projectUpdatedAt: updatedAt,
+//         ...(originalBuildDomain && { originalBuildDomain }),
+//         ...(deploymentData && { deploymentData }),
+//         ...(jaamToastDomain && { jaamToastDomain }),
+//       },
+//     });
+//   },
+// );
 
 subscribeEvent(
   "SCHEMA_CREATED",
