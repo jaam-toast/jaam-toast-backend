@@ -32,6 +32,9 @@ export class SocketClient {
         log.debug(
           `Getting ready for sending a building log for ${socketProjectName}`,
         );
+
+        socket.join(socketProjectName);
+
         log.subscribe(message => {
           const [projectName, buildMessage] = message.split("-");
 
@@ -42,7 +45,7 @@ export class SocketClient {
             return;
           }
 
-          socket.to(socket.id).emit("new-building-log", message);
+          socket.to(projectName).emit("new-building-log", message);
         });
 
         subscribeEvent(
@@ -52,7 +55,7 @@ export class SocketClient {
               return;
             }
 
-            socket.to(socket.id).emit(
+            socket.to(projectName).emit(
               "build-complete",
               JSON.stringify({
                 originalBuildDomain,
@@ -69,7 +72,7 @@ export class SocketClient {
               return;
             }
 
-            socket.to(socket.id).emit("build-error", error.message);
+            socket.to(projectName).emit("build-error", error.message);
             unsubscribe();
           },
         );
