@@ -3,8 +3,6 @@ import axios from "axios";
 
 import Config from "./@config";
 
-import type { Endpoints } from "@octokit/types";
-
 @injectable()
 export class GithubClient {
   private dataClient = axios.create({

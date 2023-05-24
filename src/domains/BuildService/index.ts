@@ -6,7 +6,7 @@ import { isEmpty } from "lodash";
 import Config from "../../@config";
 import { runCommand } from "../../@utils/runCommand";
 import { waitFor } from "../../@utils/waitFor";
-import { emitEvent, subscribeEvent } from "../../@utils/emitEvent";
+import { emitEvent } from "../../@utils/emitEvent";
 import {
   ForbiddenError,
   NotFoundError,
@@ -189,6 +189,18 @@ export class BuildService {
       await waitFor({
         act: () => this.recordClient.getRecordStatus({ recordId }),
         until: async isCreated => await isCreated,
+      });
+
+      log.build("Domain creation process has been completed.");
+      log.build(
+        "However, we need to wait until the new deployment is fully connected.",
+      );
+      log.build("Please wait a little longer.");
+
+      await waitFor({
+        act: () => axios.get(`https://${originalBuildDomain}`),
+        intervalTime: 1000,
+        limitTime: 1000 * 60,
       });
 
       log.build("All deployment processes have been completed!");
