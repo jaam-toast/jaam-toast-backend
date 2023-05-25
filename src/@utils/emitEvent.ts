@@ -1,4 +1,3 @@
-import { BaseError } from "../@types/baseError";
 import * as log from "./log";
 
 import type { Events } from "./defineEvents";
@@ -46,7 +45,7 @@ export function subscribeEvent<EventName extends Events["name"]>(
       unsubscribe: () =>
         unsubscribeEvent({
           eventName,
-          callbackIndex: 0,
+          callbackIndex: listeners.length - 1,
         }),
     };
   }
@@ -83,13 +82,8 @@ export async function emitEvent<EventName extends Events["name"]>(
         unsubscribeEvent({ eventName, callbackIndex: index });
       await listener(payload, unsubscribe);
     } catch (error) {
-      if (error instanceof BaseError) {
-        log.serverError(
-          error.name,
-          error.message,
-          error?.cause ?? "",
-          error?.stack ?? "",
-        );
+      if (error instanceof Error) {
+        log.serverError(error.name, error.message, error?.stack ?? "");
       }
     }
   }
