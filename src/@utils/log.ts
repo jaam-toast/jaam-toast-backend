@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import chalk from "chalk";
+import { nanoid } from "nanoid";
 
 import Config from "../@config";
 
@@ -16,19 +17,78 @@ export type LogMessage = string;
  * observer methods
  */
 
-let subscriber: (message: string) => void = () => {};
+const subscribers: Record<
+  string,
+  | {
+      subscribeId: string;
+      logCallback: (message: string) => void;
+    }[]
+  | undefined
+> = {};
 
-export function subscribe(fn: (message: string) => void) {
-  subscriber = fn;
+function subscribe(
+  name: string,
+  logCallback: (message: string) => void,
+): string {
+  const subscribeId = nanoid();
+  const logSubscribers = subscribers[name];
+
+  if (Array.isArray(logSubscribers)) {
+    logSubscribers.push({
+      subscribeId,
+      logCallback,
+    });
+  } else {
+    subscribers[name] = [
+      {
+        subscribeId,
+        logCallback,
+      },
+    ];
+  }
+
+  return subscribeId;
 }
 
-export function unsubscribe() {
-  subscriber = () => {};
+function unsubscribe(name: string, subscribeId: string): void {
+  const logSubscribers = subscribers[name];
+
+  if (!logSubscribers) {
+    return;
+  }
+
+  subscribers[name] = logSubscribers.filter(
+    subscriber => subscriber.subscribeId !== subscribeId,
+  );
 }
 
-function send(message: string) {
-  subscriber(message);
+function send(name: string, messages: string[]) {
+  const logSubscribers = subscribers[name];
+
+  if (!logSubscribers) {
+    return;
+  }
+
+  for (const subscriber of logSubscribers) {
+    for (const message of messages) {
+      subscriber.logCallback(message);
+    }
+  }
 }
+
+export const emitter = {
+  of: (name: string) => ({
+    send: (...messages: string[]) => {
+      send(name, messages);
+    },
+    subscribe: (logCallback: (message: string) => void) => {
+      return subscribe(name, logCallback);
+    },
+    unsubscribe: (subscribeId: string) => {
+      unsubscribe(name, subscribeId);
+    },
+  }),
+};
 
 /**
  * logging handlers
@@ -125,24 +185,18 @@ async function writefile(logType: LogType, ...messages: LogMessage[]) {
   }
 }
 
-function notify(...messages: LogMessage[]) {
-  for (const message of messages) {
-    send(message);
-  }
-}
-
 /**
  * logging methods
  */
 export function build(projectName: string, ...messages: LogMessage[]) {
-  const buildMessages = messages.map(message => `${projectName}-${message}`);
+  const buildMessages = messages.map(message => `[${projectName}] ${message}`);
 
   if (Config.LOGGER_OPTIONS.debug) {
     console(LogType.Deployment, ...buildMessages);
   }
 
   writefile(LogType.Deployment, ...buildMessages);
-  notify(...buildMessages);
+  emitter.of(projectName).send(...messages);
 }
 
 export function debug(...messages: LogMessage[]) {
