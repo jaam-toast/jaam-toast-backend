@@ -33,20 +33,17 @@ export class SocketClient {
           `Getting ready for sending a building log for ${socketProjectName}`,
         );
 
-        socket.join(socketProjectName);
+        const logSubscriptionId = log.emitter
+          .of(socketProjectName)
+          .subscribe(message => {
+            if (!message) {
+              return;
+            }
 
-        log.subscribe(message => {
-          const [projectName, buildMessage] = message.split("-");
-
-          if (!buildMessage) {
-            return;
-          }
-          if (projectName !== socketProjectName) {
-            return;
-          }
-
-          socket.to(projectName).emit("new-building-log", message);
-        });
+            SocketClient.instance
+              ?.to(socket.id)
+              .emit("new-building-log", message);
+          });
 
         subscribeEvent(
           "DEPLOYMENT_UPDATED",
@@ -55,12 +52,15 @@ export class SocketClient {
               return;
             }
 
-            socket.to(projectName).emit(
+            SocketClient.instance?.to(socket.id).emit(
               "build-complete",
               JSON.stringify({
                 originalBuildDomain,
               }),
             );
+
+            socket.disconnect();
+            log.emitter.of(projectName).unsubscribe(logSubscriptionId);
             unsubscribe();
           },
         );
@@ -72,7 +72,12 @@ export class SocketClient {
               return;
             }
 
-            socket.to(projectName).emit("build-error", error.message);
+            SocketClient.instance
+              ?.to(socket.id)
+              .emit("build-error", error.message);
+
+            socket.disconnect();
+            log.emitter.of(projectName).unsubscribe(logSubscriptionId);
             unsubscribe();
           },
         );

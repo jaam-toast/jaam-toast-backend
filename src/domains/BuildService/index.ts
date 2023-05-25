@@ -63,6 +63,10 @@ export class BuildService {
     buildCommand: string;
     framework: Framework;
   }) {
+    const logBuildMessage = (message: string) => {
+      log.build(resourceName, message);
+    };
+
     try {
       /**
        * Run git clone
@@ -78,7 +82,7 @@ export class BuildService {
         onStderr: log.debug,
       });
 
-      log.build("Repository has been successfully retrieved.");
+      logBuildMessage("Repository has been successfully retrieved.");
 
       /**
        * Install environmet variables
@@ -93,7 +97,9 @@ export class BuildService {
           cwd: path.join(process.cwd(), RESOURCES_PATH, resourceName, repoName),
         });
 
-        log.build("Environment variable has been successfully completed.");
+        logBuildMessage(
+          "Environment variable has been successfully completed.",
+        );
       }
 
       /**
@@ -106,7 +112,9 @@ export class BuildService {
         onStderr: log.debug,
       });
 
-      log.build("Finish installing the necessary files for your project.");
+      logBuildMessage(
+        "Finish installing the necessary files for your project.",
+      );
 
       /**
        * Build project
@@ -114,10 +122,10 @@ export class BuildService {
       await runCommand({
         command: [buildCommand],
         cwd: path.join(process.cwd(), RESOURCES_PATH, resourceName, repoName),
-        onStdout: log.build,
+        onStdout: logBuildMessage,
       });
 
-      log.build("User project resource creation completed.");
+      logBuildMessage("User project resource creation completed.");
 
       const resourcePath = path.join(
         process.cwd(),
@@ -150,7 +158,11 @@ export class BuildService {
     buildCommand: string;
     envList: Env[];
   }) {
-    log.build("We will now initiate the deployment process.");
+    const logBuildMessage = (message: string) => {
+      log.build(projectName, message);
+    };
+
+    logBuildMessage("We will now initiate the deployment process.");
 
     try {
       const jaamToastDomain = `${projectName}.${Config.SERVER_URL}`;
@@ -173,8 +185,8 @@ export class BuildService {
           resourcePath,
         });
 
-      log.build("The creation of a new deployment is now complete!");
-      log.build(
+      logBuildMessage("The creation of a new deployment is now complete!");
+      logBuildMessage(
         "Initiating domain connection process for the created deployment.",
       );
 
@@ -191,11 +203,17 @@ export class BuildService {
         until: async isCreated => await isCreated,
       });
 
-      log.build("Domain creation process has been completed.");
-      log.build(
-        "However, we need to wait until the new deployment is fully connected.",
+      logBuildMessage("Domain creation process has been completed.");
+
+      logBuildMessage(
+        "The deployment process has been completed, but it may take some time for the domain to be available.",
       );
-      log.build("Please wait a little longer.");
+      logBuildMessage(
+        "Once the process is complete, you will be able to access the page and verify it immediately.",
+      );
+      logBuildMessage(
+        "This process usually takes about 1 minute. Please wait for a moment.",
+      );
 
       /*
         wait for success response of original build domain.
@@ -206,11 +224,7 @@ export class BuildService {
         until: async result => !!(await result).data,
       });
 
-      await new Promise<void>(resolve => {
-        setTimeout(resolve, 1000 * 50);
-      });
-
-      log.build("All deployment processes have been completed!");
+      logBuildMessage("All deployment processes have been completed!");
 
       emitEvent("DEPLOYMENT_UPDATED", {
         projectName,
@@ -418,82 +432,3 @@ export class BuildService {
     }
   }
 }
-
-// import Fastify from "fastify";
-// import cors from "@fastify/cors";
-// import dotenv from "dotenv";
-
-// import { getScreenshot } from "./_lib/puppeteer";
-
-// import type { FastifyRequest } from "fastify";
-
-// dotenv.config();
-
-// function checkUrl(string: string) {
-//   try {
-//     new URL(string);
-//   } catch (error) {
-//     return false;
-//   }
-
-//   return true;
-// }
-
-// const fastify = Fastify({
-//   logger: true,
-// });
-
-// (async () =>
-//   await fastify.register(cors, {
-//     origin: [process.env.CLIENT_PRODUCTION_URL!, process.env.CLIENT_URL!, "http://localhost:5173"],
-//     credentials: true,
-//   }))();
-
-// type GetScreenshotRequest = FastifyRequest<{
-//   Querystring: {
-//     url: string;
-//     width?: string;
-//     height?: string;
-//   };
-// }>;
-
-// fastify.get("/", async (request: GetScreenshotRequest, reply) => {
-//   const { url, width, height } = request.query;
-
-//   if (!url) {
-//     return reply.status(400).send("No url query specified.");
-//   }
-//   if (!checkUrl(url)) {
-//     return reply.status(400).send("Invalid url query specified.");
-//   }
-
-//   try {
-//     const file = await getScreenshot({
-//       url,
-//       ...(width ? { width: Number(width) } : {}),
-//       ...(height ? { height: Number(height) } : {}),
-//     });
-//     reply.header("Content-Type", "image/png");
-//     reply.header(
-//       "Cache-Control",
-//       "public, immutable, no-transform, s-maxage=86400, max-age=86400"
-//     );
-//     reply.status(200).send(file);
-//   } catch (error) {
-//     console.log(error);
-//     reply
-//       .status(500)
-//       .send(
-//         "The server encountered an error. You may have inputted an invalid query."
-//       );
-//   }
-// });
-
-// fastify.listen({ port: 9000 }, (err, address) => {
-//   if (err) {
-//     fastify.log.error(err);
-//     process.exit(1);
-//   }
-
-//   fastify.log.info(`Server is now listening on ${address}`);
-// });
